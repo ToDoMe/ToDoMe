@@ -7,24 +7,37 @@ public class KeywordDatabase {
 
 	ArrayList<Keyword> keywords = new ArrayList<Keyword>();
 
-	public void Keyword() {
+	public KeywordDatabase() {
 		keywords.add(new Keyword("post", "postbox"));
 	}
-
+	
+	public int size() {
+		return keywords.size();
+	}
+	
 	public String getType(String name) {
-		String[] words = name.split(" ");
+		String keyword = null;
+		String lowerName = name.toLowerCase();
+		for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
+			Keyword keywordObj = iter.next();
+			if (lowerName.contains(keywordObj.keyword))
+			{
+				keyword = keywordObj.type;
+			}
+		}
+		/*String[] words = name.split(" ");
 		for (int i = 0; i < words.length; i++)
 		{
 			for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
 				Keyword keywordObj = iter.next();
 	
 				if (keywordObj.keyword == words[i].toLowerCase()) {
-					return "postbox";
+					return keywordObj.keyword;
 				}
 			}
-		}
+		}*/
 
-		return "postbox";
+		return keyword;
 	}
 
 	private class Keyword {

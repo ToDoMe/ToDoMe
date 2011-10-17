@@ -13,7 +13,7 @@ import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class TodoActivity extends Activity {
-	private ArrayList<Task> tasks;
+	private ArrayList<Task> tasks;	// Loaded from TimePlaceActivity for convenience 
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -55,13 +55,13 @@ public class TodoActivity extends Activity {
 	
 		lv.setOnItemClickListener(new OnItemClickListener() {
 		    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		    	touchedTask = tasks.get(position);
 		    	if (((TextView) view).getText() == "New task")
 		    	{
 		    		showTaskDialog();
 		    	}
 				else
 				{
-					touchedTask = tasks.get(position);
 					alert.show();
 				}
 		    }
@@ -106,7 +106,9 @@ public class TodoActivity extends Activity {
 		tasks.add(tasks.size() - 1, task);
 		dialog.hide();
 		taskAdapter.notifyDataSetChanged();
-		task.setType(TimePlaceActivity.keywords.getType(task.getName()));
+		String type = TimePlaceActivity.keywords.getType(task.getName());
+		task.setType(type);
+		message("", type);
 	}
 	
 	private void message(String title, String message) {
