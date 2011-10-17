@@ -22,13 +22,20 @@ public final class R {
         public static final int todo_selected=0x7f020008;
     }
     public static final class id {
+        public static final int completeButton=0x7f05000b;
         public static final int layout_root=0x7f050001;
+        public static final int linearLayout1=0x7f050009;
         public static final int mapview=0x7f050000;
-        public static final int okButton=0x7f050004;
-        public static final int ratingEntry=0x7f050003;
-        public static final int taskList=0x7f050006;
-        public static final int taskNameEntry=0x7f050002;
-        public static final int widget0=0x7f050005;
+        public static final int notesEntry=0x7f050006;
+        public static final int okButton=0x7f05000a;
+        public static final int postcodeEntry=0x7f050008;
+        public static final int ratingEntry=0x7f050004;
+        public static final int taskList=0x7f05000d;
+        public static final int taskNameEntry=0x7f050003;
+        public static final int textView1=0x7f050002;
+        public static final int textView2=0x7f050005;
+        public static final int textView3=0x7f050007;
+        public static final int widget0=0x7f05000c;
     }
     public static final class layout {
         public static final int list_item=0x7f030000;
@@ -40,5 +47,10 @@ public final class R {
     public static final class string {
         public static final int app_name=0x7f040001;
         public static final int hello=0x7f040000;
+        public static final int mark_complete=0x7f040006;
+        public static final int name=0x7f040002;
+        public static final int notes=0x7f040003;
+        public static final int save=0x7f040005;
+        public static final int specific_location=0x7f040004;
     }
 }

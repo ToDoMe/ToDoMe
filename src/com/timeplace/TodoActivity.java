@@ -13,7 +13,6 @@ import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class TodoActivity extends Activity {
-	/** Called when the activity is first created. */
 	private ArrayList<Task> tasks;
 	private Task touchedTask;
 	private ListView lv;
@@ -58,7 +57,7 @@ public class TodoActivity extends Activity {
 		    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		    	if (((TextView) view).getText() == "New task")
 		    	{
-		    		showNewTaskDialog();
+		    		showTaskDialog();
 		    	}
 				else
 				{
@@ -69,7 +68,7 @@ public class TodoActivity extends Activity {
 		});
 	}
 	
-	private void showNewTaskDialog() {
+	private void showTaskDialog() {
 		try
 		{
 			dialog = new Dialog(this, R.layout.new_task_dialog);
@@ -82,15 +81,7 @@ public class TodoActivity extends Activity {
 			okButton.setOnClickListener(new OnClickListener() {
 				public void onClick(View v)
 	        	{
-	        		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
-	        		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
-	        		Task task = new Task(taskNameEntry.getText().toString(), (int)ratingEntry.getRating(), false);
-	        		tasks.add(tasks.size() - 1, task);
-	        		dialog.hide();
-	        		taskAdapter.notifyDataSetChanged();
-	        		String type = TimePlaceActivity.keywords.getType(task.getName());
-	        		task.setType(type);
-	        		//message(task.getName(), type);
+	        		hideTaskDialog();
 	        	}
 			});
 		}
@@ -98,6 +89,24 @@ public class TodoActivity extends Activity {
 		{
 			message(ex.getClass().toString(), ex.getMessage());
 		}
+	}
+	
+	private void hideTaskDialog()
+	{
+		EditText	taskNameEntry	= (EditText) dialog.findViewById(R.id.taskNameEntry);
+		RatingBar	ratingEntry		= (RatingBar) dialog.findViewById(R.id.ratingEntry);
+		EditText	notesEntry		= (EditText) dialog.findViewById(R.id.notesEntry);
+		EditText	postcodeEntry	= (EditText) dialog.findViewById(R.id.postcodeEntry);
+		
+		Task task = new Task(taskNameEntry.getText().toString(),
+							notesEntry.getText().toString(),
+							postcodeEntry.getText().toString(),
+							(int)ratingEntry.getRating());
+		
+		tasks.add(tasks.size() - 1, task);
+		dialog.hide();
+		taskAdapter.notifyDataSetChanged();
+		task.setType(TimePlaceActivity.keywords.getType(task.getName()));
 	}
 	
 	private void message(String title, String message) {

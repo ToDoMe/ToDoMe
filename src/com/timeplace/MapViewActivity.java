@@ -52,7 +52,6 @@ public class MapViewActivity extends MapActivity {
     
     public class GeoUpdateHandler implements LocationListener {
 
-		@Override
 		public void onLocationChanged(Location location) {
 			int lat = (int) (location.getLatitude() * 1E6);
 			int lng = (int) (location.getLongitude() * 1E6);
@@ -89,15 +88,12 @@ public class MapViewActivity extends MapActivity {
 	    	}
 		}
 
-		@Override
 		public void onProviderDisabled(String provider) {
 		}
 
-		@Override
 		public void onProviderEnabled(String provider) {
 		}
 
-		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
 		}
 	}

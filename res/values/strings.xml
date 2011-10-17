@@ -2,4 +2,9 @@
 <resources>
     <string name="hello">Hello World, TimePlaceActivity!</string>
     <string name="app_name">TimePlace</string>
+    <string name="name">Task:</string>
+    <string name="notes">Notes:</string>
+    <string name="specific_location">Postcode (optional):</string>
+    <string name="save">Save</string>
+    <string name="mark_complete">Mark complete</string>
 </resources>
