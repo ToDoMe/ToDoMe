@@ -127,7 +127,7 @@ public class TaskActivity extends Activity {
 		taskAdapter.notifyDataSetChanged();
 		String type = TimePlaceActivity.keywords.getType(task.getName());
 		task.setType(type);
-		message("", type);
+		//message("", type);
 	}
 
 	private void message(String title, String message) {
