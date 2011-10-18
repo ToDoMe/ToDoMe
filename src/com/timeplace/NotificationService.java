@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,6 +50,7 @@ public class NotificationService extends Service {
 		public void run() {
 			Log.i(TAG, "Timer task doing work");
 			notification.setLatestEventInfo(context, "ToDoMe ", "Need to post something?", contentIntent);
+			//notificationPopup(TimePlaceActivity.tasks.get(0));
 			nm.notify(1, notification);
 		}
 	};
@@ -70,17 +72,15 @@ public class NotificationService extends Service {
 		notification = new Notification(icon, "Hello there!", System.currentTimeMillis());
 		notification.defaults |= Notification.DEFAULT_SOUND;		// Adds sound
 		notification.icon = R.drawable.notification_icon;
-		notification.defaults |= Notification.DEFAULT_VIBRATE;	// TODO stop this line from crashing the program
+		notification.defaults |= Notification.DEFAULT_VIBRATE;
 		intent = new Intent(this, TaskActivity.class);
 		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		context = getApplicationContext();
 	}
 	
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) 
-    {
+    public int onStartCommand(Intent intent, int flags, int startId) {
     	Log.v("StartServiceAtBoot", "StartAtBootService -- onStartCommand()");	        
-
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;
@@ -90,9 +90,12 @@ public class NotificationService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		Log.i(TAG, "Service destroying");
-
 		timer.cancel();
 		timer = null;
+	}
+	
+	public void notificationPopup(Task task){
+		notification.setLatestEventInfo(context, "ToDoMe Reminder", (CharSequence)task.getName(), contentIntent);
 	}
 	
 	void getDataAndUpdateDatabase(GeoPoint point, int radius, String type) {
