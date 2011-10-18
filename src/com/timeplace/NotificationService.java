@@ -49,6 +49,7 @@ public class NotificationService extends Service {
 		@Override
 		public void run() {
 			Log.i(TAG, "Timer task doing work");
+			notification.setLatestEventInfo(context, "ToDoMe ", "Need to post something?", contentIntent);
 			//notificationPopup(TimePlaceActivity.tasks.get(0));
 			try {
 			String name = TimePlaceActivity.tasks.get(1).getName();
@@ -76,8 +77,8 @@ public class NotificationService extends Service {
 		nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notification = new Notification(icon, "Hello there!", System.currentTimeMillis());
 		notification.defaults |= Notification.DEFAULT_SOUND;		// Adds sound
-		notification.icon = R.drawable.notification_icon;			//sets icon
-		//notification.defaults |= Notification.DEFAULT_VIBRATE;	// TODO stop this line from crashing the program
+		notification.icon = R.drawable.notification_icon;
+		notification.defaults |= Notification.DEFAULT_VIBRATE;
 		intent = new Intent(this, TaskActivity.class);
 		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		context = getApplicationContext();
@@ -143,6 +144,5 @@ public class NotificationService extends Service {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 }

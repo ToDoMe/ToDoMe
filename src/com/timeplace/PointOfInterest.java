@@ -7,40 +7,33 @@ import com.google.android.maps.GeoPoint;
 public class PointOfInterest extends GeoPoint {
 	
 	final String locationType;
-	final String name;
+	final double radiusOfEffect;
 	
-	final Time openingTime;
-	final Time closingTime;
-	
-	final String postcode;
+	final Time[] openingTimes;
+	final Time[] closingTimes;
 	
 	public String getLocationType() {
 		return locationType;
 	}
 
-	public String getName() {
-		return name;
+	public double getRadiusOfEffect() {
+		return radiusOfEffect;
 	}
 
-	public Time getOpeningTime() {
-		return openingTime;
+	public Time[] getOpeningTimes() {
+		return openingTimes;
 	}
 
-	public Time getClosingTime() {
-		return closingTime;
+	public Time[] getClosingTimes() {
+		return closingTimes;
 	}
 
-	public String getPostcode() {
-		return postcode;
-	}
-
-	public PointOfInterest(String postcode, int latitude, int longitude, Time openingTime, Time closingTime, String name, String type) {
+	public PointOfInterest(int latitude, int longitude, String locationType, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
 		super(latitude, longitude);
-		this.locationType = type;
-		this.name = name;
-		this.closingTime = closingTime;
-		this.openingTime = openingTime;
-		this.postcode = postcode; 
+		this.locationType = locationType;
+		this.openingTimes = openingTimes;
+		this.closingTimes = closingTimes;
+		this.radiusOfEffect = radiusOfEffect;
 	}
 }
 

@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import android.text.format.Time;
 
 public class PostcodeParser {
 	private File postcodeFile;
@@ -25,7 +26,13 @@ public class PostcodeParser {
 			while ((line = reader.readLine()) != null) {
 				String[] lineItems = line.split("\t");
 				
-				database.add(new PointOfInterest(lineItems[0], (int)(Double.valueOf(lineItems[1]) * (10e5)), (int)(Double.valueOf(lineItems[2]) * (10e5)), null, null, "postbox", "postbox"));
+				database.add(new PointOfInterest(
+						(int)(Double.valueOf(lineItems[1]) * (10e6)), 
+						(int)(Double.valueOf(lineItems[2]) * (10e6)), 
+						lineItems[0], 
+						new Time[7], 
+						new Time[7], 
+						0.01));
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

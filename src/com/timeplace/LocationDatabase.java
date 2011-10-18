@@ -1,5 +1,5 @@
 package com.timeplace;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -7,7 +7,11 @@ import android.app.AlertDialog;
 
 import com.google.android.maps.GeoPoint;
 
-public class LocationDatabase extends ArrayList<PointOfInterest> {
+public class LocationDatabase extends HashSet<PointOfInterest> {
+	
+	public LocationDatabase() {
+		super();
+	}
 
 	public LocationDatabase searchAboutType(String type) {
 		LocationDatabase subset = new LocationDatabase();
@@ -23,30 +27,55 @@ public class LocationDatabase extends ArrayList<PointOfInterest> {
 		return subset;
 	}
 	
-	public LocationDatabase searchAboutGeoPoint(GeoPoint location, double km_radius) {
+	public LocationDatabase findPointsWithinRadius(GeoPoint location, double km_radius) {
+		return findPointsWithinRadiusOfLocDB(location, km_radius, this);
+	}
+	
+	private static LocationDatabase findPointsWithinRadiusOfLocDB(GeoPoint location, double km_radius, LocationDatabase db) {
 		LocationDatabase results = new LocationDatabase();
 		
-		int R = 6371; // radius of Earth in km
+		Iterator<PointOfInterest> iter = db.iterator();
 		
-		for (int i = 0; i < this.size(); i++) {
-			PointOfInterest database_entry = this.get(i);
+		while (iter.hasNext()) {
+			PointOfInterest database_entry = iter.next();
+			GeoPoint database_point = new GeoPoint(database_entry.getLatitudeE6(), database_entry.getLongitudeE6());
 		
-			// Implemented from code at http://www.movable-type.co.uk/scripts/latlong.html
-			double lat2 = Math.toRadians(database_entry.getLatitudeE6() * 10e6);
-			double lat1 = Math.toRadians(location.getLatitudeE6() * 10e6);
-			
-			double dLat = lat2 - lat1;
-			double dLon = Math.toRadians((database_entry.getLongitudeE6() - location.getLongitudeE6()) * 10e6);
-
-			double a = Math.sin(dLat /2 ) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2); 
-			double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-			double d = R * c;
-		
-			if (d <= km_radius) {
-				results.add(database_entry);
-			}
+			if (isPointsWithinRange(location, database_point, km_radius)) results.add(database_entry);
 		}
 		
 		return results;
+	}
+	
+	public LocationDatabase findTriggeredPoints(GeoPoint location, double range) {
+		LocationDatabase results = new LocationDatabase();
+		
+		LocationDatabase searchArea = findPointsWithinRadius(location, range);
+		Iterator<PointOfInterest> iter = searchArea.iterator();
+		
+		while (iter.hasNext()) {
+			PointOfInterest database_entry = iter.next();
+			GeoPoint database_point = new GeoPoint(database_entry.getLatitudeE6(), database_entry.getLongitudeE6());
+			
+			if (isPointsWithinRange(location, database_point, database_entry.getRadiusOfEffect())) results.add(database_entry);
+		}
+		
+		return results;
+	}
+	
+	private static boolean isPointsWithinRange(GeoPoint point1, GeoPoint point2, double radius) {
+		// Implemented from code at http://www.movable-type.co.uk/scripts/latlong.html
+		int R = 6371; // radius of Earth in km
+		
+		double lat2 = Math.toRadians(point2.getLatitudeE6() * 10e6);
+		double lat1 = Math.toRadians(point1.getLatitudeE6() * 10e6);
+		
+		double dLat = lat2 - lat1;
+		double dLon = Math.toRadians((point2.getLongitudeE6() - point1.getLongitudeE6()) * 10e6);
+
+		double a = Math.sin(dLat /2 ) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2); 
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+		double d = R * c;
+	
+		return (d <= radius);
 	}
 }
