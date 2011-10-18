@@ -50,6 +50,12 @@ public class NotificationService extends Service {
 		public void run() {
 			Log.i(TAG, "Timer task doing work");
 			//notificationPopup(TimePlaceActivity.tasks.get(0));
+			try {
+			String name = TimePlaceActivity.tasks.get(1).getName();
+			} catch (Exception e) {
+				System.out.println("It's all broked still :(");
+			}
+			notification.setLatestEventInfo(context, "ToDoMe Reminder", "Task name", contentIntent);
 			nm.notify(1, notification);
 		}
 	};
@@ -94,7 +100,7 @@ public class NotificationService extends Service {
 	}
 	
 	public void notificationPopup(Task task){
-		notification.setLatestEventInfo(context, "ToDoMe Reminder", (CharSequence)task.getName(), contentIntent);
+		notification.setLatestEventInfo(context, "ToDoMe Reminder", task.getName(), contentIntent);
 	}
 	
 	void getDataAndUpdateDatabase(GeoPoint point, int radius, String type) {
