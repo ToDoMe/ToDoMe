@@ -9,9 +9,16 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.RatingBar;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class TaskActivity extends Activity {
@@ -23,7 +30,9 @@ public class TaskActivity extends Activity {
 	private Dialog dialog;
 	private AlertDialog alert;
 	public String taskType;
-
+	
+	private static final String TAG = "TodoActivity";
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -128,6 +137,7 @@ public class TaskActivity extends Activity {
 		String type = TimePlaceActivity.keywords.getType(task.getName());
 		task.setType(type);
 		message("", type);
+		Log.d(TAG, "Its here!");
 	}
 
 	private void message(String title, String message) {

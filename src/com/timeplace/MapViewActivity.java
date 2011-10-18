@@ -63,9 +63,13 @@ public class MapViewActivity extends MapActivity {
 	    			Task task = iter.next();
 	    			if (task.getName() != "New task"){
 		    			LocationDatabase taskDb = locDb.searchAboutType(task.getType());
-						for (int i = 0; i < taskDb.size(); i++){
-							PointOfInterest poi = taskDb.get(i);
-							itemizedOverlay.addOverlay(new OverlayItem(poi, poi.getName(), poi.getOpeningTime() + " - " + poi.getClosingTime()));
+
+		    			Iterator<PointOfInterest> DBiter = taskDb.iterator();
+		    			
+						while (DBiter.hasNext())
+						{
+							PointOfInterest poi = DBiter.next();
+							itemizedOverlay.addOverlay(new OverlayItem(poi, poi.getLocationType(), poi.getOpeningTimes() + " - " + poi.getClosingTimes()));
 						}
 	    			}
 	    		}
