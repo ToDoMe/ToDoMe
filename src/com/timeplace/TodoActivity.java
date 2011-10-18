@@ -7,6 +7,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
@@ -77,10 +79,23 @@ public class TodoActivity extends Activity {
 			dialog.setTitle("New Task");
 			dialog.show();
 			
-			Button okButton = (Button) dialog.findViewById(R.id.okButton);
+			EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);			
+			final Button okButton = (Button) dialog.findViewById(R.id.okButton);
+			okButton.setEnabled(false);
+			
+			taskNameEntry.addTextChangedListener(new TextWatcher() {
+				
+				public void onTextChanged(CharSequence s, int start, int before, int count) {
+					okButton.setEnabled(s.length() > 0);
+				}
+				
+				public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+				
+				public void afterTextChanged(Editable s) { }
+			});
+			
 			okButton.setOnClickListener(new OnClickListener() {
-				public void onClick(View v)
-	        	{
+				public void onClick(View v) {
 	        		hideTaskDialog();
 	        	}
 			});

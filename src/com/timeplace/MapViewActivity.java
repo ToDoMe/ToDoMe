@@ -56,18 +56,15 @@ public class MapViewActivity extends MapActivity {
 			int lat = (int) (location.getLatitude() * 1E6);
 			int lng = (int) (location.getLongitude() * 1E6);
 			GeoPoint point = new GeoPoint(lat, lng);
-			mapController.animateTo(point); //	mapController.setCenter(point);
-			if (haveLocation) return;
-			
+			mapController.animateTo(point); //	mapController.setCenter(point);			
 			try
 	    	{
-	    		locDb = TimePlaceActivity.db;//.searchAboutGeoPoint(point, 1000);	// TODO Fix searchAboutGeoPoint
+	    		locDb = TimePlaceActivity.db;
 	    		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext(); )
 	    		{
 	    			Task task = iter.next();
 	    			if (task.getName() != "New task")
 	    			{
-		    			//message(task.getName(), task.getType());
 		    			LocationDatabase taskDb = locDb.searchAboutType(task.getType());
 						for (int i = 0; i < taskDb.size(); i++)
 						{
@@ -77,9 +74,6 @@ public class MapViewActivity extends MapActivity {
 	    			}
 	    		}
 				
-				//OverlayItem overlayitem = new OverlayItem(new GeoPoint(50937696,-1398070), "Post Office", "At Highfield Campus");
-				
-				//itemizedOverlay.addOverlay(overlayitem);
 				mapOverlays.add(itemizedOverlay);
 	    	}
 	    	catch (Exception ex)

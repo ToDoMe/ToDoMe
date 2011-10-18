@@ -40,16 +40,20 @@ public class TimePlaceActivity extends TabActivity {
 			intent = new Intent().setClass(this, MapViewActivity.class);
 			spec = tabHost.newTabSpec("map").setIndicator("Map", res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
 			tabHost.addTab(spec);
+			
+			intent = new Intent().setClass(this, TestTabActivity.class);
+			spec = tabHost.newTabSpec("map").setIndicator("Test", res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
+			tabHost.addTab(spec);
 
 			tabHost.setCurrentTab(0);
 
 			// Get database
-			File file = new File("/mnt/sdcard/spb.tsv");
+			File file = new File("/data/spb.tsv");
 			if (file.exists()) {
 				PostcodeParser parser = new PostcodeParser(file, db);
 				parser.parse();
 			} else {
-				message("Error", "TSV file not found. Please place the file at /mnt/sdcard/spb.tsv");
+				message("Error", "TSV file not found. Please place the file at /data/spb.tsv");
 			}
 
 			// Add a "New task" task if one does not already exist

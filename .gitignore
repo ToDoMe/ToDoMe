@@ -1,2 +1,7 @@
 bin/
 assets/
+*.class
+*.temp
+*.bak
+*~
+*.tmp
