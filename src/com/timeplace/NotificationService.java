@@ -17,6 +17,8 @@ import android.util.Log;
 public class NotificationService extends Service {
 
 	private static final String TAG = NotificationService.class.getSimpleName();
+	
+	private boolean debug = true;
 
 	private Timer timer;
 	private NotificationManager nm;
@@ -32,7 +34,7 @@ public class NotificationService extends Service {
 		public void run() {
 			Log.i(TAG, "Timer task doing work");
 			num++;
-			notification.setLatestEventInfo(context, "Hello World! " + num, "Need to post something?", contentIntent);
+			notification.setLatestEventInfo(context, "ToDoMe " + num, "Need to post something?", contentIntent);
 			nm.notify(1, notification);
 		}
 	};
@@ -53,11 +55,22 @@ public class NotificationService extends Service {
 		nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notification = new Notification(icon, "Hello there!", System.currentTimeMillis());
 		notification.defaults |= Notification.DEFAULT_SOUND;		// Adds sound
+		notification.icon = R.drawable.notification_icon;
 		//notification.defaults |= Notification.DEFAULT_VIBRATE;	// TODO stop this line from crashing the program
-		intent = new Intent(this, TodoActivity.class);
+		intent = new Intent(this, TaskActivity.class);
 		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		context = getApplicationContext();
 	}
+	
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) 
+    {
+    	Log.v("StartServiceAtBoot", "StartAtBootService -- onStartCommand()");	        
+
+        // We want this service to continue running until it is explicitly
+        // stopped, so return sticky.
+        return START_STICKY;
+    }
 
 	@Override
 	public void onDestroy() {

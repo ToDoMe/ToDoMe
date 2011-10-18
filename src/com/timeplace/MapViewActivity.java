@@ -57,17 +57,13 @@ public class MapViewActivity extends MapActivity {
 			int lng = (int) (location.getLongitude() * 1E6);
 			GeoPoint point = new GeoPoint(lat, lng);
 			mapController.animateTo(point); //	mapController.setCenter(point);			
-			try
-	    	{
+			try {
 	    		locDb = TimePlaceActivity.db;
-	    		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext(); )
-	    		{
+	    		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext(); ){
 	    			Task task = iter.next();
-	    			if (task.getName() != "New task")
-	    			{
+	    			if (task.getName() != "New task"){
 		    			LocationDatabase taskDb = locDb.searchAboutType(task.getType());
-						for (int i = 0; i < taskDb.size(); i++)
-						{
+						for (int i = 0; i < taskDb.size(); i++){
 							PointOfInterest poi = taskDb.get(i);
 							itemizedOverlay.addOverlay(new OverlayItem(poi, poi.getName(), poi.getOpeningTime() + " - " + poi.getClosingTime()));
 						}
@@ -76,27 +72,18 @@ public class MapViewActivity extends MapActivity {
 				
 				mapOverlays.add(itemizedOverlay);
 	    	}
-	    	catch (Exception ex)
-	    	{
+	    	catch (Exception ex){
 	    		message("onLocationChanged: " + ex.getClass().toString(), ex.getMessage());
 	    	}
 		}
 
-		public void onProviderDisabled(String provider) {
-		}
-
-		public void onProviderEnabled(String provider) {
-		}
-
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-		}
+		public void onProviderDisabled(String provider) {	}
+		public void onProviderEnabled(String provider) {	}
+		public void onStatusChanged(String provider, int status, Bundle extras) {	}
 	}
-
     
     @Override
-    protected boolean isRouteDisplayed() {
-        return false;
-    }
+    protected boolean isRouteDisplayed() { return false; }
     
 	private void message(String title, String message) {
 		AlertDialog alertDialog = new AlertDialog.Builder(this).create();

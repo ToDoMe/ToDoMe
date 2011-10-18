@@ -9,6 +9,11 @@ public class KeywordDatabase {
 
 	public KeywordDatabase() {
 		keywords.add(new Keyword("post", "postbox"));
+		keywords.add(new Keyword("letter", "postbox"));
+		keywords.add(new Keyword("stamp", "post office"));
+		keywords.add(new Keyword("withdraw", "bank"));
+		keywords.add(new Keyword("money", "bank"));
+		keywords.add(new Keyword("train", "train station"));
 	}
 	
 	public int size() {

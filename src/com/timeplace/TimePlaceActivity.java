@@ -30,7 +30,7 @@ public class TimePlaceActivity extends TabActivity {
 			Intent intent;					// Reusable Intent for each tab
 
 			// Create an Intent to launch an Activity for the tab (to be reused)
-			intent = new Intent().setClass(this, TodoActivity.class);
+			intent = new Intent().setClass(this, TaskActivity.class);
 
 			// Initialise a TabSpec for each tab and add it to the TabHost
 			spec = tabHost.newTabSpec("todo").setIndicator("To-Do", res.getDrawable(R.drawable.ic_tab_todo)).setContent(intent);
@@ -46,16 +46,7 @@ public class TimePlaceActivity extends TabActivity {
 			tabHost.addTab(spec);
 
 			tabHost.setCurrentTab(0);
-
-			// Get database
-			File file = new File("/data/spb.tsv");
-			if (file.exists()) {
-				PostcodeParser parser = new PostcodeParser(file, db);
-				parser.parse();
-			} else {
-				message("Error", "TSV file not found. Please place the file at /data/spb.tsv");
-			}
-
+			
 			// Add a "New task" task if one does not already exist
 			boolean found = false;
 			for (int i = 0; i < tasks.size(); i++) {
@@ -66,6 +57,7 @@ public class TimePlaceActivity extends TabActivity {
 			if (!found) {
 				tasks.add(new Task("New task", "", "", 0));
 			}
+
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
 		}

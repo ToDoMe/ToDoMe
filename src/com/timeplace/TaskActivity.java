@@ -14,15 +14,16 @@ import android.view.View.OnClickListener;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class TodoActivity extends Activity {
-	private ArrayList<Task> tasks;	// Loaded from TimePlaceActivity for convenience 
+public class TaskActivity extends Activity {
+	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
+									// convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
 	private Dialog dialog;
 	private AlertDialog alert;
 	public String taskType;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -69,55 +70,58 @@ public class TodoActivity extends Activity {
 		    }
 		});
 	}
-	
+
 	private void showTaskDialog() {
-		try
-		{
+		try {
 			dialog = new Dialog(this, R.layout.new_task_dialog);
 
 			dialog.setContentView(R.layout.new_task_dialog);
 			dialog.setTitle("New Task");
 			dialog.show();
-			
-			EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);			
+
+			EditText taskNameEntry = (EditText) dialog
+					.findViewById(R.id.taskNameEntry);
 			final Button okButton = (Button) dialog.findViewById(R.id.okButton);
 			okButton.setEnabled(false);
-			
+
 			taskNameEntry.addTextChangedListener(new TextWatcher() {
-				
-				public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+				public void onTextChanged(CharSequence s, int start,
+						int before, int count) {
 					okButton.setEnabled(s.length() > 0);
 				}
-				
-				public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-				
-				public void afterTextChanged(Editable s) { }
+
+				public void beforeTextChanged(CharSequence s, int start,
+						int count, int after) {
+				}
+
+				public void afterTextChanged(Editable s) {
+				}
 			});
-			
+
 			okButton.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-	        		hideTaskDialog();
-	        	}
+					hideTaskDialog();
+				}
 			});
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			message(ex.getClass().toString(), ex.getMessage());
 		}
 	}
-	
-	private void hideTaskDialog()
-	{
-		EditText	taskNameEntry	= (EditText) dialog.findViewById(R.id.taskNameEntry);
-		RatingBar	ratingEntry		= (RatingBar) dialog.findViewById(R.id.ratingEntry);
-		EditText	notesEntry		= (EditText) dialog.findViewById(R.id.notesEntry);
-		EditText	postcodeEntry	= (EditText) dialog.findViewById(R.id.postcodeEntry);
-		
-		Task task = new Task(taskNameEntry.getText().toString(),
-							notesEntry.getText().toString(),
-							postcodeEntry.getText().toString(),
-							(int)ratingEntry.getRating());
-		
+
+	private void hideTaskDialog() {
+		EditText taskNameEntry = (EditText) dialog
+				.findViewById(R.id.taskNameEntry);
+		RatingBar ratingEntry = (RatingBar) dialog
+				.findViewById(R.id.ratingEntry);
+		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
+		EditText postcodeEntry = (EditText) dialog
+				.findViewById(R.id.postcodeEntry);
+
+		Task task = new Task(taskNameEntry.getText().toString(), notesEntry
+				.getText().toString(), postcodeEntry.getText().toString(),
+				(int) ratingEntry.getRating());
+
 		tasks.add(tasks.size() - 1, task);
 		dialog.hide();
 		taskAdapter.notifyDataSetChanged();
@@ -125,7 +129,7 @@ public class TodoActivity extends Activity {
 		task.setType(type);
 		message("", type);
 	}
-	
+
 	private void message(String title, String message) {
 		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 		alertDialog.setTitle(title);
