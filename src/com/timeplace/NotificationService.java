@@ -34,7 +34,7 @@ import android.util.Log;
 public class NotificationService extends Service {
 
 	private static final String TAG = NotificationService.class.getSimpleName();
-	
+
 	private boolean debug = true;
 
 	private Timer timer;
@@ -44,14 +44,19 @@ public class NotificationService extends Service {
 	private Intent intent;
 	private Notification notification;
 	private PendingIntent contentIntent;
- 
+
 	private TimerTask updateTask = new TimerTask() {
 		@Override
 		public void run() {
 			Log.i(TAG, "Timer task doing work");
-			notification.setLatestEventInfo(context, "ToDoMe ", "Need to post something?", contentIntent);
-			//notificationPopup(TimePlaceActivity.tasks.get(0));
-			//nm.notify(1, notification);
+			try {
+				String name = TimePlaceActivity.tasks.get(1).getName();
+			} catch (Exception e) {
+				System.out.println("It's all broked still :(");
+			}
+			notification.setLatestEventInfo(context, "ToDoMe Reminder",
+					"Task name", contentIntent);
+			nm.notify(1, notification);
 		}
 	};
 
@@ -65,28 +70,31 @@ public class NotificationService extends Service {
 		super.onCreate();
 		Log.i(TAG, "Service creating");
 
-		// Notification example from http://developer.android.com/guide/topics/ui/notifiers/notifications.html
+		// Notification example from
+		// http://developer.android.com/guide/topics/ui/notifiers/notifications.html
 		timer = new Timer("TimePlaceNotificationTimer");
 		timer.schedule(updateTask, 1000L, 60 * 1000L);
 		nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notification = new Notification(icon, "Hello there!", System.currentTimeMillis());
-		notification.defaults |= Notification.DEFAULT_SOUND;		// Adds sound
+		notification = new Notification(icon, "Hello there!", System
+				.currentTimeMillis());
+		notification.defaults |= Notification.DEFAULT_SOUND; // Adds sound
 		notification.icon = R.drawable.notification_icon;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
 		intent = new Intent(this, TaskActivity.class);
 		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		context = getApplicationContext();
-		
-		getDataAndUpdateDatabase(new GeoPoint((int) (50.896996f * 1e6), (int) (-1.40416f * 1e6)), 100, "bct");
+
+		getDataAndUpdateDatabase(new GeoPoint((int) (50.896996f * 1e6),
+				(int) (-1.40416f * 1e6)), 100, "bct");
 	}
-	
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-    	Log.v("StartServiceAtBoot", "StartAtBootService -- onStartCommand()");	        
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
-        return START_STICKY;
-    }
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.v("StartServiceAtBoot", "StartAtBootService -- onStartCommand()");
+		// We want this service to continue running until it is explicitly
+		// stopped, so return sticky.
+		return START_STICKY;
+	}
 
 	@Override
 	public void onDestroy() {
@@ -95,19 +103,22 @@ public class NotificationService extends Service {
 		timer.cancel();
 		timer = null;
 	}
-	
-	public void notificationPopup(Task task){
-		notification.setLatestEventInfo(context, "ToDoMe Reminder", (CharSequence)task.getName(), contentIntent);
+
+	public void notificationPopup(Task task) {
+		notification.setLatestEventInfo(context, "ToDoMe Reminder", task
+				.getName(), contentIntent);
 	}
-	
+
 	void getDataAndUpdateDatabase(GeoPoint point, int radius, String type) {
-		
+
 		StringBuilder builder = new StringBuilder();
 		HttpClient client = new DefaultHttpClient();
 		double lat = point.getLatitudeE6() / 1e6;
 		double lng = point.getLongitudeE6() / 1e6;
 		HttpGet httpGet = new HttpGet(
-				"http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat="+lat+"&long="+lng+"&radius="+radius+"&type=" + type);
+				"http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat="
+						+ lat + "&long=" + lng + "&radius=" + radius + "&type="
+						+ type);
 		try {
 			HttpResponse response = client.execute(httpGet);
 			StatusLine statusLine = response.getStatusLine();
@@ -129,23 +140,25 @@ public class NotificationService extends Service {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		try {
 			JSONArray jsonArray = new JSONArray(builder.toString());
-			Log.i("",
-					"Number of entries " + jsonArray.length());
-			notification.setLatestEventInfo(context, "ToDoMe ", "" + jsonArray.length(), contentIntent);
+			Log.i("", "Number of entries " + jsonArray.length());
+			notification.setLatestEventInfo(context, "ToDoMe ", ""
+					+ jsonArray.length(), contentIntent);
 			nm.notify(1, notification);
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				Log.i("", jsonObject.getString("text"));
 			}
 			TimePlaceActivity.tasks.clear();
-			
-			for (int i=0; i<jsonArray.length(); i++) {
+
+			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
-				
-				TimePlaceActivity.db.add(new PointOfInterest((int) (jsonObject.getDouble("lat")*1e6),(int) (jsonObject.getDouble("long")*1e6), null, null, null, 10));
+
+				TimePlaceActivity.db.add(new PointOfInterest((int) (jsonObject
+						.getDouble("lat") * 1e6), (int) (jsonObject
+						.getDouble("long") * 1e6), null, null, null, 10));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
