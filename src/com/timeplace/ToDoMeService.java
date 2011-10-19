@@ -28,10 +28,12 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -47,13 +49,18 @@ import android.util.Log;
 //All of the code making a notification appear is not needed here.
 
 public class ToDoMeService extends Service implements LocationListener {
+	
+	public static ToDoMeService instance;
+	public static ToDoMeService getInstance() {
+		return instance;
+	}
 
 	// Data
 	public static LocationDatabase pointsOfInterest = new LocationDatabase();
 	public static KeywordDatabase keywords = new KeywordDatabase();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
 
-	public static boolean running = false;
+	public boolean running = false;
 
 	private static final String TAG = "ToDoMe-" + Service.class.getSimpleName();
 
@@ -108,6 +115,11 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onCreate() {
 		super.onCreate();
 		Log.i(TAG, "Service creating");
+		
+		ContentResolver cr = getContentResolver();
+		String[] args = { "array", "of", "string"};
+		tasks = (ArrayList<Task>)cr.query(Uri.parse("content://com.timeplace.taskprovider"), args, "", args, "");
+		Log.i(TAG, tasks.size() + " tasks");
 
 		running = true;
 
@@ -219,6 +231,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			Log.i(TAG, "Getting tasks for " + type);
 			pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
 		}
+
 	}
 
 	void checkForReleventNotifications() {
@@ -248,25 +261,21 @@ public class ToDoMeService extends Service implements LocationListener {
 		return taskTypes;
 	}
 
-	@Override
 	public void onLocationChanged(Location location) {
 		userCurrentLocation = location;
 		checkForReleventNotifications();
 	}
 
-	@Override
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void onProviderEnabled(String provider) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 

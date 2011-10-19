@@ -56,7 +56,7 @@ public class TestTabActivity extends Activity implements ServiceConnection {
 			readyButton.setOnClickListener(new OnClickListener() {
 
 				public void onClick(View v) {
-					Log.i("ToDoMe", "Running " + ToDoMeService.running);
+					//Log.i("ToDoMe", "Running " + ToDoMeService.running);
 					startTV.setText("Waiting for fix...");
 					started = true;
 				}
@@ -68,7 +68,8 @@ public class TestTabActivity extends Activity implements ServiceConnection {
 
 			startServB.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					start();
+					Log.i("ToDoMe", "Running " + ToDoMeService.getInstance().running);
+					//start();
 				}
 			});
 
@@ -85,9 +86,9 @@ public class TestTabActivity extends Activity implements ServiceConnection {
 	private void start() {
 		Log.i("ToDoMe::TestTabActivity", "About to start service");
 		// Looper.prepareMainLooper();
-		Log.i("ToDoMe", "Running " + ToDoMeService.running);
+		//Log.i("ToDoMe", "Running " + ToDoMeService.running);
 		bindService(new Intent(this, ToDoMeService.class), this, 0);
-		Log.i("ToDoMe", "Running " + ToDoMeService.running);
+		//Log.i("ToDoMe", "Running " + ToDoMeService.running);
 	}
 	
 	
@@ -132,15 +133,13 @@ public class TestTabActivity extends Activity implements ServiceConnection {
 		}
 	}
 
-	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
-		Log.i("ToDoMe", "Service connected " + ToDoMeService.running);
+		//Log.i("ToDoMe", "Service connected " + ToDoMeService.running);
 		
 	}
 
-	@Override
 	public void onServiceDisconnected(ComponentName name) {
-		Log.i("ToDoMe", "Service disconnected " + ToDoMeService.running);
+		//Log.i("ToDoMe", "Service disconnected " + ToDoMeService.running);
 		
 	}
 }
