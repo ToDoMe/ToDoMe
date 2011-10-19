@@ -97,7 +97,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		notification.defaults |= Notification.DEFAULT_SOUND; // Adds sound
 		notification.icon = R.drawable.notification_icon;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
-		intent = new Intent(this, TaskActivity.class);
+		intent = new Intent(this, TaskViewActivity.class);
 		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		context = getApplicationContext();
 	}
