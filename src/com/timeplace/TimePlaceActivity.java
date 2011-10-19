@@ -7,24 +7,26 @@ import com.timeplace.google.MapViewActivity;
 
 import android.app.AlertDialog;
 import android.app.TabActivity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.TabHost;
 
 public class TimePlaceActivity extends TabActivity {
+	
+	public static LocationDatabase pointsOfInterest = new LocationDatabase();
 
-	// Data
-	public static LocationDatabase db = new LocationDatabase();
 	public static KeywordDatabase keywords = new KeywordDatabase();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i("ToDoMe::TimePlaceActivity", "Begining ToDoMe, start of onCreate");
+		Log.i("ToDoMe::TimePlaceActivity", "Begining ToDoMe, start of onCreate.");
 		try {
 			setContentView(R.layout.main);
 
@@ -50,6 +52,28 @@ public class TimePlaceActivity extends TabActivity {
 			tabHost.addTab(spec);
 
 			tabHost.setCurrentTab(0);
+			
+			// Add a "New task" task if one does not already exist
+			boolean found = false;
+			for (int i = 0; i < tasks.size(); i++) {
+				if (tasks.get(i).getName() == "New task") {
+					found = true;
+				}
+			}
+			if (!found) {
+				tasks.add(new Task("New task", "", "", 0));
+			}
+			
+			// start the service
+			Log.d("ToDoMe-TimePlaceActivity", "Starting service");
+			bindService(new Intent(this, ToDoMeService.class), null, 0);
+			
+			ContentResolver cr = getContentResolver();
+			String[] args = { "array", "of", "string"};
+			
+			Object taskTemp = (Object)cr.query(Uri.parse("content://com.timeplace.taskprovider"), args, "", args, "");
+			tasks = (ArrayList<Task>) taskTemp;
+			Log.i("TimePlaceActivity", ""+(tasks == null));
 
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());

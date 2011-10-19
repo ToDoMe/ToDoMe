@@ -56,6 +56,9 @@
 				</category>
 			</intent-filter>
 		</receiver>
+		
+		<provider android:name="com.timeplace.TaskProvider"
+          android:authorities="com.timeplace.taskprovider" />
 
 	</application>
 </manifest>

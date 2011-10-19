@@ -1,6 +1,7 @@
 package com.timeplace;
 
 import java.io.BufferedReader;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,12 +28,18 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IInterface;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.util.Log;
 
 // Service example from http://mindtherobot.com/blog/37/android-architecture-tutorial-developing-an-app-with-a-background-service-using-ipc/
@@ -42,8 +49,18 @@ import android.util.Log;
 //All of the code making a notification appear is not needed here.
 
 public class ToDoMeService extends Service implements LocationListener {
+	
+	public static ToDoMeService instance;
+	public static ToDoMeService getInstance() {
+		return instance;
+	}
 
-	LocationDatabase pointsOfInterest = TimePlaceActivity.db;
+	// Data
+	public static LocationDatabase pointsOfInterest = new LocationDatabase();
+	public static KeywordDatabase keywords = new KeywordDatabase();
+	public static ArrayList<Task> tasks = new ArrayList<Task>();
+
+	public boolean running = false;
 
 	private static final String TAG = "ToDoMe-" + Service.class.getSimpleName();
 
@@ -60,16 +77,26 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	Location userCurrentLocation;
 
+	// This is the object that receives interactions from clients. See
+	// RemoteService for a more complete example.
+	private final IBinder mBinder = new LocalBinder();
+
+	public class LocalBinder extends Binder {
+		ToDoMeService getService() {
+			return ToDoMeService.this;
+		}
+	}
+
 	private TimerTask updateTask = new TimerTask() {
 		@Override
 		public void run() {
 			Log.i(TAG, "Timer task doing work");
-			
+
 			userCurrentLocation = new Location("");
 			userCurrentLocation.setLatitude(50.896995f);
 			userCurrentLocation.setLongitude(-1.40416);
 			checkForReleventNotifications();
-			
+
 			// notification.setLatestEventInfo(context, "ToDoMe Reminder", name,
 			// contentIntent);
 			// notification.setLatestEventInfo(context, "ToDoMe Reminder",
@@ -80,13 +107,21 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		return null;
+		Log.i(TAG, "Service just bound to");
+		return mBinder;
 	}
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		Log.i(TAG, "Service creating");
+		
+		ContentResolver cr = getContentResolver();
+		String[] args = { "array", "of", "string"};
+		tasks = (ArrayList<Task>)cr.query(Uri.parse("content://com.timeplace.taskprovider"), args, "", args, "");
+		Log.i(TAG, tasks.size() + " tasks");
+
+		running = true;
 
 		// Notification example from
 		// http://developer.android.com/guide/topics/ui/notifiers/notifications.html
@@ -100,6 +135,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		intent = new Intent(this, TaskViewActivity.class);
 		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		context = getApplicationContext();
+
 	}
 
 	@Override
@@ -162,7 +198,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			JSONArray jsonArray = new JSONArray(builder.toString());
 
 			Log.i(TAG, "Number of entries " + jsonArray.length());
-			TimePlaceActivity.tasks.clear();
+			tasks.clear();
 
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -177,7 +213,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			e1.printStackTrace();
 		}
 
-		Log.i(TAG, TimePlaceActivity.db.print());
+		Log.i(TAG, pointsOfInterest.print());
 
 		return newLocDatabase;
 
@@ -195,6 +231,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			Log.i(TAG, "Getting tasks for " + type);
 			pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
 		}
+
 	}
 
 	void checkForReleventNotifications() {
@@ -210,38 +247,35 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	HashSet<String> getAllTaskTypes() {
-		Log.i(TAG, "Finding all task types " + TimePlaceActivity.tasks.size());
+
+		Log.i(TAG, "Finding all task types " + tasks.size());
 		HashSet<String> taskTypes = new HashSet<String>();
 
-		for (Iterator<Task> iter = TimePlaceActivity.tasks.iterator(); iter.hasNext();) {
+		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			Log.i(TAG, "Looking at task " + task.getName());
-			Log.i(TAG, "It has types "  + task.getTypes());
+			Log.i(TAG, "It has types " + task.getTypes());
 			taskTypes.addAll(task.getTypes());
 		}
 		Log.i(TAG, "Total of " + taskTypes.size() + " returned");
 		return taskTypes;
 	}
 
-	@Override
 	public void onLocationChanged(Location location) {
 		userCurrentLocation = location;
 		checkForReleventNotifications();
 	}
 
-	@Override
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void onProviderEnabled(String provider) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 
