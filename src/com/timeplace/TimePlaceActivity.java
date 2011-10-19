@@ -13,16 +13,11 @@ import android.util.Log;
 import android.widget.TabHost;
 
 public class TimePlaceActivity extends TabActivity {
-	
-	// Data
-	public static LocationDatabase db = new LocationDatabase();
-	public static KeywordDatabase keywords = new KeywordDatabase();
-	public static ArrayList<Task> tasks = new ArrayList<Task>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i("ToDoMe::TimePlaceActivity", "Begining ToDoMe, start of onCreate");
+		Log.i("ToDoMe::TimePlaceActivity", "Begining ToDoMe, start of onCreate " + ToDoMeService.running);
 		try {
 			setContentView(R.layout.main);
 
