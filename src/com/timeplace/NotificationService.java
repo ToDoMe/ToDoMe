@@ -30,7 +30,11 @@ import android.os.IBinder;
 import android.util.Log;
 
 // Service example from http://mindtherobot.com/blog/37/android-architecture-tutorial-developing-an-app-with-a-background-service-using-ipc/
-// TODO make subsequent notifications show up
+//TODO - THIS CLASS IS A MESS!
+//This class needs renaming and completely tearing apart and restructuring as it is not the service that displays reminders, it is the service that requests data from the server.
+//The notifications being displayed were simply a debug feature, the notifications should be handled elsewhere, not here as this is a backend service and notifications are front end.
+//All of the code making a notification appear is not needed here.
+
 public class NotificationService extends Service {
 
 	private static final String TAG = NotificationService.class.getSimpleName();
@@ -53,8 +57,8 @@ public class NotificationService extends Service {
 		public void run() {
 			Log.i(TAG, "Timer task doing work");
 			//notification.setLatestEventInfo(context, "ToDoMe Reminder", name, contentIntent);
-			notification.setLatestEventInfo(context, "ToDoMe Reminder", "Task name", contentIntent);
-			nm.notify(1, notification);
+			//notification.setLatestEventInfo(context, "ToDoMe Reminder", "Task name", contentIntent);
+			//nm.notify(1, notification);
 		}
 	};
 
@@ -102,10 +106,10 @@ public class NotificationService extends Service {
 		timer = null;
 	}
 
-	public void notificationPopup(Task task) {
+	/*public void notificationPopup(Task task) {
 		notification.setLatestEventInfo(context, "ToDoMe Reminder", task
 				.getName(), contentIntent);
-	}
+	}*/
 
 	void getDataAndUpdateDatabase(GeoPoint point, int radius, String type) {
 
