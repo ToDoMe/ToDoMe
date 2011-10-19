@@ -15,9 +15,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 
 public class MapViewActivity extends MapActivity {
-    /** Called when the activity is first created. */
+	/** Called when the activity is first created. */
 	private ArrayList<Task> tasks;
-	
+
 	private MapController mapController;
 	private MapView mapView;
 	private MyLocationOverlay locOverlay;
@@ -26,69 +26,91 @@ public class MapViewActivity extends MapActivity {
 	private boolean haveLocation = false;
 	private MapViewOverlay itemizedOverlay;
 	private List<Overlay> mapOverlays;
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-    	// 50.9376967, -1.3980702
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.map);
-        tasks = TimePlaceActivity.tasks;
-        
+
+	private double hardcodedBeginLat = 50.896996;
+	private double hardcodedBeginLong = -1.40416;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// 50.9376967, -1.3980702
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.map);
+		tasks = TimePlaceActivity.tasks;
+
 		// Enable zoom
-        mapView = (MapView) findViewById(R.id.mapview);
-        mapView.setBuiltInZoomControls(true);
-        mapController = mapView.getController();
+		mapView = (MapView) findViewById(R.id.mapview);
+		mapView.setBuiltInZoomControls(true);
+		mapController = mapView.getController();
 		mapController.setZoom(14); // Zoom 1 is world view
-		
+
 		// Get LocationManager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new GeoUpdateHandler());
-		
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+				0, new GeoUpdateHandler());
+
 		// Overlays
 		mapOverlays = mapView.getOverlays();
-		Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
+		Drawable drawable = this.getResources().getDrawable(
+				R.drawable.androidmarker);
 		itemizedOverlay = new MapViewOverlay(drawable, this);
-    }
-    
-    public class GeoUpdateHandler implements LocationListener {
+
+		displayMapAt(new GeoPoint((int) (hardcodedBeginLat * 1e6),
+				(int) (hardcodedBeginLong * 1e6)));
+	}
+
+	public class GeoUpdateHandler implements LocationListener {
 
 		public void onLocationChanged(Location location) {
 			int lat = (int) (location.getLatitude() * 1E6);
 			int lng = (int) (location.getLongitude() * 1E6);
 			GeoPoint point = new GeoPoint(lat, lng);
-			mapController.animateTo(point); //	mapController.setCenter(point);			
-			try {
-	    		locDb = TimePlaceActivity.db;
-	    		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext(); ){
-	    			Task task = iter.next();
-	    			if (task.getName() != "New task"){
-		    			LocationDatabase taskDb = locDb.searchAboutType(task.getType());
-
-		    			Iterator<PointOfInterest> DBiter = taskDb.iterator();
-		    			
-						while (DBiter.hasNext())
-						{
-							PointOfInterest poi = DBiter.next();
-							itemizedOverlay.addOverlay(new OverlayItem(poi, poi.getLocationType(), poi.getOpeningTimes() + " - " + poi.getClosingTimes()));
-						}
-	    			}
-	    		}
-				
-				mapOverlays.add(itemizedOverlay);
-	    	}
-	    	catch (Exception ex){
-	    		message("onLocationChanged: " + ex.getClass().toString(), ex.getMessage());
-	    	}
+			mapController.animateTo(point); // mapController.setCenter(point);
+			displayMapAt(point);
 		}
 
-		public void onProviderDisabled(String provider) {	}
-		public void onProviderEnabled(String provider) {	}
-		public void onStatusChanged(String provider, int status, Bundle extras) {	}
+		public void onProviderDisabled(String provider) {
+		}
+
+		public void onProviderEnabled(String provider) {
+		}
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
 	}
-    
-    @Override
-    protected boolean isRouteDisplayed() { return false; }
-    
+
+	void displayMapAt(GeoPoint point) {
+		mapController.animateTo(point); // mapController.setCenter(point);
+		try {
+			locDb = TimePlaceActivity.db;
+			for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
+				Task task = iter.next();
+				if (task.getName() != "New task") {
+					LocationDatabase taskDb = locDb.searchAboutType(task
+							.getType());
+
+					Iterator<PointOfInterest> DBiter = taskDb.iterator();
+
+					while (DBiter.hasNext()) {
+						PointOfInterest poi = DBiter.next();
+						itemizedOverlay.addOverlay(new OverlayItem(poi, poi
+								.getLocationType(), poi.getOpeningTimes()
+								+ " - " + poi.getClosingTimes()));
+					}
+				}
+			}
+
+			mapOverlays.add(itemizedOverlay);
+		} catch (Exception ex) {
+			message("onLocationChanged: " + ex.getClass().toString(), ex
+					.getMessage());
+		}
+	}
+
+	@Override
+	protected boolean isRouteDisplayed() {
+		return false;
+	}
+
 	private void message(String title, String message) {
 		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 		alertDialog.setTitle(title);
