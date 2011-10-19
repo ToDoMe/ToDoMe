@@ -16,11 +16,12 @@ public final class R {
         public static final int ic_tab_map=0x7f020002;
         public static final int ic_tab_todo=0x7f020003;
         public static final int icon=0x7f020004;
-        public static final int map_not_selected=0x7f020005;
-        public static final int map_selected=0x7f020006;
-        public static final int notification_icon=0x7f020007;
-        public static final int todo_not_selected=0x7f020008;
-        public static final int todo_selected=0x7f020009;
+        public static final int logo_icon=0x7f020005;
+        public static final int map_not_selected=0x7f020006;
+        public static final int map_selected=0x7f020007;
+        public static final int notification_icon=0x7f020008;
+        public static final int todo_not_selected=0x7f020009;
+        public static final int todo_selected=0x7f02000a;
     }
     public static final class id {
         public static final int completeButton=0x7f05000b;

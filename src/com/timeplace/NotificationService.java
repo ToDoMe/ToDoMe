@@ -44,6 +44,7 @@ public class NotificationService extends Service {
 	private Intent intent;
 	private Notification notification;
 	private PendingIntent contentIntent;
+	private String name;
  
 	private TimerTask updateTask = new TimerTask() {
 		@Override
@@ -52,11 +53,10 @@ public class NotificationService extends Service {
 			notification.setLatestEventInfo(context, "ToDoMe ", "Need to post something?", contentIntent);
 			//notificationPopup(TimePlaceActivity.tasks.get(0));
 			try {
-			String name = TimePlaceActivity.tasks.get(1).getName();
+				name = TimePlaceActivity.tasks.get(0).getName();
 			} catch (Exception e) {
-				System.out.println("It's all broked still :(");
 			}
-			notification.setLatestEventInfo(context, "ToDoMe Reminder", "Task name", contentIntent);
+			notification.setLatestEventInfo(context, "ToDoMe Reminder", name, contentIntent);
 			nm.notify(1, notification);
 		}
 	};
