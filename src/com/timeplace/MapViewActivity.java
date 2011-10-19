@@ -86,7 +86,7 @@ public class MapViewActivity extends MapActivity {
 
 	void displayMapAt(GeoPoint point) {
 		mapController.animateTo(point); // mapController.setCenter(point);
-		try { // Something in here is broken
+		try {
 			locDb = TimePlaceActivity.db;
 			for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 				Task task = iter.next();
@@ -105,7 +105,6 @@ public class MapViewActivity extends MapActivity {
 			}
 			
 			mapOverlays.add(itemizedOverlay);
-			message("1", "1");
 		} catch (Exception ex) {
 			message("onLocationChanged: " + ex.getClass().toString(), ex
 					.getMessage());

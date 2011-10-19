@@ -21,6 +21,7 @@ public class MapViewOverlay extends ItemizedOverlay {
 	public MapViewOverlay(Drawable defaultMarker, Context context) {
 		super(boundCenterBottom(defaultMarker));
 		this.context = context;
+		populate();
 	}
 	
 	public void addOverlay(OverlayItem overlay) {
