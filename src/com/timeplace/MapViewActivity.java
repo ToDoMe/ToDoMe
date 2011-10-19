@@ -69,7 +69,7 @@ public class MapViewActivity extends MapActivity {
 						while (DBiter.hasNext())
 						{
 							PointOfInterest poi = DBiter.next();
-							itemizedOverlay.addOverlay(new OverlayItem(poi, poi.getLocationType(), poi.getOpeningTimes() + " - " + poi.getClosingTimes()));
+							itemizedOverlay.addOverlay(new OverlayItem(poi, poi.getLocationType()[1], poi.getOpeningTimes() + " - " + poi.getClosingTimes()));
 						}
 	    			}
 	    		}

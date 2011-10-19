@@ -6,13 +6,13 @@ import com.google.android.maps.GeoPoint;
 
 public class PointOfInterest extends GeoPoint {
 	
-	final String locationType;
+	final String[] locationType;
 	final double radiusOfEffect;
 	
 	final Time[] openingTimes;
 	final Time[] closingTimes;
 	
-	public String getLocationType() {
+	public String[] getLocationType() {
 		return locationType;
 	}
 
@@ -28,7 +28,7 @@ public class PointOfInterest extends GeoPoint {
 		return closingTimes;
 	}
 
-	public PointOfInterest(int latitude, int longitude, String locationType, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
+	public PointOfInterest(int latitude, int longitude, String[] locationType, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
 		super(latitude, longitude);
 		this.locationType = locationType;
 		this.openingTimes = openingTimes;
