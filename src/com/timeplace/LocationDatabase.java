@@ -1,9 +1,7 @@
 package com.timeplace;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Collections;
 import java.util.Iterator;
-
-import android.app.AlertDialog;
 
 import com.google.android.maps.GeoPoint;
 
@@ -13,14 +11,20 @@ public class LocationDatabase extends HashSet<PointOfInterest> {
 		super();
 	}
 
-	public LocationDatabase searchAboutType(String type) {
+	public LocationDatabase searchAboutTypes(ArrayList<String> type) {
 		LocationDatabase subset = new LocationDatabase();
 		
 		for (Iterator<PointOfInterest> iter = this.iterator(); iter.hasNext(); ) {
 			PointOfInterest location  = iter.next();
 			
-			if (location.locationType.equals(type)) {
-				subset.add(location);
+			for (int i = 0; i < type.size(); i++) {
+				
+				for (int j = 0; j < location.locationTypes.size(); j++) {
+					
+					if (location.locationTypes.get(j).equals(type.get(i))) {
+						subset.add(location);
+					}
+				}
 			}
 		}
 		

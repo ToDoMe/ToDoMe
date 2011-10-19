@@ -1,19 +1,21 @@
 package com.timeplace;
 
+import java.util.ArrayList;
+
 import android.text.format.Time;
 
 import com.google.android.maps.GeoPoint;
 
 public class PointOfInterest extends GeoPoint {
 	
-	final String[] locationType;
+	final ArrayList<String> locationTypes;
 	final double radiusOfEffect;
 	
 	final Time[] openingTimes;
 	final Time[] closingTimes;
 	
-	public String[] getLocationType() {
-		return locationType;
+	public ArrayList<String> getLocationTypes() {
+		return locationTypes;
 	}
 
 	public double getRadiusOfEffect() {
@@ -28,9 +30,9 @@ public class PointOfInterest extends GeoPoint {
 		return closingTimes;
 	}
 
-	public PointOfInterest(int latitude, int longitude, String[] locationType, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
+	public PointOfInterest(int latitude, int longitude, ArrayList<String> locationTypes, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
 		super(latitude, longitude);
-		this.locationType = locationType;
+		this.locationTypes = locationTypes;
 		this.openingTimes = openingTimes;
 		this.closingTimes = closingTimes;
 		this.radiusOfEffect = radiusOfEffect;
