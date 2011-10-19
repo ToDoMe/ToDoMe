@@ -51,7 +51,7 @@ public class NotificationService extends Service {
 			Log.i(TAG, "Timer task doing work");
 			notification.setLatestEventInfo(context, "ToDoMe ", "Need to post something?", contentIntent);
 			//notificationPopup(TimePlaceActivity.tasks.get(0));
-			nm.notify(1, notification);
+			//nm.notify(1, notification);
 		}
 	};
 
@@ -76,6 +76,8 @@ public class NotificationService extends Service {
 		intent = new Intent(this, TaskActivity.class);
 		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		context = getApplicationContext();
+		
+		getDataAndUpdateDatabase(new GeoPoint((int) (50.896996f * 1e6), (int) (-1.40416f * 1e6)), 100, "bct");
 	}
 	
     @Override
@@ -102,8 +104,10 @@ public class NotificationService extends Service {
 		
 		StringBuilder builder = new StringBuilder();
 		HttpClient client = new DefaultHttpClient();
+		double lat = point.getLatitudeE6() / 1e6;
+		double lng = point.getLongitudeE6() / 1e6;
 		HttpGet httpGet = new HttpGet(
-				"http://twitter.com/statuses/user_timeline/vogella.json");
+				"http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat="+lat+"&long="+lng+"&radius="+radius+"&type=" + type);
 		try {
 			HttpResponse response = client.execute(httpGet);
 			StatusLine statusLine = response.getStatusLine();
@@ -130,13 +134,22 @@ public class NotificationService extends Service {
 			JSONArray jsonArray = new JSONArray(builder.toString());
 			Log.i("",
 					"Number of entries " + jsonArray.length());
+			notification.setLatestEventInfo(context, "ToDoMe ", "" + jsonArray.length(), contentIntent);
+			nm.notify(1, notification);
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				Log.i("", jsonObject.getString("text"));
 			}
+			TimePlaceActivity.tasks.clear();
 			
+			for (int i=0; i<jsonArray.length(); i++) {
+				JSONObject jsonObject = jsonArray.getJSONObject(i);
+				
+				TimePlaceActivity.db.add(new PointOfInterest((int) (jsonObject.getDouble("lat")*1e6),(int) (jsonObject.getDouble("long")*1e6), null, null, null, 10));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 }
