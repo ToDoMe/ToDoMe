@@ -1,4 +1,4 @@
-package com.timeplace;
+package com.timeplace.google;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,6 +20,8 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+import com.timeplace.*;
+import com.timeplace.gui.TimePlaceActivity;
 
 public class MapViewActivity extends MapActivity {
 	/** Called when the activity is first created. */
@@ -52,16 +54,13 @@ public class MapViewActivity extends MapActivity {
 
 		// Get LocationManager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-				0, new GeoUpdateHandler());
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new GeoUpdateHandler());
 
 		// Overlays
 		mapOverlays = mapView.getOverlays();
-		Drawable drawable = this.getResources().getDrawable(
-				R.drawable.androidmarker);
+		Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
 		itemizedOverlay = new MapViewOverlay(drawable, this);
-		displayMapAt(new GeoPoint((int) (hardcodedBeginLat * 1e6),
-				(int) (hardcodedBeginLong * 1e6)));
+		displayMapAt(new GeoPoint((int) (hardcodedBeginLat * 1e6), (int) (hardcodedBeginLong * 1e6)));
 	}
 
 	public class GeoUpdateHandler implements LocationListener {
@@ -87,35 +86,37 @@ public class MapViewActivity extends MapActivity {
 	void displayMapAt(GeoPoint point) {
 		mapController.animateTo(point); // mapController.setCenter(point);
 		try {
-			locDb = ToDoMeService.pointsOfInterest;
+			locDb = TimePlaceActivity.pointsOfInterest;
 			for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 				Task task = iter.next();
 				if (task.getName() != "New task") {
 					LocationDatabase taskDb = locDb.searchAboutTypes(task.getTypes());
 
-					Iterator<PointOfInterest> DBiter = taskDb.iterator();
-
+					Iterator<PointOfInterest> DBiter = taskDb.iterator(); 
 					while (DBiter.hasNext()) {
 						PointOfInterest poi = DBiter.next();
-						itemizedOverlay.addOverlay(new OverlayItem(poi,
-								poi.getLocationTypes().get(1),
-								poi.getOpeningTimes()[getDayOfWeek()] + " - " + poi.getClosingTimes()[getDayOfWeek()]));
+						itemizedOverlay.addOverlay(new OverlayItem(poi, poi.getLocationTypes().get(1), poi.getOpeningTimes()[getDayOfWeek()] + " - "
+								+ poi.getClosingTimes()[getDayOfWeek()]));
 					}
 				}
 			}
-			
+
 			mapOverlays.add(itemizedOverlay);
 		} catch (Exception ex) {
 			message("onLocationChanged: " + ex.getClass().toString(), ex.getMessage());
 		}
 	}
-	
+
 	static int getDayOfWeek() {
 		Calendar rightNow = Calendar.getInstance();
-		
-		int DOW = rightNow.get(Calendar.DAY_OF_WEEK) - 2; // fix to get Monday = 0
-		
-		if (DOW > -1) return DOW; else return 6;
+
+		int DOW = rightNow.get(Calendar.DAY_OF_WEEK) - 2; // fix to get Monday =
+															// 0
+
+		if (DOW > -1)
+			return DOW;
+		else
+			return 6;
 	}
 
 	@Override

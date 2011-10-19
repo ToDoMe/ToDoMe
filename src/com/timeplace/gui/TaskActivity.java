@@ -1,6 +1,10 @@
-package com.timeplace;
+package com.timeplace.gui;
 
 import java.util.ArrayList;
+
+import com.timeplace.R;
+import com.timeplace.R.id;
+import com.timeplace.R.layout;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -22,11 +26,9 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class TaskActivity extends Activity {
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
-	// convenience
-	private Task touchedTask;
+
 	private ListView lv;
-	private ArrayAdapter<Task> taskAdapter;
+
 	private Dialog dialog;
 	private AlertDialog alert;
 	public String taskType;
@@ -38,14 +40,12 @@ public class TaskActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.todo);
 
-		tasks = TimePlaceActivity.tasks;
-
 		// Build popup
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				tasks.remove(touchedTask);
-				taskAdapter.notifyDataSetChanged();
+				// tasks.remove(touchedTask);
+				// taskAdapter.notifyDataSetChanged();
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
@@ -59,12 +59,13 @@ public class TaskActivity extends Activity {
 	private void setUpListView() {
 		lv = (ListView) findViewById(R.id.taskList);
 		lv.setTextFilterEnabled(true);
-		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasks);
-		lv.setAdapter(taskAdapter);
+		// taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item,
+		// tasks);
+		// lv.setAdapter(taskAdapter);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				touchedTask = tasks.get(position);
+				// touchedTask = tasks.get(position);
 				if (((TextView) view).getText() == "New task") {
 					showTaskDialog();
 				} else {
@@ -115,18 +116,17 @@ public class TaskActivity extends Activity {
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
 		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 
-		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(), (int) ratingEntry
-				.getRating());
-
 		dialog.hide();
-		taskAdapter.notifyDataSetChanged();
-		ArrayList<String> type = TimePlaceActivity.keywords.getTypes(task.getName());
-		task.setTypes(type);
-		
-		tasks.add(tasks.size() - 1, task);
-		
-		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size()-1) + " tasks");
-		Log.i(TAG, "Tasks: " + tasks.toString());
+		// taskAdapter.notifyDataSetChanged();
+		// ArrayList<String> type =
+		// TimePlaceActivity.keywords.getTypes(task.getName());
+		// task.setTypes(type);
+
+		// tasks.add(tasks.size() - 1, task);
+
+		// Log.i(TAG, "Task just added (" + task.getName() + " " + type +
+		// ") now have " + (tasks.size() - 1) + " tasks");
+		// Log.i(TAG, "Tasks: " + tasks.toString());
 
 		// message("", type);
 		Log.d(TAG, "Its here!");

@@ -1,11 +1,9 @@
 package com.timeplace;
 
 import java.io.BufferedReader;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Timer;
@@ -22,58 +20,31 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.android.maps.GeoPoint;
-
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Parcel;
-import android.os.RemoteException;
 import android.util.Log;
 
-// Service example from http://mindtherobot.com/blog/37/android-architecture-tutorial-developing-an-app-with-a-background-service-using-ipc/
-//TODO - THIS CLASS IS A MESS!
-//This class needs renaming and completely tearing apart and restructuring as it is not the service that displays reminders, it is the service that requests data from the server.
-//The notifications being displayed were simply a debug feature, the notifications should be handled elsewhere, not here as this is a backend service and notifications are front end.
-//All of the code making a notification appear is not needed here.
+import com.google.android.maps.GeoPoint;
+import com.timeplace.gui.TaskActivity;
 
 public class ToDoMeService extends Service implements LocationListener {
-	
-	public static ToDoMeService instance;
-	public static ToDoMeService getInstance() {
-		return instance;
-	}
-
-	// Data
-	public static LocationDatabase pointsOfInterest = new LocationDatabase();
-	public static KeywordDatabase keywords = new KeywordDatabase();
-	public static ArrayList<Task> tasks = new ArrayList<Task>();
 
 	public boolean running = false;
 
 	private static final String TAG = "ToDoMe-" + Service.class.getSimpleName();
 
-	private boolean debug = true;
-
 	private Timer timer;
-	private NotificationManager nm;
 	private int icon = R.drawable.icon;
-	private Context context;
-	private Intent intent;
 	private Notification notification;
-	private PendingIntent contentIntent;
-	private String name;
+	
+	private ToDoMeDatabaseAdapter dbHelper;
 
 	Location userCurrentLocation;
 
@@ -115,26 +86,25 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onCreate() {
 		super.onCreate();
 		Log.i(TAG, "Service creating");
-		
-		ContentResolver cr = getContentResolver();
-		String[] args = { "array", "of", "string"};
-		tasks = (ArrayList<Task>)cr.query(Uri.parse("content://com.timeplace.taskprovider"), args, "", args, "");
-		Log.i(TAG, tasks.size() + " tasks");
 
 		running = true;
+		
+		// Database Test
+		dbHelper = new ToDoMeDatabaseAdapter(this);
+		dbHelper.open();
+
+		dbHelper.createTask("Task 1", "Notes 1", "Postcode 1", 2);
+		dbHelper.createTask("Task 2", "Notes 2", "Postcode 2", 4);
 
 		// Notification example from
 		// http://developer.android.com/guide/topics/ui/notifiers/notifications.html
-		timer = new Timer("TimePlaceNotificationTimer");
-		timer.schedule(updateTask, 1000L, 60 * 1000L);
-		nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notification = new Notification(icon, "Hello there!", System.currentTimeMillis());
-		notification.defaults |= Notification.DEFAULT_SOUND; // Adds sound
-		notification.icon = R.drawable.notification_icon;
-		notification.defaults |= Notification.DEFAULT_VIBRATE;
-		intent = new Intent(this, TaskActivity.class);
-		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
-		context = getApplicationContext();
+		// timer = new Timer("TimePlaceNotificationTimer");
+		// timer.schedule(updateTask, 1000L, 60 * 1000L);
+		// notification = new Notification(icon, "Hello there!",
+		// System.currentTimeMillis());
+		// notification.defaults |= Notification.DEFAULT_SOUND; // Adds sound
+		// notification.icon = R.drawable.notification_icon;
+		// notification.defaults |= Notification.DEFAULT_VIBRATE;
 
 	}
 
@@ -160,7 +130,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	 * .getName(), contentIntent); }
 	 */
 
-	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
+	private void getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Begining to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
 
 		StringBuilder builder = new StringBuilder();
@@ -192,30 +162,26 @@ public class ToDoMeService extends Service implements LocationListener {
 			e.printStackTrace();
 		}
 
-		LocationDatabase newLocDatabase = new LocationDatabase();
-
 		try {
 			JSONArray jsonArray = new JSONArray(builder.toString());
 
 			Log.i(TAG, "Number of entries " + jsonArray.length());
-			tasks.clear();
 
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
-				try {
-					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), null, null,
-							null, 10));
-				} catch (JSONException e) {
-					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
-				}
+				// try {
+				// newLocDatabase.add(new PointOfInterest((int)
+				// (jsonObject.getDouble("lat") * 1e6), (int)
+				// (jsonObject.getDouble("long") * 1e6), null, null,
+				// null, 10));
+				// } catch (JSONException e) {
+				// Log.e(TAG, e.getMessage() + " for " + i + "/" +
+				// jsonArray.length(), e);
+				// }
 			}
 		} catch (JSONException e1) {
 			e1.printStackTrace();
 		}
-
-		Log.i(TAG, pointsOfInterest.print());
-
-		return newLocDatabase;
 
 	}
 
@@ -223,13 +189,12 @@ public class ToDoMeService extends Service implements LocationListener {
 	 * This updates the central database with the relevant data from the server
 	 */
 	private void updateDatabase(HashSet<String> taskTypes) {
-		pointsOfInterest.clear();
-		Log.i(TAG, "Location database cleared");
 
 		for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
 			String type = iter.next();
 			Log.i(TAG, "Getting tasks for " + type);
-			pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
+			// pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation),
+			// 100, type));
 		}
 
 	}
@@ -238,25 +203,27 @@ public class ToDoMeService extends Service implements LocationListener {
 		Log.i(TAG, "Checking for relevent notifications");
 		updateDatabase(getAllTaskTypes());
 
-		for (Iterator<PointOfInterest> iter = pointsOfInterest.iterator(); iter.hasNext();) {
-			PointOfInterest poi = iter.next();
-
-			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi));
-			Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
-		}
+		/*
+		 * for (Iterator<PointOfInterest> iter = pointsOfInterest.iterator();
+		 * iter.hasNext();) { PointOfInterest poi = iter.next();
+		 * 
+		 * float dist =
+		 * userCurrentLocation.distanceTo(Util.geoPointToLocation(poi));
+		 * Log.i(TAG, "Distance from " + poi.toString() + " is " + dist); }
+		 */
 	}
 
 	HashSet<String> getAllTaskTypes() {
 
-		Log.i(TAG, "Finding all task types " + tasks.size());
+		// Log.i(TAG, "Finding all task types " + tasks.size());
 		HashSet<String> taskTypes = new HashSet<String>();
 
-		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
-			Task task = iter.next();
-			Log.i(TAG, "Looking at task " + task.getName());
-			Log.i(TAG, "It has types " + task.getTypes());
-			taskTypes.addAll(task.getTypes());
-		}
+		/*
+		 * for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) { Task
+		 * task = iter.next(); Log.i(TAG, "Looking at task " + task.getName());
+		 * Log.i(TAG, "It has types " + task.getTypes());
+		 * taskTypes.addAll(task.getTypes()); }
+		 */
 		Log.i(TAG, "Total of " + taskTypes.size() + " returned");
 		return taskTypes;
 	}
