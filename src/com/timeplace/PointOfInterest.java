@@ -2,6 +2,7 @@ package com.timeplace;
 
 import java.util.ArrayList;
 
+import android.location.Location;
 import android.text.format.Time;
 
 import com.google.android.maps.GeoPoint;
@@ -31,7 +32,7 @@ public class PointOfInterest extends GeoPoint {
 	}
 
 	public PointOfInterest(int latitude, int longitude, ArrayList<String> locationTypes, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
-		super(latitude, longitude);
+		super(latitude,longitude);
 		this.locationTypes = locationTypes;
 		this.openingTimes = openingTimes;
 		this.closingTimes = closingTimes;

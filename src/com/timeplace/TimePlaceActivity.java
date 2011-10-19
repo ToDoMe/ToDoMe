@@ -9,18 +9,20 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.TabHost;
 
 public class TimePlaceActivity extends TabActivity {
-
+	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
 	public static KeywordDatabase keywords = new KeywordDatabase();
-	public static ArrayList<Task> tasks = new ArrayList<Task>();;
+	public static ArrayList<Task> tasks = new ArrayList<Task>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.i("ToDoMe::TimePlaceActivity", "Begining ToDoMe, start of onCreate");
 		try {
 			setContentView(R.layout.main);
 

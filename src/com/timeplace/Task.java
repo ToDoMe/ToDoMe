@@ -37,4 +37,5 @@ public class Task {
 	public void setComplete(boolean complete) { this.complete = complete; }
 	public int getRating() { return rating; }
 	public void setRating(int rating) { this.rating = rating; }
+
 }

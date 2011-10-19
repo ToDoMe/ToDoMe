@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -72,12 +73,13 @@ public class TestTabActivity extends Activity {
 	}
 	
 	private void start() {
+		Log.i("ToDoMe::TestTabActivity", "About to start service");
 		//Looper.prepareMainLooper();
-		startService(new Intent(this, NotificationService.class));
+		startService(new Intent(this, ToDoMeService.class));
 	}
 	
 	private void stop() {
-		stopService(new Intent(this, NotificationService.class));
+		stopService(new Intent(this, ToDoMeService.class));
 	}
 	
 	private void message(String title, String message) {
