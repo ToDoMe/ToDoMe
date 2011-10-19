@@ -56,7 +56,7 @@ public class ToDoMeDatabaseAdapter {
 				TASKS_KEY_TYPE }, null, null, null, null, null);
 	}
 
-	public Cursor fetchTodo(long rowId) throws SQLException {
+	public Cursor fetchTask(long rowId) throws SQLException {
 		Cursor mCursor = database.query(true, TASKS_TABLE, new String[] { TASKS_KEY_ROWID, TASKS_KEY_NAME, TASKS_KEY_NOTES, TASKS_KEY_POSTCODE,
 				TASKS_KEY_RATING, TASKS_KEY_TYPE }, TASKS_KEY_ROWID + "=" + rowId, null, null, null, null, null);
 		if (mCursor != null) {

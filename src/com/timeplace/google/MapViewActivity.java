@@ -21,17 +21,14 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.timeplace.*;
-import com.timeplace.gui.TimePlaceActivity;
 
 public class MapViewActivity extends MapActivity {
 	/** Called when the activity is first created. */
-	private ArrayList<Task> tasks;
 
 	private MapController mapController;
 	private MapView mapView;
 	private MyLocationOverlay locOverlay;
 	private LocationManager locationManager;
-	private LocationDatabase locDb;
 	private boolean haveLocation = false;
 	private MapViewOverlay itemizedOverlay;
 	private List<Overlay> mapOverlays;
@@ -44,7 +41,6 @@ public class MapViewActivity extends MapActivity {
 		// 50.9376967, -1.3980702
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
-		tasks = TimePlaceActivity.tasks;
 
 		// Enable zoom
 		mapView = (MapView) findViewById(R.id.mapview);
@@ -86,20 +82,19 @@ public class MapViewActivity extends MapActivity {
 	void displayMapAt(GeoPoint point) {
 		mapController.animateTo(point); // mapController.setCenter(point);
 		try {
-			locDb = TimePlaceActivity.pointsOfInterest;
-			for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
-				Task task = iter.next();
-				if (task.getName() != "New task") {
-					LocationDatabase taskDb = locDb.searchAboutTypes(task.getTypes());
-
-					Iterator<PointOfInterest> DBiter = taskDb.iterator(); 
-					while (DBiter.hasNext()) {
-						PointOfInterest poi = DBiter.next();
-						itemizedOverlay.addOverlay(new OverlayItem(poi, poi.getLocationTypes().get(1), poi.getOpeningTimes()[getDayOfWeek()] + " - "
-								+ poi.getClosingTimes()[getDayOfWeek()]));
-					}
-				}
-			}
+			/*
+			 * locDb = TimePlaceActivity.pointsOfInterest; for (Iterator<Task>
+			 * iter = tasks.iterator(); iter.hasNext();) { Task task =
+			 * iter.next(); if (task.getName() != "New task") { LocationDatabase
+			 * taskDb = locDb.searchAboutTypes(task.getTypes());
+			 * 
+			 * Iterator<PointOfInterest> DBiter = taskDb.iterator(); while
+			 * (DBiter.hasNext()) { PointOfInterest poi = DBiter.next();
+			 * itemizedOverlay.addOverlay(new OverlayItem(poi,
+			 * poi.getLocationTypes().get(1),
+			 * poi.getOpeningTimes()[getDayOfWeek()] + " - " +
+			 * poi.getClosingTimes()[getDayOfWeek()])); } } }
+			 */
 
 			mapOverlays.add(itemizedOverlay);
 		} catch (Exception ex) {
@@ -111,7 +106,7 @@ public class MapViewActivity extends MapActivity {
 		Calendar rightNow = Calendar.getInstance();
 
 		int DOW = rightNow.get(Calendar.DAY_OF_WEEK) - 2; // fix to get Monday =
-															// 0
+		// 0
 
 		if (DOW > -1)
 			return DOW;

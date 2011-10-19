@@ -34,7 +34,6 @@ public class TaskViewActivity extends ListActivity {
 
 	private ToDoMeDatabaseAdapter dbHelper;
 	private Dialog dialog;
-	private TaskListArrayAdapter taskAdapter;
 
 	private static final String TAG = "TodoActivity";
 
@@ -99,7 +98,6 @@ public class TaskViewActivity extends ListActivity {
 		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 
 		dialog.hide();
-		taskAdapter.notifyDataSetChanged();
 
 	}
 

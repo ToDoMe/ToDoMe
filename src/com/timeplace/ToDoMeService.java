@@ -36,6 +36,8 @@ import com.timeplace.gui.TaskActivity;
 
 public class ToDoMeService extends Service implements LocationListener {
 
+	private ToDoMeDatabaseAdapter dbHelper;
+
 	public boolean running = false;
 
 	private static final String TAG = "ToDoMe-" + Service.class.getSimpleName();
@@ -43,8 +45,6 @@ public class ToDoMeService extends Service implements LocationListener {
 	private Timer timer;
 	private int icon = R.drawable.icon;
 	private Notification notification;
-	
-	private ToDoMeDatabaseAdapter dbHelper;
 
 	Location userCurrentLocation;
 
@@ -73,6 +73,9 @@ public class ToDoMeService extends Service implements LocationListener {
 			// notification.setLatestEventInfo(context, "ToDoMe Reminder",
 			// "Task name", contentIntent);
 			// nm.notify(1, notification);
+
+			int num = dbHelper.fetchAllTasks().getColumnCount();
+			Log.i(TAG, "Fetching tasks from service " + num);
 		}
 	};
 
@@ -88,7 +91,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		Log.i(TAG, "Service creating");
 
 		running = true;
-		
+
 		// Database Test
 		dbHelper = new ToDoMeDatabaseAdapter(this);
 		dbHelper.open();

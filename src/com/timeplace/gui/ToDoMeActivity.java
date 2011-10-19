@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import com.timeplace.R;
+import com.timeplace.ToDoMeDatabaseAdapter;
 import com.timeplace.ToDoMeService;
 import com.timeplace.R.drawable;
 import com.timeplace.R.layout;
@@ -21,6 +22,8 @@ import android.util.Log;
 import android.widget.TabHost;
 
 public class ToDoMeActivity extends TabActivity {
+
+	private ToDoMeDatabaseAdapter dbHelper;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,17 +45,23 @@ public class ToDoMeActivity extends TabActivity {
 			tabHost.addTab(spec);
 
 			// Do the same for the other tabs
-			//intent = new Intent().setClass(this, MapViewActivity.class);
-			//spec = tabHost.newTabSpec("map").setIndicator("Map", res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
-			//tabHost.addTab(spec);
+			// intent = new Intent().setClass(this, MapViewActivity.class);
+			// spec = tabHost.newTabSpec("map").setIndicator("Map",
+			// res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
+			// tabHost.addTab(spec);
 
 			tabHost.setCurrentTab(0);
+
+			dbHelper = new ToDoMeDatabaseAdapter(this);
+			dbHelper.open();
+
+			dbHelper.createTask("Task 1", "Notes 1", "Postcode 1", 2);
+			dbHelper.createTask("Task 2", "Notes 2", "Postcode 2", 4);
 
 			// start the service
 			Log.d("ToDoMe-TimePlaceActivity", "Starting service");
 			bindService(new Intent(this, ToDoMeService.class), null, 0);
 
-			
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
 		}
