@@ -20,14 +20,14 @@ public class KeywordDatabase {
 		return keywords.size();
 	}
 	
-	public String getType(String name) {
-		String keyword = null;
+	public ArrayList<String> getTypes(String name) {
+		ArrayList<String> types = new ArrayList<String>();
 		String lowerName = name.toLowerCase();
 		for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
 			Keyword keywordObj = iter.next();
 			if (lowerName.contains(keywordObj.keyword))
 			{
-				keyword = keywordObj.type;
+				types.add(keywordObj.type);
 			}
 		}
 		/*String[] words = name.split(" ");
@@ -42,7 +42,7 @@ public class KeywordDatabase {
 			}
 		}*/
 
-		return keyword;
+		return types;
 	}
 
 	private class Keyword {

@@ -134,8 +134,8 @@ public class TaskActivity extends Activity {
 		tasks.add(tasks.size() - 1, task);
 		dialog.hide();
 		taskAdapter.notifyDataSetChanged();
-		String type = TimePlaceActivity.keywords.getType(task.getName());
-		task.setType(type);
+		ArrayList<String> type = TimePlaceActivity.keywords.getTypes(task.getName());
+		task.setTypes(type);
 
 		//message("", type);
 		Log.d(TAG, "Its here!");
