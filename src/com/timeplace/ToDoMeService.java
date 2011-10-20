@@ -137,7 +137,7 @@ public class ToDoMeService extends Service {
         // In this sample, we'll use the same text for the ticker and the expanded notification
         CharSequence text = getText(R.string.service_started);
         // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
+        Notification notification = new Notification(R.drawable.notification_icon, text, System.currentTimeMillis());
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TestTabActivity.class), 0);
         // Set the info for the views that show in the notification panel.
