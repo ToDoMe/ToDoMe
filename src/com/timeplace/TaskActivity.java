@@ -22,8 +22,7 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class TaskActivity extends Activity {
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
-	// convenience
+	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;

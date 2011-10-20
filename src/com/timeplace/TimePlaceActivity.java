@@ -35,8 +35,8 @@ public class TimePlaceActivity extends TabActivity {
 			intent = new Intent().setClass(this, TaskActivity.class);
 
 			// Initialise a TabSpec for each tab and add it to the TabHost
-			spec = tabHost.newTabSpec("todo").setIndicator("To-Do", res.getDrawable(R.drawable.ic_tab_todo)).setContent(intent);
-			tabHost.addTab(spec);
+			//spec = tabHost.newTabSpec("todo").setIndicator("To-Do", res.getDrawable(R.drawable.ic_tab_todo)).setContent(intent);
+			//tabHost.addTab(spec);
 
 			// Do the same for the other tabs
 			intent = new Intent().setClass(this, MapViewActivity.class);
