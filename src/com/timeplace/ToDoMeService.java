@@ -267,6 +267,17 @@ public class ToDoMeService extends Service {
 			Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
 		}
 	}
+	
+	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
+		ArrayList<Task> releventTasks = new ArrayList<Task>();
+		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext(); ) {
+			Task task = iter.next();
+			if (poi.locationTypes.contains(task.getTypes().get(0))) {
+				releventTasks.add(task);
+			}
+		}
+		return releventTasks;
+	}
 
 	HashSet<String> getAllTaskTypes() {
 

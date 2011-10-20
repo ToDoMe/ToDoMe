@@ -25,8 +25,7 @@ public class Util {
 	}
 
 	static GeoPoint locationToGeoPoint(Location loc) {
-		return new GeoPoint(doubleToIntE6(loc.getLatitude()), doubleToIntE6(loc
-				.getLongitude()));
+		return new GeoPoint(doubleToIntE6(loc.getLatitude()), doubleToIntE6(loc.getLongitude()));
 	}
 
 	static Location geoPointToLocation(GeoPoint point) {
@@ -52,8 +51,7 @@ public class Util {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(
-					new ByteArrayOutputStream());
+			ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
 			oos.writeObject(obj);
 			return baos.toString();
 		} catch (IOException e) {
@@ -63,31 +61,21 @@ public class Util {
 		return null;
 	}
 
-	static LocationDatabase getLocationDatabaseFromString(String str)
-			throws StreamCorruptedException, IOException,
-			ClassNotFoundException {
+	static LocationDatabase getLocationDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (LocationDatabase) getObjectFromString(str);
 	}
 
-	static ArrayList<Task> getTaskListFromString(String str)
-			throws StreamCorruptedException, IOException,
-			ClassNotFoundException {
+	static ArrayList<Task> getTaskListFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (ArrayList<Task>) getObjectFromString(str);
 	}
 
-	static KeywordDatabase getKeyboardDatabaseFromString(String str)
-			throws StreamCorruptedException, IOException,
-			ClassNotFoundException {
+	static KeywordDatabase getKeyboardDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (KeywordDatabase) getObjectFromString(str);
 	}
 
-	static Object getObjectFromString(String str)
-			throws StreamCorruptedException, IOException,
-			ClassNotFoundException {
-		Log.i("ToDoMe-Util", "Getting object from: " + str + " of length "
-				+ str.length());
-		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(
-				str.getBytes()));
+	static Object getObjectFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
+		Log.i("ToDoMe-Util", "Getting object from: " + str + " of length " + str.length());
+		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(str.getBytes()));
 		return ois.readObject();
 	}
 }
