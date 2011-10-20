@@ -81,7 +81,7 @@ public class ToDoMeService extends Service {
                 break;
             case MSG_TASKS_UPDATED:
             	String tasksData = msg.getData().getString("str1");
-            	Log.i(TAG, "Data: " + tasksData);
+            	//Log.i(TAG, "Data: " + tasksData);
             	try {
             		tasks = Util.getTaskListFromString(tasksData);
             	}
@@ -262,10 +262,24 @@ public class ToDoMeService extends Service {
 
 			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi));
 			if (dist < 100) {
-				
+				ArrayList<Task> releventTasks = getReleventTasks(poi);
+				if (releventTasks.size() > 0) {
+					showNotification(releventTasks.get(0), poi);
+				}
 			}
 			Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
 		}
+	}
+	
+	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
+		ArrayList<Task> releventTasks = new ArrayList<Task>();
+		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext(); ) {
+			Task task = iter.next();
+			if (poi.locationTypes.contains(task.getTypes().get(0))) {
+				releventTasks.add(task);
+			}
+		}
+		return releventTasks;
 	}
 
 	HashSet<String> getAllTaskTypes() {
@@ -285,6 +299,7 @@ public class ToDoMeService extends Service {
 
 	public void onLocationChanged(Location location) {
 		userCurrentLocation = location;
+		Log.i(TAG, "Location changed.");
 		checkForReleventNotifications();
 	}
 

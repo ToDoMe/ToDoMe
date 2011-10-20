@@ -3,11 +3,14 @@ package com.timeplace;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import android.text.format.Time;
+
 public class Task implements Serializable {	
 	private String name;
 	private String notes;
 	private String postcode;
 	private ArrayList<String> types;
+	private Time alarmTime;
 	
 	private boolean complete; 
 	private int rating;
@@ -38,5 +41,8 @@ public class Task implements Serializable {
 	public void setComplete(boolean complete) { this.complete = complete; }
 	public int getRating() { return rating; }
 	public void setRating(int rating) { this.rating = rating; }
+	public Time getAlarmTime() {return alarmTime;}
+
+	public void setAlarmTime(Time alarmTime) {this.alarmTime = alarmTime;}
 
 }
