@@ -7,3 +7,4 @@ assets/
 *.tmp
 .settings/
 .metadata/
+res/layout/map.xml
