@@ -58,9 +58,11 @@ public class ToDoMeActivity extends TabActivity {
 			dbHelper.createTask("Task 1", "Notes 1", "Postcode 1", 2);
 			dbHelper.createTask("Task 2", "Notes 2", "Postcode 2", 4);
 
+			Intent serviceIntent = new Intent(this, ToDoMeService.class)
 			// start the service
 			Log.d("ToDoMe-TimePlaceActivity", "Starting service");
-			bindService(new Intent(this, ToDoMeService.class), null, 0);
+			bindService(serviceIntent, null, 0);
+			serviceIntent.
 
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
