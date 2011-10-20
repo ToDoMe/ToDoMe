@@ -48,17 +48,6 @@ public class TimePlaceActivity extends TabActivity {
 			tabHost.addTab(spec);
 
 			tabHost.setCurrentTab(0);
-			
-			// Add a "New task" task if one does not already exist
-			boolean found = false;
-			for (int i = 0; i < tasks.size(); i++) {
-				if (tasks.get(i).getName() == "New task") {
-					found = true;
-				}
-			}
-			if (!found) {
-				tasks.add(new Task("New task", "", "", 0));
-			}
 
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
