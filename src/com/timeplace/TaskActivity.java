@@ -55,10 +55,7 @@ public class TaskActivity extends Activity {
 		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				tasks.remove(touchedTask);
-				tasksWithNewTask.clear();
-				tasksWithNewTask.addAll(tasks);
-				tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
-				tasksWithNewTask.add(new Task("New Task", "", "", 0));
+				setUpTasksWithNewTasks();
 				taskAdapter.notifyDataSetChanged();
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -75,10 +72,7 @@ public class TaskActivity extends Activity {
 		lv.setTextFilterEnabled(true);
 
 		// Creating list task array
-		tasksWithNewTask.clear();
-		tasksWithNewTask.addAll(tasks);
-		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
-		tasksWithNewTask.add(new Task("New Task", "", "", 0));
+		setUpTasksWithNewTasks();
 		Log.i("ToDoMe", "Tasks has " + tasks.size() + " list tasks has " + tasksWithNewTask.size());
 
 		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasksWithNewTask);
@@ -166,10 +160,7 @@ public class TaskActivity extends Activity {
 		}
 
 		// Regenerate the list task array
-		tasksWithNewTask.clear();
-		tasksWithNewTask.addAll(tasks);
-		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
-		tasksWithNewTask.add(new Task("New Task", "", "", 0));
+		setUpTasksWithNewTasks();
 
 		// Notify the taskAdaptor of the change
 		taskAdapter.notifyDataSetChanged();
@@ -196,6 +187,14 @@ public class TaskActivity extends Activity {
 		}*/
 
 		dialog.hide();
+	}
+	
+	private void setUpTasksWithNewTasks() {
+		tasksWithNewTask.clear();
+		tasksWithNewTask.addAll(tasks);
+		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
+		if (tasks.size() != 0) tasksWithNewTask.add(new Task("New Task", "", "", 0));
+
 	}
 
 	private void message(String title, String message) {
