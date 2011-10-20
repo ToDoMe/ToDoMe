@@ -1,5 +1,6 @@
 package com.timeplace;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import android.location.Location;
@@ -7,7 +8,7 @@ import android.text.format.Time;
 
 import com.google.android.maps.GeoPoint;
 
-public class PointOfInterest extends GeoPoint {
+public class PointOfInterest extends GeoPoint implements Serializable {
 	
 	final ArrayList<String> locationTypes;
 	final double radiusOfEffect;

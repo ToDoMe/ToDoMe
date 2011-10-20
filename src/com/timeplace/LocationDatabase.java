@@ -1,12 +1,13 @@
 package com.timeplace;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import com.google.android.maps.GeoPoint;
 
-public class LocationDatabase extends HashSet<PointOfInterest> {
+public class LocationDatabase extends HashSet<PointOfInterest> implements Serializable {
 
 	public LocationDatabase() {
 		super();

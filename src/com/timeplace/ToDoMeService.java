@@ -57,8 +57,10 @@ public class ToDoMeService extends Service {
 
     ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
     int mValue = 0; // Holds last value set by a client.
-    static final int MSG_TASKS_UPDATED		= 1;
-    static final int MSG_LOCATIONS_UPDATED	= 2;
+    static final int MSG_REGISTER_CLIENT	= 1;
+    static final int MSG_UNREGISTER_CLIENT	= 2;
+    static final int MSG_TASKS_UPDATED		= 3;
+    static final int MSG_LOCATIONS_UPDATED	= 4;
     final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we publish for clients to send messages to IncomingHandler.
 
     @Override
@@ -78,6 +80,10 @@ public class ToDoMeService extends Service {
             }
         }
     }
+    
+	private void sendDatabaseToUI(LocationDatabase db) {
+		// TODO implement
+	}
     
     private void sendMessageToUI(String value) {
         for (int i=mClients.size()-1; i>=0; i--) {
@@ -129,8 +135,7 @@ public class ToDoMeService extends Service {
         return START_STICKY; // run until explicitly stopped.
     }
 
-    public static boolean isRunning()
-    {
+    public static boolean isRunning() {
         return isRunning;
     }
 
@@ -156,7 +161,7 @@ public class ToDoMeService extends Service {
         isRunning = false;
     }
     
-    // Location stuff //
+
     
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Begining to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
@@ -230,6 +235,7 @@ public class ToDoMeService extends Service {
 			pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
 		}
 
+		sendDatabaseToUI(pointsOfInterest);
 	}
 
 	void checkForReleventNotifications() {

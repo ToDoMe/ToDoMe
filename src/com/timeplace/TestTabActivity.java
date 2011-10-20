@@ -62,12 +62,8 @@ public class TestTabActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case ToDoMeService.MSG_SET_INT_VALUE:
-                textIntValue.setText("Int Message: " + msg.arg1);
-                break;
-            case ToDoMeService.MSG_SET_STRING_VALUE:
-                String str1 = msg.getData().getString("str1");
-                textStrValue.setText("Str Message: " + str1);
+            case ToDoMeService.MSG_LOCATIONS_UPDATED:
+                // Deserialise the string into a LocationDatabase
                 break;
             default:
                 super.handleMessage(msg);
@@ -145,7 +141,7 @@ public class TestTabActivity extends Activity {
         if (mIsBound) {
             if (mService != null) {
                 try {
-                    Message msg = Message.obtain(null, ToDoMeService.MSG_SET_INT_VALUE, value, 0);
+                    Message msg = Message.obtain(null, ToDoMeService.MSG_TASKS_UPDATED, value, 0);
                     msg.replyTo = mMessenger;
                     mService.send(msg);
                 } catch (RemoteException e) {

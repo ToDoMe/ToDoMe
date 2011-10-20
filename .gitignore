@@ -5,3 +5,5 @@ assets/
 *.bak
 *~
 *.tmp
+.settings/
+.metadata/

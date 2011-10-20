@@ -1,9 +1,10 @@
 package com.timeplace;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class KeywordDatabase {
+public class KeywordDatabase implements Serializable {
 
 	ArrayList<Keyword> keywords = new ArrayList<Keyword>();
 
