@@ -27,8 +27,9 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import com.google.android.maps.GeoPoint;
 
 public class TaskActivity extends Activity {
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
-	// convenience
+	private TimePlaceActivity parent;
+	
+	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -44,6 +45,7 @@ public class TaskActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.todo);
+		parent = (TimePlaceActivity) getParent();
 
 		tasks = TimePlaceActivity.tasks;
 		tasksWithNewTask = new ArrayList<Task>();
