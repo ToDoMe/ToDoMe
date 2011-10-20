@@ -14,7 +14,7 @@ public class ToDoMeDatabaseHelper extends SQLiteOpenHelper {
 	private static final String TASKS_TABLE = "create table tasks (_id integer primary key autoincrement, name text not null, notes text not null, postcode text not null, type text not null, complete integer not null, rating integer not null);";
 	private static final String KEYWORDS_TABLE= "create table keywords (_id integer primary key autoincrement, name text not null, notes text not null, postcode text not null, type text not null, complete integer not null, rating integer not null);";
 	private static final String LOCATIONS_TABLE= "create table locations (_id integer primary key autoincrement, name text not null, notes text not null, postcode text not null, type text not null, complete integer not null, rating integer not null);";
-	private static final String DATABASE_CREATE = TASKS_TABLE + " " + TYPES_TABLE + " " + LOCATIONS_TABLE;
+	private static final String DATABASE_CREATE = TASKS_TABLE;
 
 	public ToDoMeDatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);

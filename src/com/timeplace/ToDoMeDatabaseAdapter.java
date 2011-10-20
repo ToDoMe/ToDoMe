@@ -13,8 +13,9 @@ public class ToDoMeDatabaseAdapter {
 	public static final String TASKS_KEY_NAME = "name";
 	public static final String TASKS_KEY_NOTES = "notes";
 	public static final String TASKS_KEY_POSTCODE = "postcode";
-	public static final String TASKS_KEY_RATING = "rating";
 	public static final String TASKS_KEY_TYPE = "type";
+	public static final String TASKS_KEY_RATING = "rating";
+	public static final String TASKS_KEY_COMPLETE = "complete";
 	private static final String TASKS_TABLE = "tasks";
 
 	private Context context;
@@ -35,14 +36,14 @@ public class ToDoMeDatabaseAdapter {
 		dbHelper.close();
 	}
 
-	public long createTask(String name, String notes, String postcode, int rating) {
-		ContentValues initialValues = createTasksContentValues(name, notes, postcode, rating);
+	public long createTask(String name, String notes, String postcode, String type, boolean complete, int rating) {
+		ContentValues initialValues = createTasksContentValues(name, notes, postcode, type, (complete ? 1 : 0), rating);
 
 		return database.insert(TASKS_TABLE, null, initialValues);
 	}
 
-	public boolean updateTodo(long rowId, String name, String notes, String postcode, int rating) {
-		ContentValues updateValues = createTasksContentValues(name, notes, postcode, rating);
+	public boolean updateTodo(long rowId, String name, String notes, String postcode, String type, boolean complete, int rating) {
+		ContentValues updateValues = createTasksContentValues(name, notes, postcode, type, (complete ? 1 : 0), rating);
 
 		return database.update(TASKS_TABLE, updateValues, TASKS_KEY_ROWID + "=" + rowId, null) > 0;
 	}
@@ -52,24 +53,26 @@ public class ToDoMeDatabaseAdapter {
 	}
 
 	public Cursor fetchAllTasks() {
-		return database.query(TASKS_TABLE, new String[] { TASKS_KEY_ROWID, TASKS_KEY_NAME, TASKS_KEY_NOTES, TASKS_KEY_POSTCODE, TASKS_KEY_RATING,
-				TASKS_KEY_TYPE }, null, null, null, null, null);
+		return database.query(TASKS_TABLE, new String[] { TASKS_KEY_ROWID, TASKS_KEY_NAME, TASKS_KEY_NOTES, TASKS_KEY_POSTCODE, TASKS_KEY_TYPE,
+				TASKS_KEY_COMPLETE, TASKS_KEY_RATING }, null, null, null, null, null);
 	}
 
 	public Cursor fetchTask(long rowId) throws SQLException {
-		Cursor mCursor = database.query(true, TASKS_TABLE, new String[] { TASKS_KEY_ROWID, TASKS_KEY_NAME, TASKS_KEY_NOTES, TASKS_KEY_POSTCODE,
-				TASKS_KEY_RATING, TASKS_KEY_TYPE }, TASKS_KEY_ROWID + "=" + rowId, null, null, null, null, null);
+		Cursor mCursor = database.query(true, TASKS_TABLE, new String[] { TASKS_KEY_ROWID, TASKS_KEY_NAME, TASKS_KEY_NOTES, TASKS_KEY_POSTCODE, TASKS_KEY_TYPE,
+				TASKS_KEY_COMPLETE, TASKS_KEY_RATING }, TASKS_KEY_ROWID + "=" + rowId, null, null, null, null, null);
 		if (mCursor != null) {
 			mCursor.moveToFirst();
 		}
 		return mCursor;
 	}
 
-	private ContentValues createTasksContentValues(String name, String notes, String postcode, int rating) {
+	private ContentValues createTasksContentValues(String name, String notes, String postcode, String type, int complete, int rating) {
 		ContentValues values = new ContentValues();
 		values.put(TASKS_KEY_NAME, name);
 		values.put(TASKS_KEY_NOTES, notes);
 		values.put(TASKS_KEY_POSTCODE, postcode);
+		values.put(TASKS_KEY_TYPE, type);
+		values.put(TASKS_KEY_COMPLETE, complete);
 		values.put(TASKS_KEY_RATING, rating);
 		return values;
 	}

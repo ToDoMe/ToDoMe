@@ -48,16 +48,6 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	Location userCurrentLocation;
 
-	// This is the object that receives interactions from clients. See
-	// RemoteService for a more complete example.
-	private final IBinder mBinder = new LocalBinder();
-
-	public class LocalBinder extends Binder {
-		ToDoMeService getService() {
-			return ToDoMeService.this;
-		}
-	}
-
 	private TimerTask updateTask = new TimerTask() {
 		@Override
 		public void run() {
@@ -74,16 +64,10 @@ public class ToDoMeService extends Service implements LocationListener {
 			// "Task name", contentIntent);
 			// nm.notify(1, notification);
 
-			int num = dbHelper.fetchAllTasks().getColumnCount();
-			Log.i(TAG, "Fetching tasks from service " + num);
+			//int num = dbHelper.fetchAllTasks().getColumnCount();
+			//Log.i(TAG, "Fetching tasks from service " + num);
 		}
 	};
-
-	@Override
-	public IBinder onBind(Intent intent) {
-		Log.i(TAG, "Service just bound to");
-		return mBinder;
-	}
 
 	@Override
 	public void onCreate() {
@@ -96,8 +80,9 @@ public class ToDoMeService extends Service implements LocationListener {
 		dbHelper = new ToDoMeDatabaseAdapter(this);
 		dbHelper.open();
 
-		dbHelper.createTask("Task 1", "Notes 1", "Postcode 1", 2);
-		dbHelper.createTask("Task 2", "Notes 2", "Postcode 2", 4);
+		Log.i("C String", dbHelper.fetchAllTasks().getString(1));
+		
+		dbHelper.close();
 
 		// Notification example from
 		// http://developer.android.com/guide/topics/ui/notifiers/notifications.html
@@ -249,6 +234,12 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
