@@ -1,5 +1,6 @@
 package com.timeplace;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -9,6 +10,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,9 +24,12 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
+import com.google.android.maps.GeoPoint;
+
 public class TaskActivity extends Activity {
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
-	// convenience
+	private TimePlaceActivity parent;
+	
+	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -40,6 +45,7 @@ public class TaskActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.todo);
+		parent = (TimePlaceActivity) getParent();
 
 		tasks = TimePlaceActivity.tasks;
 		tasksWithNewTask = new ArrayList<Task>();
@@ -171,8 +177,25 @@ public class TaskActivity extends Activity {
 		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size() - 1) + " tasks");
 		Log.i(TAG, "Tasks: " + tasks.toString());
 
-		dialog.hide();
+		// message("", type);
+		Log.d(TAG, "Its here!");
+		
+		/*ArrayList<String> typez = new ArrayList<String>();
+		
+		Time LOL  = new Time();
+		LOL.set(1319155174000l);
+		Time[] time = {LOL, LOL, LOL, LOL, LOL, LOL, LOL};
+		typez.add("postbox");
+		
+		PointOfInterest poi = new PointOfInterest(4143206, -8038992, typez, null, time, 1.0);
+		
+		try {
+			message("", Long.toString(LocationDatabase.calculateTimeDeltaInMilliseconds(new GeoPoint(4043206,-8038992), poi)));
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}*/
 
+		dialog.hide();
 	}
 
 	private void message(String title, String message) {
