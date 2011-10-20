@@ -108,6 +108,9 @@ public class ToDoMeService extends Service implements LocationListener {
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.i(TAG, "Service just bound to");
+		
+		intent.putExtra("test", true);
+		Log.i(TAG, "Put value");
 		return mBinder;
 	}
 
@@ -132,7 +135,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		notification.defaults |= Notification.DEFAULT_SOUND; // Adds sound
 		notification.icon = R.drawable.notification_icon;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
-		intent = new Intent(this, TaskViewActivity.class);
+		//intent = new Intent(this, TaskViewActivity.class);
 		contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		context = getApplicationContext();
 

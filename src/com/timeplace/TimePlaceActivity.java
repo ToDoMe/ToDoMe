@@ -3,8 +3,6 @@ package com.timeplace;
 import java.io.File;
 import java.util.ArrayList;
 
-import com.timeplace.google.MapViewActivity;
-
 import android.app.AlertDialog;
 import android.app.TabActivity;
 import android.content.ContentResolver;
@@ -17,7 +15,7 @@ import android.util.Log;
 import android.widget.TabHost;
 
 public class TimePlaceActivity extends TabActivity {
-	
+
 	public static LocationDatabase pointsOfInterest = new LocationDatabase();
 
 	public static KeywordDatabase keywords = new KeywordDatabase();
@@ -36,11 +34,12 @@ public class TimePlaceActivity extends TabActivity {
 			Intent intent; // Reusable Intent for each tab
 
 			// Create an Intent to launch an Activity for the tab (to be reused)
-			intent = new Intent().setClass(this, TaskViewActivity.class);
+			// intent = new Intent().setClass(this, TaskViewActivity.class);
 
 			// Initialise a TabSpec for each tab and add it to the TabHost
-			spec = tabHost.newTabSpec("todo").setIndicator("To-Do", res.getDrawable(R.drawable.ic_tab_todo)).setContent(intent);
-			tabHost.addTab(spec);
+			// spec = tabHost.newTabSpec("todo").setIndicator("To-Do",
+			// res.getDrawable(R.drawable.ic_tab_todo)).setContent(intent);
+			// tabHost.addTab(spec);
 
 			// Do the same for the other tabs
 			intent = new Intent().setClass(this, MapViewActivity.class);
@@ -52,7 +51,7 @@ public class TimePlaceActivity extends TabActivity {
 			tabHost.addTab(spec);
 
 			tabHost.setCurrentTab(0);
-			
+
 			// Add a "New task" task if one does not already exist
 			boolean found = false;
 			for (int i = 0; i < tasks.size(); i++) {
@@ -63,17 +62,17 @@ public class TimePlaceActivity extends TabActivity {
 			if (!found) {
 				tasks.add(new Task("New task", "", "", 0));
 			}
-			
+
 			// start the service
 			Log.d("ToDoMe-TimePlaceActivity", "Starting service");
 			bindService(new Intent(this, ToDoMeService.class), null, 0);
-			
+
 			ContentResolver cr = getContentResolver();
-			String[] args = { "array", "of", "string"};
-			
-			Object taskTemp = (Object)cr.query(Uri.parse("content://com.timeplace.taskprovider"), args, "", args, "");
+			String[] args = { "array", "of", "string" };
+
+			Object taskTemp = (Object) cr.query(Uri.parse("content://com.timeplace.taskprovider"), args, "", args, "");
 			tasks = (ArrayList<Task>) taskTemp;
-			Log.i("TimePlaceActivity", ""+(tasks == null));
+			Log.i("TimePlaceActivity", "" + (tasks == null));
 
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
