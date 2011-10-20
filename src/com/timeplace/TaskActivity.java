@@ -22,6 +22,8 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class TaskActivity extends Activity {
+	private TimePlaceActivity parent;
+	
 	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
@@ -36,6 +38,7 @@ public class TaskActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.todo);
+		parent = (TimePlaceActivity) getParent();
 
 		tasks = TimePlaceActivity.tasks;
 
@@ -123,13 +126,8 @@ public class TaskActivity extends Activity {
 		task.setTypes(type);
 		
 		tasks.add(tasks.size() - 1, task);
-		
-		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size()-1) + " tasks");
-		Log.i(TAG, "Tasks: " + tasks.toString());
-
 		// message("", type);
-		Log.d(TAG, "Its here!");
-
+		parent.sendTasksToService();
 	}
 
 	private void message(String title, String message) {

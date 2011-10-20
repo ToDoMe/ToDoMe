@@ -70,10 +70,30 @@ public class ToDoMeService extends Service {
     class IncomingHandler extends Handler { // Handler of incoming messages from clients.
         @Override
         public void handleMessage(Message msg) {
-        	Log.i(TAG, "Message received");
             switch (msg.what) {
+            case MSG_REGISTER_CLIENT:
+                mClients.add(msg.replyTo);
+                Log.i(TAG, "Client registered.");
+                break;
+            case MSG_UNREGISTER_CLIENT:
+                mClients.remove(msg.replyTo);
+                break;
             case MSG_TASKS_UPDATED:
             	// Take the serialised task array as a string out of the bundle, then deserialise into an ArrayList<Task>
+            	String tasksData = msg.getData().getString("str1");
+            	Log.i(TAG, "Data: " + tasksData);
+            	try {
+            		tasks = Util.getTaskListFromString(tasksData);
+            	}
+            	catch (Exception ex) {
+            		Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+            	}
+            	
+            	if (tasks != null) {
+            		Log.i(TAG, "MSG_TASKS_UPDATED received. tasks.size() = " + tasks.size());
+            	} else {
+            		Log.i(TAG, "MSG_TASKS_UPDATED received. tasks = null.");
+            	}
             	break;
             default:
                 super.handleMessage(msg);
@@ -88,15 +108,13 @@ public class ToDoMeService extends Service {
     private void sendMessageToUI(String value) {
         for (int i=mClients.size()-1; i>=0; i--) {
             try {
-                // Send data as an Integer
-                //mClients.get(i).send(Message.obtain(null, MSG_SET_INT_VALUE, value, 0));
-
                 //Send data as a String
                 Bundle b = new Bundle();
                 b.putString("str1", value);
                 Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
                 msg.setData(b);
                 mClients.get(i).send(msg);
+                Log.i(TAG, "Sent message \"" + value + "\" to " + i);
 
             } catch (RemoteException e) {
                 // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
@@ -144,7 +162,7 @@ public class ToDoMeService extends Service {
         //Log.i("TimerTick", "Timer doing work." + counter);
         try {
             counter += incrementby;
-            sendMessageToUI("" + counter);
+            //sendMessageToUI("" + counter);
 
         } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
             Log.e(TAG, "Timer Tick Failed.", t);            
