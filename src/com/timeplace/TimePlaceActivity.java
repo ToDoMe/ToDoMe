@@ -57,8 +57,8 @@ public class TimePlaceActivity extends TabActivity {
 			tabHost.setCurrentTab(0);
 
 			// Service interaction
-			CheckIfServiceIsRunning();
-			sendTasksToService();
+			checkIfServiceIsRunning();
+			//sendTasksToService();
 
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
@@ -82,6 +82,7 @@ public class TimePlaceActivity extends TabActivity {
 	private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mService = new Messenger(service);
+            sendTasksToService();
             //textStatus.setText("Attached.");
             try {
                 Message msg = Message.obtain(null, ToDoMeService.MSG_REGISTER_CLIENT);
@@ -104,8 +105,11 @@ public class TimePlaceActivity extends TabActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case ToDoMeService.MSG_LOCATIONS_UPDATED:
-				Log.i(TAG, "Message received: " + msg.getData().getString("str1"));
-				// Deserialise the string into a LocationDatabase
+				try {
+					db = Util.getLocationDatabaseFromString(msg.getData().getString("str1"));
+				} catch (Exception ex) {
+					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+				}
 				break;
 			default:
 				super.handleMessage(msg);
@@ -113,7 +117,7 @@ public class TimePlaceActivity extends TabActivity {
 		}
 	}
 	
-	private void CheckIfServiceIsRunning() {
+	private void checkIfServiceIsRunning() {
         //If the service is running when the activity starts, we want to automatically bind to it.
         if (ToDoMeService.isRunning()) {
             doBindService();
@@ -138,9 +142,9 @@ public class TimePlaceActivity extends TabActivity {
                     msg.setData(b);
                     mService.send(msg);
                     
-                    ArrayList<Task> reTasks = Util.getTaskListFromString(msg.getData().getString("str1"));
-                    Log.i(TAG, "Sending. reTasks.size() = " + reTasks.size());
-                } catch (Exception ex) {
+                    //ArrayList<Task> reTasks = Util.getTaskListFromString(msg.getData().getString("str1"));
+                    Log.i(TAG, "Sending " + value);
+                } catch (RemoteException ex) {
                 	Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
                 }
             }

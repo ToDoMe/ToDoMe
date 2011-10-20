@@ -1,6 +1,5 @@
 package com.timeplace;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -10,7 +9,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,11 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RatingBar;
-import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-
-import com.google.android.maps.GeoPoint;
 
 public class TaskActivity extends Activity {
 	private TimePlaceActivity parent;
@@ -127,13 +122,11 @@ public class TaskActivity extends Activity {
 
 		taskNameEntry.addTextChangedListener(new TextWatcher() {
 
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				okButton.setEnabled(s.length() > 0);
 			}
 
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 			}
 
 			public void afterTextChanged(Editable s) {
@@ -148,22 +141,17 @@ public class TaskActivity extends Activity {
 	}
 
 	private void hideTaskDialog(final int position) {
-		EditText taskNameEntry = (EditText) dialog
-				.findViewById(R.id.taskNameEntry);
-		RatingBar ratingEntry = (RatingBar) dialog
-				.findViewById(R.id.ratingEntry);
+		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
+		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
-		EditText postcodeEntry = (EditText) dialog
-				.findViewById(R.id.postcodeEntry);
+		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 
 		// Create the new task
-		Task task = new Task(taskNameEntry.getText().toString(), notesEntry
-				.getText().toString(), postcodeEntry.getText().toString(),
-				(int) ratingEntry.getRating());
+		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(),
+				postcodeEntry.getText().toString(), (int) ratingEntry.getRating());
 
 		// Give it a type
-		ArrayList<String> type = TimePlaceActivity.keywords.getTypes(task
-				.getName());
+		ArrayList<String> type = TimePlaceActivity.keywords.getTypes(task.getName());
 		task.setTypes(type);
 
 		// Put it in the array, in the right place
@@ -179,8 +167,7 @@ public class TaskActivity extends Activity {
 		// Notify the taskAdaptor of the change
 		taskAdapter.notifyDataSetChanged();
 
-		Log.i(TAG, "Task just added (" + task.getName() + " " + type
-				+ ") now have " + (tasks.size() - 1) + " tasks");
+		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size() - 1) + " tasks");
 		Log.i(TAG, "Tasks: " + tasks.toString());
 
 		// message("", type);
@@ -202,6 +189,7 @@ public class TaskActivity extends Activity {
 		 */
 		
 		taskNameEntry.setText("");
+		parent.sendTasksToService();
 
 		dialog.hide();
 	}
