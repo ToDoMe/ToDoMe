@@ -39,13 +39,17 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
-// Service example from http://mindtherobot.com/blog/37/android-architecture-tutorial-developing-an-app-with-a-background-service-using-ipc/
-//TODO - THIS CLASS IS A MESS!
-//This class needs renaming and completely tearing apart and restructuring as it is not the service that displays reminders, it is the service that requests data from the server.
-//The notifications being displayed were simply a debug feature, the notifications should be handled elsewhere, not here as this is a backend service and notifications are front end.
-//All of the code making a notification appear is not needed here.
+// Service will fetch location data from server and send it to the Activity
 
 public class ToDoMeService extends Service {
+	private final String TAG = "ToDoMeService";
+	
+	// Data
+	private ArrayList<Task> tasks;
+	private LocationDatabase pointsOfInterest;
+	
+	private Location userCurrentLocation;
+	
 	private NotificationManager nm;
     private Timer timer = new Timer();
     private int counter = 0, incrementby = 1;
@@ -53,12 +57,11 @@ public class ToDoMeService extends Service {
 
     ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
     int mValue = 0; // Holds last value set by a client.
-    static final int MSG_REGISTER_CLIENT = 1;
-    static final int MSG_UNREGISTER_CLIENT = 2;
-    static final int MSG_SET_INT_VALUE = 3;
-    static final int MSG_SET_STRING_VALUE = 4;
+    static final int MSG_REGISTER_CLIENT	= 1;
+    static final int MSG_UNREGISTER_CLIENT	= 2;
+    static final int MSG_TASKS_UPDATED		= 3;
+    static final int MSG_LOCATIONS_UPDATED	= 4;
     final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we publish for clients to send messages to IncomingHandler.
-
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -67,31 +70,31 @@ public class ToDoMeService extends Service {
     class IncomingHandler extends Handler { // Handler of incoming messages from clients.
         @Override
         public void handleMessage(Message msg) {
+        	Log.i(TAG, "Message received");
             switch (msg.what) {
-            case MSG_REGISTER_CLIENT:
-                mClients.add(msg.replyTo);
-                break;
-            case MSG_UNREGISTER_CLIENT:
-                mClients.remove(msg.replyTo);
-                break;
-            case MSG_SET_INT_VALUE:
-                incrementby = msg.arg1;
-                break;
+            case MSG_TASKS_UPDATED:
+            	// Take the serialised task array as a string out of the bundle, then deserialise into an ArrayList<Task>
+            	break;
             default:
                 super.handleMessage(msg);
             }
         }
     }
-    private void sendMessageToUI(int intvaluetosend) {
+    
+	private void sendDatabaseToUI(LocationDatabase db) {
+		// TODO implement
+	}
+    
+    private void sendMessageToUI(String value) {
         for (int i=mClients.size()-1; i>=0; i--) {
             try {
                 // Send data as an Integer
-                mClients.get(i).send(Message.obtain(null, MSG_SET_INT_VALUE, intvaluetosend, 0));
+                //mClients.get(i).send(Message.obtain(null, MSG_SET_INT_VALUE, value, 0));
 
                 //Send data as a String
                 Bundle b = new Bundle();
-                b.putString("str1", "ab" + intvaluetosend + "cd");
-                Message msg = Message.obtain(null, MSG_SET_STRING_VALUE);
+                b.putString("str1", value);
+                Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
                 msg.setData(b);
                 mClients.get(i).send(msg);
 
@@ -105,11 +108,12 @@ public class ToDoMeService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i("MyService", "Service Started.");
+        Log.i(TAG, "Service Started.");
         showNotification();
         timer.scheduleAtFixedRate(new TimerTask(){ public void run() {onTimerTick();}}, 0, 100L);
         isRunning = true;
     }
+    
     private void showNotification() {
         nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         // In this sample, we'll use the same text for the ticker and the expanded notification
@@ -124,14 +128,14 @@ public class ToDoMeService extends Service {
         // We use a layout id because it is a unique number.  We use it later to cancel.
         nm.notify(R.string.service_started, notification);
     }
+    
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("MyService", "Received start id " + startId + ": " + intent);
         return START_STICKY; // run until explicitly stopped.
     }
 
-    public static boolean isRunning()
-    {
+    public static boolean isRunning() {
         return isRunning;
     }
 
@@ -140,10 +144,10 @@ public class ToDoMeService extends Service {
         //Log.i("TimerTick", "Timer doing work." + counter);
         try {
             counter += incrementby;
-            sendMessageToUI(counter);
+            sendMessageToUI("" + counter);
 
         } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
-            Log.e("TimerTick", "Timer Tick Failed.", t);            
+            Log.e(TAG, "Timer Tick Failed.", t);            
         }
     }
 
@@ -153,7 +157,131 @@ public class ToDoMeService extends Service {
         if (timer != null) {timer.cancel();}
         counter=0;
         nm.cancel(R.string.service_started); // Cancel the persistent notification.
-        Log.i("MyService", "Service Stopped.");
+        Log.i(TAG, "Service Stopped.");
         isRunning = false;
     }
+    
+
+    
+	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
+		Log.i(TAG, "Begining to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
+
+		StringBuilder builder = new StringBuilder();
+		HttpClient client = new DefaultHttpClient();
+		double lat = point.getLatitudeE6() / 1e6;
+		double lng = point.getLongitudeE6() / 1e6;
+		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius
+				+ "&type=" + type;
+		HttpGet httpGet = new HttpGet(request);
+		Log.i(TAG, "Request used: " + request);
+		try {
+			HttpResponse response = client.execute(httpGet);
+			StatusLine statusLine = response.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode == 200) {
+				HttpEntity entity = response.getEntity();
+				InputStream content = entity.getContent();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					builder.append(line);
+				}
+			} else {
+				Log.e("", "Failed to download file");
+			}
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		LocationDatabase newLocDatabase = new LocationDatabase();
+
+		try {
+			JSONArray jsonArray = new JSONArray(builder.toString());
+
+			Log.i(TAG, "Number of entries " + jsonArray.length());
+			tasks.clear();
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jsonObject = jsonArray.getJSONObject(i);
+				try {
+					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), null, null,
+							null, 10));
+				} catch (JSONException e) {
+					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
+				}
+			}
+		} catch (JSONException e1) {
+			e1.printStackTrace();
+		}
+
+		Log.i(TAG, pointsOfInterest.print());
+
+		return newLocDatabase;
+
+	}
+
+	/**
+	 * This updates the central database with the relevant data from the server
+	 */
+	private void updateDatabase(HashSet<String> taskTypes) {
+		pointsOfInterest.clear();
+		Log.i(TAG, "Location database cleared");
+
+		for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
+			String type = iter.next();
+			Log.i(TAG, "Getting tasks for " + type);
+			pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
+		}
+
+		sendDatabaseToUI(pointsOfInterest);
+	}
+
+	void checkForReleventNotifications() {
+		Log.i(TAG, "Checking for relevent notifications");
+		updateDatabase(getAllTaskTypes());
+
+		for (Iterator<PointOfInterest> iter = pointsOfInterest.iterator(); iter.hasNext();) {
+			PointOfInterest poi = iter.next();
+
+			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi));
+			Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
+		}
+	}
+
+	HashSet<String> getAllTaskTypes() {
+
+		Log.i(TAG, "Finding all task types " + tasks.size());
+		HashSet<String> taskTypes = new HashSet<String>();
+
+		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
+			Task task = iter.next();
+			Log.i(TAG, "Looking at task " + task.getName());
+			Log.i(TAG, "It has types " + task.getTypes());
+			taskTypes.addAll(task.getTypes());
+		}
+		Log.i(TAG, "Total of " + taskTypes.size() + " returned");
+		return taskTypes;
+	}
+
+	public void onLocationChanged(Location location) {
+		userCurrentLocation = location;
+		checkForReleventNotifications();
+	}
+
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+
+	}
 }

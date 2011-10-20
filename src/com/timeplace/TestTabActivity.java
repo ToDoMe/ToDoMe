@@ -62,12 +62,8 @@ public class TestTabActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case ToDoMeService.MSG_SET_INT_VALUE:
-                textIntValue.setText("Int Message: " + msg.arg1);
-                break;
-            case ToDoMeService.MSG_SET_STRING_VALUE:
-                String str1 = msg.getData().getString("str1");
-                textStrValue.setText("Str Message: " + str1);
+            case ToDoMeService.MSG_LOCATIONS_UPDATED:
+                // Deserialise the string into a LocationDatabase
                 break;
             default:
                 super.handleMessage(msg);
@@ -98,15 +94,15 @@ public class TestTabActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.test_tab);
-        btnStart = (Button)findViewById(R.id.btnStart);
-        btnStop = (Button)findViewById(R.id.btnStop);
-        btnBind = (Button)findViewById(R.id.btnBind);
-        btnUnbind = (Button)findViewById(R.id.btnUnbind);
-        textStatus = (TextView)findViewById(R.id.textStatus);
+        btnStart	 = (Button)findViewById(R.id.btnStart);
+        btnStop		 = (Button)findViewById(R.id.btnStop);
+        btnBind		 = (Button)findViewById(R.id.btnBind);
+        btnUnbind	 = (Button)findViewById(R.id.btnUnbind);
+        textStatus	 = (TextView)findViewById(R.id.textStatus);
         textIntValue = (TextView)findViewById(R.id.textIntValue);
         textStrValue = (TextView)findViewById(R.id.textStrValue);
-        btnUpby1 = (Button)findViewById(R.id.btnUpby1);
-        btnUpby10 = (Button)findViewById(R.id.btnUpby10);
+        btnUpby1	 = (Button)findViewById(R.id.btnUpby1);
+        btnUpby10	 = (Button)findViewById(R.id.btnUpby10);
 
         btnStart.setOnClickListener(btnStartListener);
         btnStop.setOnClickListener(btnStopListener);
@@ -141,11 +137,11 @@ public class TestTabActivity extends Activity {
         }
     }
 
-    private void sendMessageToService(int intvaluetosend) {
+    private void sendMessageToService(int value) {
         if (mIsBound) {
             if (mService != null) {
                 try {
-                    Message msg = Message.obtain(null, ToDoMeService.MSG_SET_INT_VALUE, intvaluetosend, 0);
+                    Message msg = Message.obtain(null, ToDoMeService.MSG_TASKS_UPDATED, value, 0);
                     msg.replyTo = mMessenger;
                     mService.send(msg);
                 } catch (RemoteException e) {

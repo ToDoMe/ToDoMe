@@ -1,8 +1,9 @@
 package com.timeplace;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Task {	
+public class Task implements Serializable {	
 	private String name;
 	private String notes;
 	private String postcode;

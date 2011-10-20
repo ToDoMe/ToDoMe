@@ -2,6 +2,7 @@ package com.timeplace;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import android.text.format.Time;
 
 import com.google.android.maps.GeoPoint;
 
-public class LocationDatabase extends HashSet<PointOfInterest> {
+public class LocationDatabase extends HashSet<PointOfInterest> implements Serializable {
 
 	public LocationDatabase() {
 		super();

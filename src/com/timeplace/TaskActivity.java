@@ -22,17 +22,21 @@ import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.google.android.maps.GeoPoint;
 
 public class TaskActivity extends Activity {
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
+	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
+	// convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
 	private Dialog dialog;
 	private AlertDialog alert;
 	public String taskType;
+
+	private ArrayList<Task> tasksWithNewTask;
 
 	private static final String TAG = "TodoActivity";
 
@@ -42,12 +46,17 @@ public class TaskActivity extends Activity {
 		setContentView(R.layout.todo);
 
 		tasks = TimePlaceActivity.tasks;
+		tasksWithNewTask = new ArrayList<Task>();
 
 		// Build popup
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				tasks.remove(touchedTask);
+				tasksWithNewTask.clear();
+				tasksWithNewTask.addAll(tasks);
+				tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
+				tasksWithNewTask.add(new Task("New Task", "", "", 0));
 				taskAdapter.notifyDataSetChanged();
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -62,22 +71,37 @@ public class TaskActivity extends Activity {
 	private void setUpListView() {
 		lv = (ListView) findViewById(R.id.taskList);
 		lv.setTextFilterEnabled(true);
-		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasks);
+
+		// Creating list task array
+		tasksWithNewTask.clear();
+		tasksWithNewTask.addAll(tasks);
+		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
+		tasksWithNewTask.add(new Task("New Task", "", "", 0));
+		Log.i("ToDoMe", "Tasks has " + tasks.size() + " list tasks has " + tasksWithNewTask.size());
+
+		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasksWithNewTask);
 		lv.setAdapter(taskAdapter);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				touchedTask = tasks.get(position);
-				if (((TextView) view).getText() == "New task") {
-					showTaskDialog();
+				if (position == 0 || position == (tasks.size() + 1)) {
+					showTaskDialog(position);
 				} else {
+					touchedTask = tasks.get(position - 1);
 					alert.show();
 				}
 			}
 		});
+
+		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				showTaskDialog(position);
+				return true;
+			}
+		});
 	}
 
-	private void showTaskDialog() {
+	private void showTaskDialog(final int position) {
 		try {
 			dialog = new Dialog(this, R.layout.new_task_dialog);
 
@@ -88,6 +112,12 @@ public class TaskActivity extends Activity {
 			EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
 			final Button okButton = (Button) dialog.findViewById(R.id.okButton);
 			okButton.setEnabled(false);
+			
+			/*if (tasks.size() >= (position - 1)) {
+				Task task = tasks.get(position - 1);
+				
+				taskNameEntry.setText(task.getName());
+			}*/
 
 			taskNameEntry.addTextChangedListener(new TextWatcher() {
 
@@ -104,7 +134,7 @@ public class TaskActivity extends Activity {
 
 			okButton.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					hideTaskDialog();
+					hideTaskDialog(position);
 				}
 			});
 		} catch (Exception ex) {
@@ -112,23 +142,37 @@ public class TaskActivity extends Activity {
 		}
 	}
 
-	private void hideTaskDialog() {
+	private void hideTaskDialog(final int position) {
 		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
 		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
 		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 
+		// Create the new task
 		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(), (int) ratingEntry
 				.getRating());
 
-		dialog.hide();
-		taskAdapter.notifyDataSetChanged();
+		// Give it a type
 		ArrayList<String> type = TimePlaceActivity.keywords.getTypes(task.getName());
 		task.setTypes(type);
-		
-		tasks.add(tasks.size() - 1, task);
-		
-		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size()-1) + " tasks");
+
+		// Put it in the array, in the right place
+		if (position == 0) {
+			tasks.add(0, task);
+		} else {
+			tasks.add(task);
+		}
+
+		// Regenerate the list task array
+		tasksWithNewTask.clear();
+		tasksWithNewTask.addAll(tasks);
+		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
+		tasksWithNewTask.add(new Task("New Task", "", "", 0));
+
+		// Notify the taskAdaptor of the change
+		taskAdapter.notifyDataSetChanged();
+
+		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size() - 1) + " tasks");
 		Log.i(TAG, "Tasks: " + tasks.toString());
 
 		// message("", type);
@@ -148,6 +192,8 @@ public class TaskActivity extends Activity {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}*/
+
+		dialog.hide();
 	}
 
 	private void message(String title, String message) {
