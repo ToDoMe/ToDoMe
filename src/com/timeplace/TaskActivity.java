@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 public class TaskActivity extends Activity {
 	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
@@ -79,13 +80,19 @@ public class TaskActivity extends Activity {
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				// if (((TextView) view).getText() == "New task") {
 				if (position == 0 || position == (tasks.size() + 1)) {
 					showTaskDialog(position);
 				} else {
 					touchedTask = tasks.get(position - 1);
 					alert.show();
 				}
+			}
+		});
+
+		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				showTaskDialog(position);
+				return true;
 			}
 		});
 	}
@@ -101,6 +108,12 @@ public class TaskActivity extends Activity {
 			EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
 			final Button okButton = (Button) dialog.findViewById(R.id.okButton);
 			okButton.setEnabled(false);
+			
+			/*if (tasks.size() >= (position - 1)) {
+				Task task = tasks.get(position - 1);
+				
+				taskNameEntry.setText(task.getName());
+			}*/
 
 			taskNameEntry.addTextChangedListener(new TextWatcher() {
 
