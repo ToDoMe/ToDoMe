@@ -19,7 +19,7 @@ import android.util.Log;
 import android.widget.TabHost;
 
 public class ToDoMeActivity extends TabActivity {
-	private final String TAG = "TimePlaceActivity";
+	private final String TAG = "ToDoMeActivity";
 	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();

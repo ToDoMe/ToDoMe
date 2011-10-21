@@ -42,7 +42,7 @@ public class TaskActivity extends Activity {
 
 	private ArrayList<Task> tasksWithNewTask;
 
-	private static final String TAG = "TodoActivity";
+	private static final String TAG = "TaskActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -231,7 +231,7 @@ public class TaskActivity extends Activity {
 		// Notify the taskAdaptor of the change
 		taskAdapter.notifyDataSetChanged();
 
-		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size() - 1) + " tasks");
+		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + tasks.size() + " tasks");
 		Log.i(TAG, "Tasks: " + tasks.toString());
 
 		// message("", type);
