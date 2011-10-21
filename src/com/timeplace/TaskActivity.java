@@ -88,9 +88,9 @@ public class TaskActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
-					showTaskDialog(position);
+					showTaskDialog(tasks.size() + 1);
 				} else {
-					touchedTask = tasks.get(position-1);
+					touchedTask = tasks.get(position - 1);
 					alert.show();
 				}
 			}
@@ -99,8 +99,12 @@ public class TaskActivity extends Activity {
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				showTaskDialog(position);
-				return true;
+				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
+					return false;
+				} else {
+					showTaskDialog(position - 1);
+					return true;
+				}
 			}
 		});
 	}
