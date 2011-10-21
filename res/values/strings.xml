@@ -11,4 +11,7 @@
     <string name="service_started">Service started</string>
     <string name="service_stopped">Service stopped</string>
     <string name="service_label">Service label</string>
+    <string name="preferences">Preferences</string>
+    <string name="pref">Pref</string>
+    <string name="about">About</string>
 </resources>
