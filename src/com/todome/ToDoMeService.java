@@ -1,4 +1,4 @@
-package com.timeplace;
+package com.todome;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -19,7 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.android.maps.GeoPoint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -36,6 +36,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.google.android.maps.GeoPoint;
 
 // Service will fetch location data from server and send it to the Activity
 
@@ -116,62 +118,67 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	private void sendMessageToUI(String value) {
-        for (int i=mClients.size()-1; i>=0; i--) {
-            try {
-                //Send data as a String
-                Bundle b = new Bundle();
-                b.putString("str1", value);
-                Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
-                msg.setData(b);
-                mClients.get(i).send(msg);
-                //Log.i(TAG, "Sent message \"" + value + "\" to " + i);
+		for (int i = mClients.size() - 1; i >= 0; i--) {
+			try {
+				// Send data as a String
+				Bundle b = new Bundle();
+				b.putString("str1", value);
+				Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
+				msg.setData(b);
+				mClients.get(i).send(msg);
+				// Log.i(TAG, "Sent message \"" + value + "\" to " + i);
 
-            } catch (RemoteException e) {
-                // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
-                mClients.remove(i);
-            }
-        }
-    }
+			} catch (RemoteException e) {
+				// The client is dead. Remove it from the list; we are going
+				// through the list from back to front so this is safe to do
+				// inside the loop.
+				mClients.remove(i);
+			}
+		}
+	}
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(TAG, "Service Started.");
-        isRunning = true;
-        
-        // Register LocationListener
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		Log.i(TAG, "Service Started.");
+		isRunning = true;
+
+		// Register LocationListener
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-    }
-    
-    private void showNotification(Task task, PointOfInterest poi) {
-        nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.notification_icon, task.getName(), System.currentTimeMillis());
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TimePlaceActivity.class), 0);
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, task.getName(), poi.getLocationTypes().get(0), contentIntent);
-        // Send the notification.
-        // We use a layout id because it is a unique number.  We use it later to cancel.
-        nm.notify(R.string.service_started, notification);
-    }
-    
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("MyService", "Received start id " + startId + ": " + intent);
-        return START_STICKY; // run until explicitly stopped.
-    }
+	}
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        nm.cancel(R.string.service_started); // Cancel the persistent notification.
-        Log.i(TAG, "Service Stopped.");
-        isRunning = false;
-    }
-    
-    private void showNotification(ArrayList<Task> tasks, PointOfInterest poi) {
+	private void showNotification(Task task, PointOfInterest poi) {
+		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		// Set the icon, scrolling text and timestamp
+		Notification notification = new Notification(R.drawable.notification_icon, task.getName(), System.currentTimeMillis());
+		// The PendingIntent to launch our activity if the user selects this
+		// notification
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class), 0);
+		// Set the info for the views that show in the notification panel.
+		notification.setLatestEventInfo(this, task.getName(), poi.getLocationTypes().get(0), contentIntent);
+		// Send the notification.
+		// We use a layout id because it is a unique number. We use it later to
+		// cancel.
+		nm.notify(R.string.service_started, notification);
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.i("MyService", "Received start id " + startId + ": " + intent);
+		return START_STICKY; // run until explicitly stopped.
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		nm.cancel(R.string.service_started); // Cancel the persistent
+												// notification.
+		Log.i(TAG, "Service Stopped.");
+		isRunning = false;
+	}
+
+	private void showNotification(ArrayList<Task> tasks, PointOfInterest poi) {
 		Collections.sort(tasks, new TaskPriorityComparator());
 
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -179,7 +186,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		Notification notification = new Notification(R.drawable.notification_icon, tasks.get(0).getName(), System.currentTimeMillis());
 		// The PendingIntent to launch our activity if the user selects this
 		// notification
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TimePlaceActivity.class), 0);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class), 0);
 		// Set the info for the views that show in the notification panel.
 		notification.setLatestEventInfo(this, tasks.get(0).getName(), poi.getLocationTypes().get(0), contentIntent);
 		// Send the notification.
@@ -316,24 +323,24 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	public void onLocationChanged(Location location) {
-		//Log.i(TAG, "Location changed.");
+		// Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
 		checkForReleventNotifications();
 	}
 
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void onProviderEnabled(String provider) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

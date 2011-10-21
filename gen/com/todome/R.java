@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.timeplace;
+package com.todome;
 
 public final class R {
     public static final class attr {
@@ -24,32 +24,34 @@ public final class R {
         public static final int todo_selected=0x7f02000a;
     }
     public static final class id {
-        public static final int RelativeLayout03=0x7f060013;
-        public static final int about_menu_button=0x7f060019;
-        public static final int btnBind=0x7f06000e;
-        public static final int btnStart=0x7f06000d;
-        public static final int btnStop=0x7f06000c;
-        public static final int btnUnbind=0x7f06000f;
-        public static final int btnUpby1=0x7f060014;
-        public static final int btnUpby10=0x7f060015;
-        public static final int completeButton=0x7f06000b;
+        public static final int RelativeLayout03=0x7f060015;
+        public static final int about_menu_button=0x7f06001b;
+        public static final int btnBind=0x7f060010;
+        public static final int btnStart=0x7f06000f;
+        public static final int btnStop=0x7f06000e;
+        public static final int btnUnbind=0x7f060011;
+        public static final int btnUpby1=0x7f060016;
+        public static final int btnUpby10=0x7f060017;
+        public static final int completeButton=0x7f06000d;
+        public static final int contact=0x7f060006;
         public static final int layout_root=0x7f060001;
-        public static final int linearLayout1=0x7f060009;
+        public static final int linearLayout1=0x7f06000b;
         public static final int mapview=0x7f060000;
-        public static final int notesEntry=0x7f060006;
-        public static final int okButton=0x7f06000a;
-        public static final int postcodeEntry=0x7f060008;
-        public static final int preferences_menu_button=0x7f060018;
+        public static final int notesEntry=0x7f060008;
+        public static final int okButton=0x7f06000c;
+        public static final int postcodeEntry=0x7f06000a;
+        public static final int preferences_menu_button=0x7f06001a;
         public static final int ratingEntry=0x7f060004;
-        public static final int taskList=0x7f060017;
+        public static final int taskList=0x7f060019;
         public static final int taskNameEntry=0x7f060003;
-        public static final int textIntValue=0x7f060011;
-        public static final int textStatus=0x7f060010;
-        public static final int textStrValue=0x7f060012;
+        public static final int textIntValue=0x7f060013;
+        public static final int textStatus=0x7f060012;
+        public static final int textStrValue=0x7f060014;
         public static final int textView1=0x7f060002;
-        public static final int textView2=0x7f060005;
-        public static final int textView3=0x7f060007;
-        public static final int widget0=0x7f060016;
+        public static final int textView2=0x7f060007;
+        public static final int textView3=0x7f060009;
+        public static final int textView4=0x7f060005;
+        public static final int widget0=0x7f060018;
     }
     public static final class layout {
         public static final int list_item=0x7f030000;
@@ -77,5 +79,6 @@ public final class R {
         public static final int service_started=0x7f040008;
         public static final int service_stopped=0x7f040009;
         public static final int specific_location=0x7f040004;
+        public static final int with=0x7f04000e;
     }
 }

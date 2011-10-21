@@ -1,4 +1,4 @@
-package com.timeplace;
+package com.todome;
 
 import java.util.ArrayList;
 
@@ -18,13 +18,17 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.TabHost;
 
-public class TimePlaceActivity extends TabActivity {
+public class ToDoMeActivity extends TabActivity {
 	private final String TAG = "TimePlaceActivity";
 	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
 	public static KeywordDatabase keywords = new KeywordDatabase();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
+	
+	public boolean getLite() {
+		return false;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

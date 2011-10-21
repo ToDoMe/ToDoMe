@@ -1,4 +1,4 @@
-package com.timeplace;
+package com.todome;
 
 import android.app.Activity;
 import android.content.ComponentName;

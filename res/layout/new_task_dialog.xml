@@ -20,6 +20,8 @@
               android:numStars="5"
               android:rating="0"
         	  android:stepSize="1.0"/>
+    <TextView android:id="@+id/textView4" android:layout_height="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="wrap_content" android:text="@string/with"></TextView>
+    <EditText android:layout_height="wrap_content" android:layout_width="match_parent" android:inputType="textPersonName" android:id="@+id/contact"></EditText>
     <TextView android:text="@string/notes" android:layout_height="wrap_content" android:id="@+id/textView2" android:layout_width="wrap_content"></TextView>
     <EditText android:layout_height="wrap_content" android:layout_width="match_parent" android:inputType="textMultiLine" android:id="@+id/notesEntry" android:layout_weight="0.23" android:maxLines="5">
     </EditText>

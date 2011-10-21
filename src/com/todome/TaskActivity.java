@@ -1,4 +1,4 @@
-package com.timeplace;
+package com.todome;
 
 import java.util.ArrayList;
 
@@ -25,10 +25,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 public class TaskActivity extends Activity {
-	private TimePlaceActivity parent;
+	private ToDoMeActivity parent;
 
 	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
-									// convenience
+	// convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -44,27 +44,24 @@ public class TaskActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.todo);
-		parent = (TimePlaceActivity) getParent();
+		parent = (ToDoMeActivity) getParent();
 
-		tasks = TimePlaceActivity.tasks;
+		tasks = ToDoMeActivity.tasks;
 		tasksWithNewTask = new ArrayList<Task>();
 
 		// Build popup
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Mark complete?").setCancelable(false)
-				.setPositiveButton("Yes",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								tasks.remove(touchedTask);
-								setUpTasksWithNewTasks();
-								taskAdapter.notifyDataSetChanged();
-							}
-						}).setNegativeButton("No",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
+		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				tasks.remove(touchedTask);
+				setUpTasksWithNewTasks();
+				taskAdapter.notifyDataSetChanged();
+			}
+		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
 		alert = builder.create();
 		setUpListView();
 	}
@@ -75,17 +72,19 @@ public class TaskActivity extends Activity {
 
 		// Creating list task array
 		setUpTasksWithNewTasks();
-		Log.i("ToDoMe", "Tasks has " + tasks.size() + " list tasks has "
-				+ tasksWithNewTask.size());
+		Log.i("ToDoMe", "Tasks has " + tasks.size() + " list tasks has " + tasksWithNewTask.size());
 
-		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item,
-				tasksWithNewTask);
+		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasksWithNewTask);
 		lv.setAdapter(taskAdapter);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				if (position == 0 || position == (tasks.size() + 1)) { // If
+																		// clicking
+																		// on a
+																		// New
+																		// Task
+																		// item
 					showTaskDialog(tasks.size() + 1, false);
 				} else {
 					touchedTask = tasks.get(position - 1);
@@ -95,9 +94,13 @@ public class TaskActivity extends Activity {
 		});
 
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				if (position == 0 || position == (tasks.size() + 1)) { // If
+																		// clicking
+																		// on a
+																		// New
+																		// Task
+																		// item
 					return false;
 				} else {
 					showTaskDialog(position - 1, true);
@@ -112,32 +115,33 @@ public class TaskActivity extends Activity {
 
 		dialog.setContentView(R.layout.new_task_dialog);
 		dialog.setTitle("New Task");
-		
+
 		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
-		
+
 		if (updatingTask) {
 			RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 			EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
 			EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
-			
+
 			Task thisTask = tasks.get(position);
-			
+
 			taskNameEntry.setText(thisTask.getName());
 			ratingEntry.setRating(thisTask.getRating());
 			notesEntry.setText(thisTask.getNotes());
 			postcodeEntry.setText(thisTask.getPostcode());
 		}
-		
+
 		dialog.show();
 
 		final Button okButton = (Button) dialog.findViewById(R.id.okButton);
 		okButton.setEnabled(updatingTask);
 
-		//if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check if a task is being clicked on
-		//	Task task = tasks.get(position);
+		// if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check
+		// if a task is being clicked on
+		// Task task = tasks.get(position);
 
-		//	taskNameEntry.setText(task.getName());
-		//}
+		// taskNameEntry.setText(task.getName());
+		// }
 
 		taskNameEntry.addTextChangedListener(new TextWatcher() {
 
@@ -166,13 +170,13 @@ public class TaskActivity extends Activity {
 		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 
 		// Create the new task
-		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(),
-				postcodeEntry.getText().toString(), (int) ratingEntry.getRating());
-		
+		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(), (int) ratingEntry
+				.getRating());
+
 		// Give it a type
-		ArrayList<String> type = TimePlaceActivity.keywords.getTypes(task.getName());
+		ArrayList<String> type = ToDoMeActivity.keywords.getTypes(task.getName());
 		task.setTypes(type);
-		
+
 		if (updatingTask) {
 			tasks.remove(position);
 		}
@@ -210,7 +214,7 @@ public class TaskActivity extends Activity {
 		 * GeoPoint(4043206,-8038992), poi))); } catch (Throwable e) {
 		 * e.printStackTrace(); }
 		 */
-		
+
 		taskNameEntry.setText("");
 		parent.sendTasksToService();
 
@@ -232,24 +236,24 @@ public class TaskActivity extends Activity {
 		alertDialog.setMessage(message);
 		alertDialog.show();
 	}
-	
+
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.main_menu, menu);
-	    return true;
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
 	}
-	
+
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle item selection
-	    switch (item.getItemId()) {
-	    case R.id.about_menu_button:
-	        Log.i(TAG, "About menu");
-	        return true;
-	    case R.id.preferences_menu_button:
-	        Log.i(TAG, "Preferences menu");
-	        return true;
-	    default:
-	        return super.onOptionsItemSelected(item);
-	    }
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.about_menu_button:
+			Log.i(TAG, "About menu");
+			return true;
+		case R.id.preferences_menu_button:
+			Log.i(TAG, "Preferences menu");
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 }
