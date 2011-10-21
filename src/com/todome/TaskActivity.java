@@ -112,11 +112,7 @@ public class TaskActivity extends Activity {
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == 0 || position == (tasks.size() + 1)) { // If
-					// clicking
-					// on a
-					// New
-					// Task
-					// item
+					// clicking on a New Task item
 					showTaskDialog(tasks.size() + 1, false);
 				} else {
 					touchedTask = tasks.get(position - 1);
