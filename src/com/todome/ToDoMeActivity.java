@@ -44,6 +44,8 @@ public class ToDoMeActivity extends TabActivity {
 		try {
 			SharedPreferences.Editor editor = prefs.edit();
 			editor.putString("tasks", Util.getStringFromObject(tasks));
+			boolean successfull = editor.commit();
+			Log.i(TAG, "Successfull: " + successfull);
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
@@ -52,12 +54,12 @@ public class ToDoMeActivity extends TabActivity {
 			fos.write(Util.getStringFromObject(tasks).getBytes());
 			fos.close();
 		} catch (Exception ex) {
-			staticMessage(ex.getClass().toString(), ex.getMessage());
-			//Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+			Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
 		}*/
 	}
 	
 	public void loadTasks() {
+		Log.i(TAG, "Tasks loaded");
 		try {
 			String str = prefs.getString("tasks", "");
 			if (str != "") {

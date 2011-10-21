@@ -48,11 +48,11 @@
 		<service android:name="com.todome.ToDoMeService"
 			android:process=":remote">
 			<intent-filter>
-				<action android:name="com.timeplace.ToDoMeService" />
+				<action android:name="com.todome.ToDoMeService" />
 			</intent-filter>
 		</service>
 
-		<receiver android:name="com.timeplace.ToDoMeReceiver">
+		<receiver android:name="com.todome.ToDoMeReceiver">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED">
 				</action>
