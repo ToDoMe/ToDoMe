@@ -10,6 +10,9 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -83,9 +86,9 @@ public class TaskActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
-					showTaskDialog(position);
+					showTaskDialog(tasks.size() + 1, false);
 				} else {
-					touchedTask = tasks.get(position-1);
+					touchedTask = tasks.get(position - 1);
 					alert.show();
 				}
 			}
@@ -94,31 +97,47 @@ public class TaskActivity extends Activity {
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				showTaskDialog(position);
-				return true;
+				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
+					return false;
+				} else {
+					showTaskDialog(position - 1, true);
+					return true;
+				}
 			}
 		});
 	}
 
-	private void showTaskDialog(final int position) {
+	private void showTaskDialog(final int position, final boolean updatingTask) {
 		dialog = new Dialog(this, R.layout.new_task_dialog);
 
 		dialog.setContentView(R.layout.new_task_dialog);
 		dialog.setTitle("New Task");
 		
-		EditText taskNameEntry = (EditText) dialog
-		.findViewById(R.id.taskNameEntry);
+		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
+		
+		if (updatingTask) {
+			RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
+			EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
+			EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+			
+			Task thisTask = tasks.get(position);
+			
+			taskNameEntry.setText(thisTask.getName());
+			ratingEntry.setRating(thisTask.getRating());
+			notesEntry.setText(thisTask.getNotes());
+			postcodeEntry.setText(thisTask.getPostcode());
+		}
 		
 		dialog.show();
 
 		final Button okButton = (Button) dialog.findViewById(R.id.okButton);
-		okButton.setEnabled(false);
+		okButton.setEnabled(updatingTask);
 
-		if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check if a task is being clicked on
-			Task task = tasks.get(position);
+		//if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check if a task is being clicked on
+		//	Task task = tasks.get(position);
 
-			taskNameEntry.setText(task.getName());
-		}
+		//	taskNameEntry.setText(task.getName());
+		//}
 
 		taskNameEntry.addTextChangedListener(new TextWatcher() {
 
@@ -135,12 +154,12 @@ public class TaskActivity extends Activity {
 
 		okButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				hideTaskDialog(position);
+				hideTaskDialog(position, updatingTask);
 			}
 		});
 	}
 
-	private void hideTaskDialog(final int position) {
+	private void hideTaskDialog(final int position, final boolean updatingTask) {
 		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
 		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
@@ -149,16 +168,20 @@ public class TaskActivity extends Activity {
 		// Create the new task
 		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(),
 				postcodeEntry.getText().toString(), (int) ratingEntry.getRating());
-
+		
 		// Give it a type
 		ArrayList<String> type = TimePlaceActivity.keywords.getTypes(task.getName());
 		task.setTypes(type);
+		
+		if (updatingTask) {
+			tasks.remove(position);
+		}
 
 		// Put it in the array, in the right place
-		if (position == 0) {
-			tasks.add(0, task);
+		if (position == tasks.size() + 1) {
+			tasks.add(tasks.size(), task);
 		} else {
-			tasks.add(task);
+			tasks.add(position, task);
 		}
 
 		// Regenerate the list task array
@@ -208,5 +231,25 @@ public class TaskActivity extends Activity {
 		alertDialog.setTitle(title);
 		alertDialog.setMessage(message);
 		alertDialog.show();
+	}
+	
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.main_menu, menu);
+	    return true;
+	}
+	
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	    case R.id.about_menu_button:
+	        Log.i(TAG, "About menu");
+	        return true;
+	    case R.id.preferences_menu_button:
+	        Log.i(TAG, "Preferences menu");
+	        return true;
+	    default:
+	        return super.onOptionsItemSelected(item);
+	    }
 	}
 }

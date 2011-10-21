@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import android.text.format.Time;
 
-public class Task implements Serializable {	
+public class Task implements Serializable, Comparable{	
 	private String name;
 	private String notes;
 	private String postcode;
@@ -44,5 +44,10 @@ public class Task implements Serializable {
 	public Time getAlarmTime() {return alarmTime;}
 
 	public void setAlarmTime(Time alarmTime) {this.alarmTime = alarmTime;}
+
+	public int compareTo(Object another) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 }
