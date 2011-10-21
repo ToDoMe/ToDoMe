@@ -3,17 +3,5 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/google-api-client-1.4.1-beta.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/google-api-client-extensions-android2-1.4.1-beta.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/google-api-client-googleapis-1.4.1-beta.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/google-api-client-googleapis-extensions-1.4.1-beta.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/google-api-services-tasks-v1-1.2.2-beta.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/dependencies/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/dependencies/gson-1.6.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/dependencies/guava-r09.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/dependencies/httpclient-4.0.3.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/dependencies/httpcore-4.0.1.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/dependencies/jackson-core-asl-1.6.7.jar"/>
-	<classpathentry kind="lib" path="/home/cb15g11/Programing/app/TimePlace/assets/dependencies/jsr305-1.3.9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

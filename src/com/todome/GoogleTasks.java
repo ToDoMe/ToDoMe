@@ -11,12 +11,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.google.api.client.auth.oauth2.draft10.AccessProtectedResource;
+/*import com.google.api.client.auth.oauth2.draft10.AccessProtectedResource;
 import com.google.api.client.extensions.android2.AndroidHttp;
 import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAccessProtectedResource;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
-import com.google.api.services.tasks.Tasks;
+import com.google.api.services.tasks.Tasks;*/
 
 public class GoogleTasks {
 
@@ -52,11 +52,11 @@ public class GoogleTasks {
 
 	void useTasksAPI(String accessToken) {
 		// Setting up the Tasks API Service
-		HttpTransport transport = AndroidHttp.newCompatibleTransport();
-		AccessProtectedResource accessProtectedResource = new GoogleAccessProtectedResource(accessToken);
-		Tasks service = new Tasks(transport, accessProtectedResource, new JacksonFactory());
+		//HttpTransport transport = AndroidHttp.newCompatibleTransport();
+		//AccessProtectedResource accessProtectedResource = new GoogleAccessProtectedResource(accessToken);
+		//Tasks service = new Tasks(transport, accessProtectedResource, new JacksonFactory());
 		//service.accessKey = "AIzaSyDRPAPhboFZI7Knmb1Husoyjkuj_ojRodA";
-		service.setApplicationName("Google-TasksSample/1.0");
+		//service.setApplicationName("Google-TasksSample/1.0");
 
 		// Getting all the Task lists
 		//List taskLists = service.tasklists.list().execute().getItems();
