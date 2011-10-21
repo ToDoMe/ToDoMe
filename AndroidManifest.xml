@@ -43,8 +43,19 @@
 				</intent-filter>
 			-->
 		</activity>
+		
 		<activity android:name="com.todome.TestTabActivity"
 			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar"></activity>
+			
+		<activity android:name="com.todome.AboutActivity"
+			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar">
+			<!--
+				<intent-filter> <action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+				</intent-filter>
+			-->
+		</activity>
+			
 		<service android:name="com.todome.ToDoMeService"
 			android:process=":remote">
 			<intent-filter>

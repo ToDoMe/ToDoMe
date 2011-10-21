@@ -23,6 +23,9 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.provider.OpenableColumns;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.TabHost;
 
 public class ToDoMeActivity extends TabActivity {
@@ -55,6 +58,12 @@ public class ToDoMeActivity extends TabActivity {
 			staticMessage(ex.getClass().toString(), ex.getMessage());
 			//Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
 		}*/
+	}
+	//About dialog
+	private AlertDialog aboutDialog;
+	
+	public boolean getLite() {
+		return false;
 	}
 	
 	public void loadTasks() {
@@ -239,7 +248,7 @@ public class ToDoMeActivity extends TabActivity {
             //textStatus.setText("Unbinding.");
         }
     }
-
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -248,5 +257,47 @@ public class ToDoMeActivity extends TabActivity {
         } catch (Throwable t) {
             Log.e("TestTabActivity", "Failed to unbind from the service", t);
         }
+    }
+    
+    // Menu stuff below here
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection 	
+        switch (item.getItemId()) {
+	        case R.id.about_menu_button:
+	            
+	        	Intent myIntent = new Intent();
+	        	myIntent.setClassName("com.todome", "com.todome.AboutActivity");
+	        	startActivity(myIntent);   
+	        	
+	            Log.v(TAG, "shhi1t");
+	            return true;
+	        case R.id.preferences_menu_button:
+	            //prefsDialog();
+	            return true;
+	        default:
+	        	Log.v(TAG, "shhit");
+	            return super.onOptionsItemSelected(item);
+        }
+    }
+    
+    public void aboutDialog() {
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	
+    	builder.setTitle("About").setCancelable(true).setMessage("ToDoMe v0.1\n" +
+    															 "21/10/11");
+		aboutDialog = builder.create();
+		
+		aboutDialog.show();
+		
+		Log.v(TAG, "yo");
     }
 }
