@@ -100,7 +100,6 @@ public class Task implements Serializable, Comparable<Task> {
 		year = alarmTime.year;
 	}
 
-	@Override
 	public int compareTo(Task another) {
 		// TODO Auto-generated method stub
 		return 0;
