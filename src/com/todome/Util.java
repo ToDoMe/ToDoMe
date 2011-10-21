@@ -87,6 +87,7 @@ public class Util {
 		return (LocationDatabase) getObjectFromString(str);
 	}
 
+	@SuppressWarnings("unchecked")
 	static ArrayList<Task> getTaskListFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (ArrayList<Task>) getObjectFromString(str);
 	}

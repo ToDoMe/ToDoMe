@@ -27,6 +27,8 @@ import java.util.Iterator;
 
 public class KeywordDatabase implements Serializable {
 
+	private static final long serialVersionUID = -8902088060528474897L;
+	
 	ArrayList<Keyword> keywords = new ArrayList<Keyword>();
 
 	public KeywordDatabase() {	// TODO Get from server (http://.../location_types.json)

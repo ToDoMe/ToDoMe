@@ -28,7 +28,9 @@ import android.text.format.Time;
 
 import com.google.android.maps.GeoPoint;
 
-public class PointOfInterest /*extends GeoPoint*/ implements Serializable {
+public class PointOfInterest implements Serializable {
+	
+	private static final long serialVersionUID = -2191091420442969579L;
 	
 	final ArrayList<String> locationTypes;
 	final double radiusOfEffect;
