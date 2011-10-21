@@ -4,11 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+    android:orientation="vertical" android:weightSum="1">
 	<ListView
 		android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-		android:id="@+id/taskList">	
+        android:id="@+id/taskList" android:layout_height="wrap_content">	
 	</ListView>
 </LinearLayout>

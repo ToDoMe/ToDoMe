@@ -1,8 +1,12 @@
-New task button
-You are here icon on map
+[DONE] New task button
+[DONE by Harry Cutts 21/10/2011] You are here icon on map
 Icon per category (ie Type)
 More info about tasks (Specific location reminder, notes, ...)
-Task deletion and completion
-Force portrait (for friday)
-Write service, so it can run in the background
+[DONE by John] Task deletion and completion
+[DONE] Write service, so it can run in the background
 No GPS message
+Language Translations
+Custom locations and end times
+Preferences Menu  -| Both of these should be accessed from the menu key
+About Screen      -|
+Send user data back about freqency any amount of use, and location (All opt in in the preferences)

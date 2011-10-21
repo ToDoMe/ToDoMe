@@ -1,16 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
-    <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:text="@string/ready" android:id="@+id/readyButton"></Button>
-    <TextView android:layout_height="wrap_content" android:text="TextView" android:textAppearance="?android:attr/textAppearanceLarge" android:layout_width="wrap_content" android:id="@+id/startTV"></TextView>
-    <TextView android:layout_height="wrap_content" android:text="TextView" android:textAppearance="?android:attr/textAppearanceLarge" android:layout_width="wrap_content" android:id="@+id/endTV"></TextView>
-    <TextView android:layout_height="wrap_content" android:text="TextView" android:textAppearance="?android:attr/textAppearanceLarge" android:layout_width="wrap_content" android:id="@+id/velocityTV"></TextView>
-    <LinearLayout android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/linearLayout1" android:weightSum="1">
-        <Button android:layout_height="wrap_content" android:layout_weight="0.44" android:text="Button" android:layout_width="wrap_content" android:id="@+id/startServB"></Button>
-        <Button android:text="Button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="0.48" android:id="@+id/endServB"></Button>
-    </LinearLayout>
-    
+
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+	<!--  <RelativeLayout 
+		android:id="@+id/RelativeLayout01" 
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content"> -->
+	
+		<Button 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content" 
+			android:text="Stop Service" 
+			android:layout_alignParentRight="true" 
+			android:id="@+id/btnStop">
+		</Button>
+		
+		<Button 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content" 
+			android:layout_alignParentTop="true" 
+			android:layout_toRightOf="@+id/btnStart" 
+			android:text="Start Service"
+			android:id="@+id/btnStart">
+		</Button>
+		
+		<Button 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content" 
+			android:text="Bind to Service" 
+			android:id="@+id/btnBind">
+		</Button>
+		<Button 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content" 
+			android:text="Unbind from Service" 
+			android:layout_alignParentRight="true" 
+			android:id="@+id/btnUnbind">
+		</Button>
+	<!-- </RelativeLayout> -->
+	
+	<TextView 
+		android:textSize="24sp" 
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content" 
+		android:text="Status Goes Here" 
+		android:id="@+id/textStatus">
+	</TextView>
+	<TextView 
+		android:textSize="24sp"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Integer Value Goes Here"
+		android:id="@+id/textIntValue">
+	</TextView>
+	<TextView
+		android:textSize="24sp"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="String Value Goes Here"
+		android:id="@+id/textStrValue">
+	</TextView>
+	
+	<RelativeLayout
+		android:id="@+id/RelativeLayout03"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		
+		<Button
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Increment by 1"
+			android:id="@+id/btnUpby1">
+		</Button>
+		<Button
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Increment by 10"
+			android:layout_alignParentRight="true"
+			android:id="@+id/btnUpby10">
+		</Button>
+	</RelativeLayout>
+
 </LinearLayout>
