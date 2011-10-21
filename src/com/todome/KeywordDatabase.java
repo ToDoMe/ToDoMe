@@ -15,6 +15,7 @@ public class KeywordDatabase implements Serializable {
 		keywords.add(new Keyword("withdraw", "bank"));
 		keywords.add(new Keyword("money", "bank"));
 		keywords.add(new Keyword("train", "train station"));
+		//keywords.add(new Keyword("bus", "bus"));
 	}
 	
 	public int size() {

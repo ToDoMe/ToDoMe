@@ -5,7 +5,6 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -17,7 +16,6 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
-import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
@@ -27,11 +25,9 @@ public class MapViewActivity extends MapActivity {
 
 	private MapController mapController;
 	private MapView mapView;
-	private MyLocationOverlay locOverlay;
 	private LocationManager locationManager;
 	private LocationDatabase locDb;
-	private boolean haveLocation = false;
-	private MapViewOverlay itemizedOverlay;
+	private MapViewOverlay itemizedOverlay, locOverlay;
 	private List<Overlay> mapOverlays;
 	private Drawable drawable;
 
@@ -57,6 +53,7 @@ public class MapViewActivity extends MapActivity {
 			itemizedOverlay.addOverlay(item);
 		}
 		mapOverlays.clear();
+		if (locOverlay != null) mapOverlays.add(locOverlay);
 		mapOverlays.add(itemizedOverlay);
 	}
 
@@ -91,17 +88,17 @@ public class MapViewActivity extends MapActivity {
 			int lng = (int) (location.getLongitude() * 1E6);
 			GeoPoint point = new GeoPoint(lat, lng);
 			mapController.animateTo(point); // mapController.setCenter(point);
+			locOverlay = new MapViewOverlay(getResources().getDrawable(R.drawable.current_location), MapViewActivity.this);
+			locOverlay.addOverlay(new OverlayItem(point, "You are here", ""));
+			mapOverlays.add(locOverlay);
 			displayMapAt(point);
 		}
 
-		public void onProviderDisabled(String provider) {
-		}
+		public void onProviderDisabled(String provider) { }
 
-		public void onProviderEnabled(String provider) {
-		}
+		public void onProviderEnabled(String provider) { }
 
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-		}
+		public void onStatusChanged(String provider, int status, Bundle extras) { }
 	}
 
 	void displayMapAt(GeoPoint point) {
@@ -140,12 +137,5 @@ public class MapViewActivity extends MapActivity {
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
-	}
-
-	private void message(String title, String message) {
-		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-		alertDialog.setTitle(title);
-		alertDialog.setMessage(message);
-		alertDialog.show();
 	}
 }

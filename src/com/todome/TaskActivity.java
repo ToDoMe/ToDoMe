@@ -33,7 +33,8 @@ public class TaskActivity extends Activity {
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
 	private Dialog dialog;
-	private AlertDialog alert;
+	private AlertDialog alertMarkComplete;
+	private AlertDialog alertDelete;
 	public String taskType;
 
 	private ArrayList<Task> tasksWithNewTask;
@@ -49,20 +50,43 @@ public class TaskActivity extends Activity {
 		tasks = ToDoMeActivity.tasks;
 		tasksWithNewTask = new ArrayList<Task>();
 
-		// Build popup
+		// Build popups
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				tasks.remove(touchedTask);
-				setUpTasksWithNewTasks();
-				taskAdapter.notifyDataSetChanged();
-			}
-		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
-		alert = builder.create();
+		
+		builder.setMessage("Mark complete?").setCancelable(false)
+		.setPositiveButton("Yes",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						touchedTask.setName("[Completed] " + touchedTask.getName());
+						tasks.add(touchedTask);
+						tasks.remove(touchedTask);
+						setUpTasksWithNewTasks();
+						taskAdapter.notifyDataSetChanged();
+					}
+				}).setNegativeButton("No",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		alertMarkComplete = builder.create();
+		
+		builder.setMessage("Delete?").setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								tasks.remove(touchedTask);
+								setUpTasksWithNewTasks();
+								taskAdapter.notifyDataSetChanged();
+							}
+						}).setNegativeButton("No",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+		alertDelete = builder.create();
+		
 		setUpListView();
 	}
 
@@ -88,7 +112,11 @@ public class TaskActivity extends Activity {
 					showTaskDialog(tasks.size() + 1, false);
 				} else {
 					touchedTask = tasks.get(position - 1);
-					alert.show();
+					if (touchedTask.getName().contains("[Completed] ")) {
+						alertDelete.show();
+					} else {
+						alertMarkComplete.show();
+					}
 				}
 			}
 		});
