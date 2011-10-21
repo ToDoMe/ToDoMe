@@ -68,17 +68,13 @@ public class ToDoMeService extends Service implements LocationListener {
 	// Data
 	private ArrayList<Task> tasks;
 	private LocationDatabase pointsOfInterest;
-
 	private Location userCurrentLocation;
 
 	private NotificationManager nm;
+	private LocationManager locationManager;
 	private static boolean isRunning = false;
 
-	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
-	// of all
-	// current
-	// registered
-	// clients.
+	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
 	int mValue = 0; // Holds last value set by a client.
 	static final int MSG_REGISTER_CLIENT = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
@@ -109,7 +105,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			case MSG_TASKS_UPDATED:
 				String tasksData = msg.getData().getString("str1");
 				try {
-					tasks = Util.getTaskListFromString(tasksData);
+					updateTasks(Util.getTaskListFromString(tasksData));
 				} catch (Exception ex) {
 					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
 				}
@@ -123,6 +119,18 @@ public class ToDoMeService extends Service implements LocationListener {
 			default:
 				super.handleMessage(msg);
 			}
+		}
+	}
+	
+	private void updateTasks(ArrayList<Task> tasks) {
+		this.tasks = tasks;
+		if (this.tasks.size() == 0) {
+			// Disable GPS to save battery
+			locationManager.removeUpdates(this);
+		} else {
+			// Enable GPS again
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 	 ToDoMeActivity.LOC_INTERVAL, 0, this);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		}
 	}
 
@@ -156,9 +164,9 @@ public class ToDoMeService extends Service implements LocationListener {
 		isRunning = true;
 
 		// Register LocationListener
-		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 	 ToDoMeActivity.LOC_INTERVAL, 0, this);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 	}
 
 	@Override

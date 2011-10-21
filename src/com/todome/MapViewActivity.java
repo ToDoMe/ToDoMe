@@ -32,6 +32,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -48,6 +49,7 @@ public class MapViewActivity extends MapActivity {
 	private MapView mapView;
 	private LocationManager locationManager;
 	private LocationDatabase locDb;
+	private GeoUpdateHandler guh;
 	private MapViewOverlay itemizedOverlay, locOverlay;
 	private List<Overlay> mapOverlays;
 	private Drawable drawable;
@@ -93,13 +95,30 @@ public class MapViewActivity extends MapActivity {
 
 		// Get LocationManager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new GeoUpdateHandler());
+		GeoUpdateHandler guh = new GeoUpdateHandler();
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,	 ToDoMeActivity.LOC_INTERVAL, 0, guh);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, guh);
 
 		// Overlays
 		mapOverlays = mapView.getOverlays();
 		drawable = this.getResources().getDrawable(R.drawable.androidmarker);
 		itemizedOverlay = new MapViewOverlay(drawable, this);
 		displayMapAt(new GeoPoint((int) (hardcodedBeginLat * 1e6), (int) (hardcodedBeginLong * 1e6)));
+	}
+	
+	@Override
+	public void onPause() {
+		// Disable GPS to save battery
+		locationManager.removeUpdates(guh);
+		super.onPause();
+	}
+	
+	@Override
+	public void onResume() {
+		// Enable GPS again
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,	 ToDoMeActivity.LOC_INTERVAL, 0, guh);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, guh);
+		super.onResume();
 	}
 
 	public class GeoUpdateHandler implements LocationListener {

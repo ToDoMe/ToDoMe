@@ -53,6 +53,8 @@ public class ToDoMeActivity extends TabActivity {
 		return instance;
 	}
 	
+	public static final long LOC_INTERVAL = 60000;
+	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
 	public static KeywordDatabase keywords = new KeywordDatabase();
@@ -63,7 +65,7 @@ public class ToDoMeActivity extends TabActivity {
 			SharedPreferences.Editor editor = prefs.edit();
 			editor.putString("tasks", Util.getStringFromObject(tasks));
 			boolean successfull = editor.commit();
-			Log.i(TAG, "Successfull: " + successfull);
+			Log.i(TAG, "Successful: " + successfull);
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
