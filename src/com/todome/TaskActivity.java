@@ -27,8 +27,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 public class TaskActivity extends Activity {
 	private ToDoMeActivity parent;
 
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
-	// convenience
+	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -60,8 +59,11 @@ public class TaskActivity extends Activity {
 						touchedTask.setName("[Completed] " + touchedTask.getName());
 						tasks.add(touchedTask);
 						tasks.remove(touchedTask);
+						touchedTask.setComplete(true);
 						setUpTasksWithNewTasks();
 						taskAdapter.notifyDataSetChanged();
+						parent.sendTasksToService();
+						ToDoMeActivity.saveTasks();
 					}
 				}).setNegativeButton("No",
 				new DialogInterface.OnClickListener() {
@@ -78,6 +80,8 @@ public class TaskActivity extends Activity {
 								tasks.remove(touchedTask);
 								setUpTasksWithNewTasks();
 								taskAdapter.notifyDataSetChanged();
+								parent.sendTasksToService();
+								ToDoMeActivity.saveTasks();
 							}
 						}).setNegativeButton("No",
 						new DialogInterface.OnClickListener() {
@@ -245,6 +249,7 @@ public class TaskActivity extends Activity {
 
 		taskNameEntry.setText("");
 		parent.sendTasksToService();
+		ToDoMeActivity.saveTasks();
 
 		dialog.hide();
 	}

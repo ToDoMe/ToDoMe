@@ -265,7 +265,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				//ArrayList<Task> releventTasks = getReleventTasks(poi);
 				Log.i(TAG, "Distance from " + poi.toString() + " is " + dist + ". "/* + releventTasks.size() + " relevent tasks."*/);
 				//if (releventTasks.size() > 0) {
-					showNotification(/*releventTasks*/ tasks, poi);
+					showNotification(/*releventTasks*/ tasks, poi);	// TODO Make releventTasks work
 				//}
 			} else {
 				Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);

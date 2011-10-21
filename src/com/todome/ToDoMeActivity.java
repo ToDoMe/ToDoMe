@@ -1,5 +1,9 @@
 package com.todome;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
@@ -15,25 +19,50 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.widget.TabHost;
 
 public class ToDoMeActivity extends TabActivity {
-	private final String TAG = "ToDoMeActivity";
+	private static final String TAG = "ToDoMeActivity";
+	
+	public static final String FILE_PATH = "/data/todome.dat";
+	private static ToDoMeActivity instance;
 	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
 	public static KeywordDatabase keywords = new KeywordDatabase();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
 	
-	public boolean getLite() {
-		return false;
+	public static void saveTasks() {
+		try {
+			FileOutputStream fos = instance.openFileOutput(FILE_PATH, MODE_PRIVATE);
+			fos.write(Util.getStringFromObject(tasks).getBytes());
+			fos.close();
+		} catch (Exception ex) {
+			Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+		}
 	}
+	
+	public static void loadTasks() {
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(instance.openFileInput(FILE_PATH)));
+			tasks = Util.getTaskListFromString(reader.readLine());
+			reader.close();
+		} catch (Exception ex) {
+			Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+		}
+	}
+	
+	/*public boolean getLite() {
+		return false;
+	}*/
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.i(TAG, "Begining ToDoMe, start of onCreate");
+		instance = this;
 		try {
 			setContentView(R.layout.main);
 
