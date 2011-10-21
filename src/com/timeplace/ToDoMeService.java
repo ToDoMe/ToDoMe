@@ -22,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.android.maps.GeoPoint;
+import com.timeplace.MapViewActivity.GeoUpdateHandler;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -31,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,7 +43,7 @@ import android.util.Log;
 
 // Service will fetch location data from server and send it to the Activity
 
-public class ToDoMeService extends Service {
+public class ToDoMeService extends Service implements LocationListener {
 	private final String TAG = "ToDoMeService";
 	
 	// Data
@@ -114,7 +116,7 @@ public class ToDoMeService extends Service {
                 Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
                 msg.setData(b);
                 mClients.get(i).send(msg);
-                Log.i(TAG, "Sent message \"" + value + "\" to " + i);
+                //Log.i(TAG, "Sent message \"" + value + "\" to " + i);
 
             } catch (RemoteException e) {
                 // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
@@ -129,6 +131,10 @@ public class ToDoMeService extends Service {
         Log.i(TAG, "Service Started.");
         timer.scheduleAtFixedRate(new TimerTask(){ public void run() {onTimerTick();}}, 0, 100L);
         isRunning = true;
+        
+        // Register LocationListener
+		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
     
     private void showNotification(Task task, PointOfInterest poi) {
@@ -241,12 +247,16 @@ public class ToDoMeService extends Service {
 	 * This updates the central database with the relevant data from the server
 	 */
 	private void updateDatabase(HashSet<String> taskTypes) {
-		pointsOfInterest.clear();
+		if (pointsOfInterest == null) {
+			pointsOfInterest = new LocationDatabase();
+		} else {
+			pointsOfInterest.clear();
+		}
 		Log.i(TAG, "Location database cleared");
 
 		for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
 			String type = iter.next();
-			Log.i(TAG, "Getting tasks for " + type);
+			Log.i(TAG, "Getting POIs for " + type);
 			pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
 		}
 
@@ -289,17 +299,16 @@ public class ToDoMeService extends Service {
 
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
-			Log.i(TAG, "Looking at task " + task.getName());
-			Log.i(TAG, "It has types " + task.getTypes());
+			Log.i(TAG, "The task named \"" + task.getName() + "\" has types " + task.getTypes());
 			taskTypes.addAll(task.getTypes());
 		}
-		Log.i(TAG, "Total of " + taskTypes.size() + " returned");
+		Log.i(TAG, "Total of " + taskTypes.size() + " types returned");
 		return taskTypes;
 	}
 
 	public void onLocationChanged(Location location) {
+		//Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
-		Log.i(TAG, "Location changed.");
 		checkForReleventNotifications();
 	}
 

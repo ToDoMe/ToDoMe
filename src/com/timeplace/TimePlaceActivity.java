@@ -108,7 +108,7 @@ public class TimePlaceActivity extends TabActivity {
 				try {
 					db = Util.getLocationDatabaseFromString(msg.getData().getString("str1"));
 				} catch (Exception ex) {
-					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage()); // BUG java.io.InvalidClassException com.android.maps.GeoPoint; IllegalAccessException
 				}
 				break;
 			default:
@@ -143,7 +143,7 @@ public class TimePlaceActivity extends TabActivity {
                     mService.send(msg);
                     
                     //ArrayList<Task> reTasks = Util.getTaskListFromString(msg.getData().getString("str1"));
-                    Log.i(TAG, "Sending " + value);
+                    //Log.i(TAG, "Sending " + value);
                 } catch (RemoteException ex) {
                 	Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
                 }

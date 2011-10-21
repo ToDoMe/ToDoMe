@@ -23,7 +23,7 @@ public class Util {
 	}
 
 	static double E6IntToDouble(int integer) {
-		return (int) (integer / 1e6);
+		return (double) (integer / 1e6);
 	}
 
 	static GeoPoint locationToGeoPoint(Location loc) {
@@ -74,9 +74,7 @@ public class Util {
 		return (KeywordDatabase) getObjectFromString(str);
 	}
 
-	static Object getObjectFromString(String str)
-			throws StreamCorruptedException, IOException,
-			ClassNotFoundException {
+	static Object getObjectFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		ObjectInputStream ois = null;
 		try {
 			ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(str, Base64.DEFAULT)));
