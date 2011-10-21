@@ -6,3 +6,6 @@ Task deletion and completion
 Force portrait (for friday)
 Write service, so it can run in the background
 No GPS message
+Preferences Menu  -| Both of these should be accessed from the menu key
+About Screen      -|
+Send user data back about freqency any amount of use, and location (All opt in in the preferences)
