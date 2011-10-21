@@ -61,6 +61,7 @@ public class ToDoMeService extends Service {
     static final int MSG_UNREGISTER_CLIENT	= 2;
     static final int MSG_TASKS_UPDATED		= 3;
     static final int MSG_LOCATIONS_UPDATED	= 4;
+    static final int MSG_KEYWORDS_UPDATED	= 5;
     final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we publish for clients to send messages to IncomingHandler.
 
     @Override
@@ -79,9 +80,8 @@ public class ToDoMeService extends Service {
                 mClients.remove(msg.replyTo);
                 break;
             case MSG_TASKS_UPDATED:
-            	// Take the serialised task array as a string out of the bundle, then deserialise into an ArrayList<Task>
             	String tasksData = msg.getData().getString("str1");
-            	Log.i(TAG, "Data: " + tasksData);
+            	//Log.i(TAG, "Data: " + tasksData);
             	try {
             		tasks = Util.getTaskListFromString(tasksData);
             	}
@@ -102,7 +102,7 @@ public class ToDoMeService extends Service {
     }
     
 	private void sendDatabaseToUI(LocationDatabase db) {
-		// TODO implement
+		 sendMessageToUI(Util.getLocationDatabaseString(db));
 	}
     
     private void sendMessageToUI(String value) {
@@ -127,21 +127,18 @@ public class ToDoMeService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Service Started.");
-        showNotification();
         timer.scheduleAtFixedRate(new TimerTask(){ public void run() {onTimerTick();}}, 0, 100L);
         isRunning = true;
     }
     
-    private void showNotification() {
+    private void showNotification(Task task, PointOfInterest poi) {
         nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.service_started);
         // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.notification_icon, text, System.currentTimeMillis());
+        Notification notification = new Notification(R.drawable.notification_icon, task.getName(), System.currentTimeMillis());
         // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TestTabActivity.class), 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TimePlaceActivity.class), 0);
         // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.service_label), text, contentIntent);
+        notification.setLatestEventInfo(this, task.getName(), poi.getLocationTypes().get(0), contentIntent);
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
         nm.notify(R.string.service_started, notification);
@@ -264,8 +261,25 @@ public class ToDoMeService extends Service {
 			PointOfInterest poi = iter.next();
 
 			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi));
+			if (dist < 100) {
+				ArrayList<Task> releventTasks = getReleventTasks(poi);
+				if (releventTasks.size() > 0) {
+					showNotification(releventTasks.get(0), poi);
+				}
+			}
 			Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
 		}
+	}
+	
+	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
+		ArrayList<Task> releventTasks = new ArrayList<Task>();
+		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext(); ) {
+			Task task = iter.next();
+			if (poi.locationTypes.contains(task.getTypes().get(0))) {
+				releventTasks.add(task);
+			}
+		}
+		return releventTasks;
 	}
 
 	HashSet<String> getAllTaskTypes() {
@@ -285,6 +299,7 @@ public class ToDoMeService extends Service {
 
 	public void onLocationChanged(Location location) {
 		userCurrentLocation = location;
+		Log.i(TAG, "Location changed.");
 		checkForReleventNotifications();
 	}
 

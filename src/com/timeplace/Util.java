@@ -2,6 +2,7 @@ package com.timeplace;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,6 +11,7 @@ import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 
 import android.location.Location;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
@@ -25,8 +27,7 @@ public class Util {
 	}
 
 	static GeoPoint locationToGeoPoint(Location loc) {
-		return new GeoPoint(doubleToIntE6(loc.getLatitude()), doubleToIntE6(loc
-				.getLongitude()));
+		return new GeoPoint(doubleToIntE6(loc.getLatitude()), doubleToIntE6(loc.getLongitude()));
 	}
 
 	static Location geoPointToLocation(GeoPoint point) {
@@ -52,42 +53,36 @@ public class Util {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(
-					new ByteArrayOutputStream());
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
 			oos.writeObject(obj);
-			return baos.toString();
+			return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e("Util.getStringFromObject", "IOException: " + e.getMessage());
 		}
 		return null;
 	}
 
-	static LocationDatabase getLocationDatabaseFromString(String str)
-			throws StreamCorruptedException, IOException,
-			ClassNotFoundException {
+	static LocationDatabase getLocationDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (LocationDatabase) getObjectFromString(str);
 	}
 
-	static ArrayList<Task> getTaskListFromString(String str)
-			throws StreamCorruptedException, IOException,
-			ClassNotFoundException {
+	static ArrayList<Task> getTaskListFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (ArrayList<Task>) getObjectFromString(str);
 	}
 
-	static KeywordDatabase getKeyboardDatabaseFromString(String str)
-			throws StreamCorruptedException, IOException,
-			ClassNotFoundException {
+	static KeywordDatabase getKeyboardDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (KeywordDatabase) getObjectFromString(str);
 	}
 
 	static Object getObjectFromString(String str)
 			throws StreamCorruptedException, IOException,
 			ClassNotFoundException {
-		Log.i("ToDoMe-Util", "Getting object from: " + str + " of length "
-				+ str.length());
-		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(
-				str.getBytes()));
+		ObjectInputStream ois = null;
+		try {
+			ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(str, Base64.DEFAULT)));
+		} catch (EOFException ex) {
+			Log.i("Util.getObjectFromString", "EOFException");
+		}
 		return ois.readObject();
 	}
 }
