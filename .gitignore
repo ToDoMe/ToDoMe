@@ -1,5 +1,5 @@
 bin/
-assets/
+#assets/
 *.class
 *.temp
 *.bak
