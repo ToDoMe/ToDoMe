@@ -279,7 +279,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				.hasNext();) {
 			PointOfInterest poi = iter.next();
 
-			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi));
+			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi.toGeoPoint()));
 			if (dist < 100) {
 				ArrayList<Task> releventTasks = getReleventTasks(poi);
 				if (releventTasks.size() > 0) {

@@ -58,7 +58,7 @@ public class TimePlaceActivity extends TabActivity {
 
 			// Service interaction
 			checkIfServiceIsRunning();
-			//sendTasksToService();
+			sendTasksToService();
 
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
@@ -108,7 +108,11 @@ public class TimePlaceActivity extends TabActivity {
 				try {
 					db = Util.getLocationDatabaseFromString(msg.getData().getString("str1"));
 				} catch (Exception ex) {
-					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage()); // BUG java.io.InvalidClassException com.android.maps.GeoPoint; IllegalAccessException
+					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+				}
+				Log.i(TAG, "db.size() = " + db.size());
+				if (MapViewActivity.getInstance() != null) {
+					MapViewActivity.getInstance().notifyLocationsUpdated();
 				}
 				break;
 			default:
