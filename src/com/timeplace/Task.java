@@ -45,7 +45,6 @@ public class Task implements Serializable, Comparable{
 
 	public void setAlarmTime(Time alarmTime) {this.alarmTime = alarmTime;}
 
-	@Override
 	public int compareTo(Object another) {
 		// TODO Auto-generated method stub
 		return 0;

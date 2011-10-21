@@ -58,7 +58,7 @@ public class TimePlaceActivity extends TabActivity {
 
 			// Service interaction
 			checkIfServiceIsRunning();
-			//sendTasksToService();
+			sendTasksToService();
 
 		} catch (Exception ex) {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
@@ -110,6 +110,10 @@ public class TimePlaceActivity extends TabActivity {
 				} catch (Exception ex) {
 					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
 				}
+				Log.i(TAG, "db.size() = " + db.size());
+				if (MapViewActivity.getInstance() != null) {
+					MapViewActivity.getInstance().notifyLocationsUpdated();
+				}
 				break;
 			default:
 				super.handleMessage(msg);
@@ -143,7 +147,7 @@ public class TimePlaceActivity extends TabActivity {
                     mService.send(msg);
                     
                     //ArrayList<Task> reTasks = Util.getTaskListFromString(msg.getData().getString("str1"));
-                    Log.i(TAG, "Sending " + value);
+                    //Log.i(TAG, "Sending " + value);
                 } catch (RemoteException ex) {
                 	Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
                 }

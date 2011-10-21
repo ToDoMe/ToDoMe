@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -23,7 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.android.maps.GeoPoint;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -32,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -42,7 +39,7 @@ import android.util.Log;
 
 // Service will fetch location data from server and send it to the Activity
 
-public class ToDoMeService extends Service {
+public class ToDoMeService extends Service implements LocationListener {
 	private final String TAG = "ToDoMeService";
 
 	// Data
@@ -52,8 +49,6 @@ public class ToDoMeService extends Service {
 	private Location userCurrentLocation;
 
 	private NotificationManager nm;
-	private Timer timer = new Timer();
-	private int counter = 0, incrementby = 1;
 	private static boolean isRunning = false;
 
 	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
@@ -98,7 +93,6 @@ public class ToDoMeService extends Service {
 				break;
 			case MSG_TASKS_UPDATED:
 				String tasksData = msg.getData().getString("str1");
-				// Log.i(TAG, "Data: " + tasksData);
 				try {
 					tasks = Util.getTaskListFromString(tasksData);
 				} catch (Exception ex) {
@@ -122,38 +116,62 @@ public class ToDoMeService extends Service {
 	}
 
 	private void sendMessageToUI(String value) {
-		for (int i = mClients.size() - 1; i >= 0; i--) {
-			try {
-				// Send data as a String
-				Bundle b = new Bundle();
-				b.putString("str1", value);
-				Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
-				msg.setData(b);
-				mClients.get(i).send(msg);
-				Log.i(TAG, "Sent message \"" + value + "\" to " + i);
+        for (int i=mClients.size()-1; i>=0; i--) {
+            try {
+                //Send data as a String
+                Bundle b = new Bundle();
+                b.putString("str1", value);
+                Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
+                msg.setData(b);
+                mClients.get(i).send(msg);
+                //Log.i(TAG, "Sent message \"" + value + "\" to " + i);
 
-			} catch (RemoteException e) {
-				// The client is dead. Remove it from the list; we are going
-				// through the list from back to front so this is safe to do
-				// inside the loop.
-				mClients.remove(i);
-			}
-		}
-	}
+            } catch (RemoteException e) {
+                // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
+                mClients.remove(i);
+            }
+        }
+    }
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		Log.i(TAG, "Service Started.");
-		timer.scheduleAtFixedRate(new TimerTask() {
-			public void run() {
-				onTimerTick();
-			}
-		}, 0, 100L);
-		isRunning = true;
-	}
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "Service Started.");
+        isRunning = true;
+        
+        // Register LocationListener
+		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+    }
+    
+    private void showNotification(Task task, PointOfInterest poi) {
+        nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        // Set the icon, scrolling text and timestamp
+        Notification notification = new Notification(R.drawable.notification_icon, task.getName(), System.currentTimeMillis());
+        // The PendingIntent to launch our activity if the user selects this notification
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TimePlaceActivity.class), 0);
+        // Set the info for the views that show in the notification panel.
+        notification.setLatestEventInfo(this, task.getName(), poi.getLocationTypes().get(0), contentIntent);
+        // Send the notification.
+        // We use a layout id because it is a unique number.  We use it later to cancel.
+        nm.notify(R.string.service_started, notification);
+    }
+    
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i("MyService", "Received start id " + startId + ": " + intent);
+        return START_STICKY; // run until explicitly stopped.
+    }
 
-	private void showNotification(ArrayList<Task> tasks, PointOfInterest poi) {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        nm.cancel(R.string.service_started); // Cancel the persistent notification.
+        Log.i(TAG, "Service Stopped.");
+        isRunning = false;
+    }
+    
+    private void showNotification(ArrayList<Task> tasks, PointOfInterest poi) {
 		Collections.sort(tasks, new TaskPriorityComparator());
 
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -170,39 +188,8 @@ public class ToDoMeService extends Service {
 		nm.notify(R.string.service_started, notification);
 	}
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.i("MyService", "Received start id " + startId + ": " + intent);
-		return START_STICKY; // run until explicitly stopped.
-	}
-
 	public static boolean isRunning() {
 		return isRunning;
-	}
-
-	private void onTimerTick() {
-		// Log.i("TimerTick", "Timer doing work." + counter);
-		try {
-			counter += incrementby;
-			// sendMessageToUI("" + counter);
-
-		} catch (Throwable t) { // you should always ultimately catch all
-			// exceptions in timer tasks.
-			Log.e(TAG, "Timer Tick Failed.", t);
-		}
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		if (timer != null) {
-			timer.cancel();
-		}
-		counter = 0;
-		nm.cancel(R.string.service_started); // Cancel the persistent
-		// notification.
-		Log.i(TAG, "Service Stopped.");
-		isRunning = false;
 	}
 
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
@@ -268,12 +255,16 @@ public class ToDoMeService extends Service {
 	 * This updates the central database with the relevant data from the server
 	 */
 	private void updateDatabase(HashSet<String> taskTypes) {
-		pointsOfInterest.clear();
+		if (pointsOfInterest == null) {
+			pointsOfInterest = new LocationDatabase();
+		} else {
+			pointsOfInterest.clear();
+		}
 		Log.i(TAG, "Location database cleared");
 
 		for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
 			String type = iter.next();
-			Log.i(TAG, "Getting tasks for " + type);
+			Log.i(TAG, "Getting POIs for " + type);
 			pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
 		}
 
@@ -288,7 +279,7 @@ public class ToDoMeService extends Service {
 				.hasNext();) {
 			PointOfInterest poi = iter.next();
 
-			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi));
+			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi.toGeoPoint()));
 			if (dist < 100) {
 				ArrayList<Task> releventTasks = getReleventTasks(poi);
 				if (releventTasks.size() > 0) {
@@ -317,18 +308,32 @@ public class ToDoMeService extends Service {
 
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
-			Log.i(TAG, "Looking at task " + task.getName());
-			Log.i(TAG, "It has types " + task.getTypes());
+			Log.i(TAG, "The task named \"" + task.getName() + "\" has types " + task.getTypes());
 			taskTypes.addAll(task.getTypes());
 		}
-		Log.i(TAG, "Total of " + taskTypes.size() + " returned");
+		Log.i(TAG, "Total of " + taskTypes.size() + " types returned");
 		return taskTypes;
 	}
 
 	public void onLocationChanged(Location location) {
+		//Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
-		Log.i(TAG, "Location changed.");
 		checkForReleventNotifications();
+	}
+
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
