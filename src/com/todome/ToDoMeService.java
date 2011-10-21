@@ -66,15 +66,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	static final int MSG_KEYWORDS_UPDATED = 5;
 	final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target
 
-	// we
-	// publish
-	// for
-	// clients
-	// to
-	// send
-	// messages
-	// to
-	// IncomingHandler.
+	// we publish for clients to send messages to IncomingHandler.
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -148,21 +140,6 @@ public class ToDoMeService extends Service implements LocationListener {
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
 	}
 
-	private void showNotification(Task task, PointOfInterest poi) {
-		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		// Set the icon, scrolling text and timestamp
-		Notification notification = new Notification(R.drawable.notification_icon, task.getName(), System.currentTimeMillis());
-		// The PendingIntent to launch our activity if the user selects this
-		// notification
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class), 0);
-		// Set the info for the views that show in the notification panel.
-		notification.setLatestEventInfo(this, task.getName(), poi.getLocationTypes().get(0), contentIntent);
-		// Send the notification.
-		// We use a layout id because it is a unique number. We use it later to
-		// cancel.
-		nm.notify(R.string.service_started, notification);
-	}
-
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.i("MyService", "Received start id " + startId + ": " + intent);
@@ -173,12 +150,13 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onDestroy() {
 		super.onDestroy();
 		nm.cancel(R.string.service_started); // Cancel the persistent
-												// notification.
+		// notification.
 		Log.i(TAG, "Service Stopped.");
 		isRunning = false;
 	}
 
 	private void showNotification(ArrayList<Task> tasks, PointOfInterest poi) {
+		Log.i(TAG, "Showing notification");
 		Collections.sort(tasks, new TaskPriorityComparator());
 
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -188,10 +166,10 @@ public class ToDoMeService extends Service implements LocationListener {
 		// notification
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class), 0);
 		// Set the info for the views that show in the notification panel.
-		notification.setLatestEventInfo(this, tasks.get(0).getName(), poi.getLocationTypes().get(0), contentIntent);
+		ArrayList<String> types = poi.getLocationTypes();
+		notification.setLatestEventInfo(this, tasks.get(0).getName(), (types == null) ? "" : types.get(0), contentIntent);
 		// Send the notification.
-		// We use a layout id because it is a unique number. We use it later to
-		// cancel.
+		// We use a layout id because it is a unique number. We use it later to cancel.
 		nm.notify(R.string.service_started, notification);
 	}
 
@@ -206,8 +184,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		HttpClient client = new DefaultHttpClient();
 		double lat = point.getLatitudeE6() / 1e6;
 		double lng = point.getLongitudeE6() / 1e6;
-		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius
-				+ "&type=" + type;
+		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius + "&type=" + type;
 		HttpGet httpGet = new HttpGet(request);
 		Log.i(TAG, "Request used: " + request);
 		try {
@@ -241,8 +218,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				try {
-					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), null, null,
-							null, 10));
+					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), null, null, null, 10));
 				} catch (JSONException e) {
 					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
 				}
@@ -281,28 +257,41 @@ public class ToDoMeService extends Service implements LocationListener {
 		Log.i(TAG, "Checking for relevent notifications");
 		updateDatabase(getAllTaskTypes());
 
-		for (Iterator<PointOfInterest> iter = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.5d).iterator(); iter
-				.hasNext();) {
+		for (Iterator<PointOfInterest> iter = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.5d).iterator(); iter.hasNext();) {
 			PointOfInterest poi = iter.next();
 
 			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi.toGeoPoint()));
-			if (dist < 100) {
-				ArrayList<Task> releventTasks = getReleventTasks(poi);
-				if (releventTasks.size() > 0) {
-					showNotification(releventTasks, poi);
-				}
+			if (dist < 100f) {
+				//ArrayList<Task> releventTasks = getReleventTasks(poi);
+				Log.i(TAG, "Distance from " + poi.toString() + " is " + dist + ". "/* + releventTasks.size() + " relevent tasks."*/);
+				//if (releventTasks.size() > 0) {
+					showNotification(/*releventTasks*/ tasks, poi);
+				//}
+			} else {
+				Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
 			}
-			Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
 		}
 	}
 
 	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
+		Log.i(TAG, "getReleventTasktypes != nulls(" + poi.toString() + ")");
+		
 		ArrayList<Task> releventTasks = new ArrayList<Task>();
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
-			ArrayList<String> types = poi.getLocationTypes();
-			if (types != null && types.contains(task.getTypes().get(0))) {
-				releventTasks.add(task);
+			
+			ArrayList<String> poiTypes = poi.getLocationTypes();
+			ArrayList<String> taskTypes = task.getTypes();
+			
+			if (poiTypes != null && taskTypes != null && taskTypes.size() != 0 && poiTypes.size() != 0) {
+				for (Iterator<String> taskTypesIter = taskTypes.iterator(); taskTypesIter.hasNext();) {
+					
+					String taskType = taskTypesIter.next();
+					if (poiTypes.contains(taskType)) {
+						releventTasks.add(task);
+						break;
+					}
+				}
 			}
 		}
 		return releventTasks;
