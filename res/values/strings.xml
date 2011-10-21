@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, TimePlaceActivity!</string>
-    <string name="app_name">TimePlace</string>
+    <string name="app_name">ToDoMe</string>
     <string name="name">Task:</string>
     <string name="notes">Notes:</string>
     <string name="specific_location">Postcode (optional):</string>
@@ -17,4 +16,8 @@
     <string name="with">With Contact</string>
     <string name="time_label">Time</string>
     <string name="priority">Priority</string>
+    <string name="app_version">0.1</string>
+    <string name="created_by">Created by: Chris Baines, Rebecca Brannum, Harry Cutts, John Preston, and James Robinson</string>
+    <string name="github">GitHub: https://github.com/Fodaro/TimePlace</string>
+    <string name="license">Licensed under GPLv2</string>
 </resources>

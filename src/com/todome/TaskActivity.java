@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2011  Chris Baines
+ * Copyright (C) 2011  Rebecca Brannum
+ * Copyright (C) 2011  Harry Cutts
+ * Copyright (C) 2011  John Preston
+ * Copyright (C) 2011  James Robinson
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 package com.todome;
 
 import java.util.ArrayList;
@@ -7,6 +28,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -24,13 +46,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TimePicker;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 public class TaskActivity extends Activity {
 	private ToDoMeActivity parent;
 
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
+	private ArrayList<Task> tasks; // Loaded from ToDoMeActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -114,6 +137,7 @@ public class TaskActivity extends Activity {
 				if (position == 0 || position == (tasks.size() + 1)) { // If
 					// clicking on a New Task item
 					showTaskDialog(tasks.size() + 1, false);
+
 				} else {
 					touchedTask = tasks.get(position - 1);
 					if (touchedTask.getName().contains("[Completed] ")) {
@@ -136,6 +160,8 @@ public class TaskActivity extends Activity {
 					return false;
 				} else {
 					showTaskDialog(position - 1, true);
+					
+					
 					return true;
 				}
 			}
@@ -224,7 +250,7 @@ public class TaskActivity extends Activity {
 		if (updatingTask) {
 			tasks.remove(position);
 		}
-
+		
 		// Put it in the array, in the right place
 		if (position == tasks.size() + 1) {
 			tasks.add(tasks.size(), task);
@@ -238,7 +264,7 @@ public class TaskActivity extends Activity {
 		// Notify the taskAdaptor of the change
 		taskAdapter.notifyDataSetChanged();
 
-		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + tasks.size() + " tasks");
+		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size() - 1) + " tasks");
 		Log.i(TAG, "Tasks: " + tasks.toString());
 
 		// message("", type);
@@ -262,7 +288,7 @@ public class TaskActivity extends Activity {
 		taskNameEntry.setText("");
 		parent.sendTasksToService();
 		ToDoMeActivity.getInstance().saveTasks();
-
+		
 		dialog.hide();
 	}
 
@@ -274,31 +300,43 @@ public class TaskActivity extends Activity {
 			tasksWithNewTask.add(new Task("New Task", "", "", 0));
 
 	}
+	
+	private void addStarRating(int position) {
+		TextView tv = (TextView) lv.getChildAt(position);
+		int rating = tasks.get(position - 1).getRating();
+		Drawable img = null;
+		
+		switch (rating) {
+			case 0:
+				img = null;
+				break;
+			case 1:
+				img = getBaseContext().getResources().getDrawable(R.drawable.staricon1);
+				break;
+			case 2:
+				img = getBaseContext().getResources().getDrawable(R.drawable.staricon2);
+				break;
+			case 3:
+				img = getBaseContext().getResources().getDrawable(R.drawable.staricon3);
+				break;
+			case 4:
+				img = getBaseContext().getResources().getDrawable(R.drawable.staricon4);
+				break;
+			case 5:
+				img = getBaseContext().getResources().getDrawable(R.drawable.staricon5);
+				break;
+			default:
+				break;
+		}
+		
+		tv.setCompoundDrawablesWithIntrinsicBounds(null, null, img, null);
+		
+	}
 
-	private void message(String title, String message) {
+	/*private void message(String title, String message) {
 		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 		alertDialog.setTitle(title);
 		alertDialog.setMessage(message);
 		alertDialog.show();
-	}
-
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.main_menu, menu);
-		return true;
-	}
-
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.about_menu_button:
-			Log.i(TAG, "About menu");
-			return true;
-		case R.id.preferences_menu_button:
-			Log.i(TAG, "Preferences menu");
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+	}*/
 }

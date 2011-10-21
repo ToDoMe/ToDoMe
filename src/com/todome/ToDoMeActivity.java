@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2011  Chris Baines
+ * Copyright (C) 2011  Rebecca Brannum
+ * Copyright (C) 2011  Harry Cutts
+ * Copyright (C) 2011  John Preston
+ * Copyright (C) 2011  James Robinson
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 package com.todome;
 
 import java.util.ArrayList;
@@ -17,6 +38,9 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.TabHost;
 
 public class ToDoMeActivity extends TabActivity {
@@ -43,6 +67,12 @@ public class ToDoMeActivity extends TabActivity {
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
+	}
+	//About dialog
+	private AlertDialog aboutDialog;
+	
+	public boolean getLite() {
+		return false;
 	}
 	
 	public void loadTasks() {
@@ -101,7 +131,7 @@ public class ToDoMeActivity extends TabActivity {
 			sendTasksToService();
 
 		} catch (Exception ex) {
-			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
+			message("ToDoMeActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
 		}
 	}
 	
@@ -219,7 +249,7 @@ public class ToDoMeActivity extends TabActivity {
             //textStatus.setText("Unbinding.");
         }
     }
-
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -228,5 +258,47 @@ public class ToDoMeActivity extends TabActivity {
         } catch (Throwable t) {
             Log.e("TestTabActivity", "Failed to unbind from the service", t);
         }
+    }
+    
+    // Menu stuff below here
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection 	
+        switch (item.getItemId()) {
+	        case R.id.about_menu_button:
+	            
+	        	Intent myIntent = new Intent();
+	        	myIntent.setClassName("com.todome", "com.todome.AboutActivity");
+	        	startActivity(myIntent);   
+	        	
+	            Log.v(TAG, "shhi1t");
+	            return true;
+	        case R.id.preferences_menu_button:
+	            //prefsDialog();
+	            return true;
+	        default:
+	        	Log.v(TAG, "shhit");
+	            return super.onOptionsItemSelected(item);
+        }
+    }
+    
+    public void aboutDialog() {
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	
+    	builder.setTitle("About").setCancelable(true).setMessage("ToDoMe v0.1\n" +
+    															 "21/10/11");
+		aboutDialog = builder.create();
+		
+		aboutDialog.show();
+		
+		Log.v(TAG, "yo");
     }
 }

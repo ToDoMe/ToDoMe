@@ -21,10 +21,19 @@
  */
 package com.todome;
 
-import java.util.Comparator;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 
-public class TaskPriorityComparator implements Comparator<Task> {
-	public int compare(Task task1, Task task2) {
-		return task1.getRating() - task2.getRating();
+public class ToDoMeReceiver extends BroadcastReceiver {
+
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
+			Intent i = new Intent();
+			i.setAction("com.todome.ToDoMe");
+			context.startService(i);
+		}
 	}
-}
+
+}// =^.^=
