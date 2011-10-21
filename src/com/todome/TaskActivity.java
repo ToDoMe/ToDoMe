@@ -30,8 +30,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 public class TaskActivity extends Activity {
 	private ToDoMeActivity parent;
 
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for
-	// convenience
+	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -55,33 +54,45 @@ public class TaskActivity extends Activity {
 
 		// Build popups
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				touchedTask.setName("[Completed] " + touchedTask.getName());
-				tasks.add(touchedTask);
-				tasks.remove(touchedTask);
-				setUpTasksWithNewTasks();
-				taskAdapter.notifyDataSetChanged();
-			}
-		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
+		
+		builder.setMessage("Mark complete?").setCancelable(false)
+		.setPositiveButton("Yes",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						touchedTask.setName("[Completed] " + touchedTask.getName());
+						tasks.add(touchedTask);
+						tasks.remove(touchedTask);
+						touchedTask.setComplete(true);
+						setUpTasksWithNewTasks();
+						taskAdapter.notifyDataSetChanged();
+						parent.sendTasksToService();
+						ToDoMeActivity.getInstance().saveTasks();
+					}
+				}).setNegativeButton("No",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
 		alertMarkComplete = builder.create();
+		
+		builder.setMessage("Delete?").setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								tasks.remove(touchedTask);
+								setUpTasksWithNewTasks();
+								taskAdapter.notifyDataSetChanged();
+								parent.sendTasksToService();
+								ToDoMeActivity.getInstance().saveTasks();
+							}
+						}).setNegativeButton("No",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
 
-		builder.setMessage("Delete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				tasks.remove(touchedTask);
-				setUpTasksWithNewTasks();
-				taskAdapter.notifyDataSetChanged();
-			}
-		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
 		alertDelete = builder.create();
 
 		setUpListView();
@@ -254,6 +265,7 @@ public class TaskActivity extends Activity {
 
 		taskNameEntry.setText("");
 		parent.sendTasksToService();
+		ToDoMeActivity.getInstance().saveTasks();
 
 		dialog.hide();
 	}

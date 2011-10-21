@@ -35,7 +35,10 @@ public class Task implements Serializable, Comparable<Task> {
 	public void setNotes(String notes) { this.notes = notes; }
 	public String getPostcode() { return postcode; }
 	public void setPostcode(String postcode) { this.postcode = postcode; }
-	public ArrayList<String> getTypes() { return types; }
+	public ArrayList<String> getTypes() {	// Returns an empty array for completed tasks
+		if (!complete) { return types; }
+		else { return new ArrayList<String>(); }
+	}
 	public void setTypes(ArrayList<String> types) { this.types = types; }
 	public boolean isComplete() { return complete; }
 	public void setComplete(boolean complete) { this.complete = complete; }
