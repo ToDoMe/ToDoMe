@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Timer;
@@ -43,141 +44,167 @@ import android.util.Log;
 
 public class ToDoMeService extends Service {
 	private final String TAG = "ToDoMeService";
-	
+
 	// Data
 	private ArrayList<Task> tasks;
 	private LocationDatabase pointsOfInterest;
-	
+
 	private Location userCurrentLocation;
-	
+
 	private NotificationManager nm;
-    private Timer timer = new Timer();
-    private int counter = 0, incrementby = 1;
-    private static boolean isRunning = false;
+	private Timer timer = new Timer();
+	private int counter = 0, incrementby = 1;
+	private static boolean isRunning = false;
 
-    ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
-    int mValue = 0; // Holds last value set by a client.
-    static final int MSG_REGISTER_CLIENT	= 1;
-    static final int MSG_UNREGISTER_CLIENT	= 2;
-    static final int MSG_TASKS_UPDATED		= 3;
-    static final int MSG_LOCATIONS_UPDATED	= 4;
-    static final int MSG_KEYWORDS_UPDATED	= 5;
-    final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we publish for clients to send messages to IncomingHandler.
+	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
+	// of all
+	// current
+	// registered
+	// clients.
+	int mValue = 0; // Holds last value set by a client.
+	static final int MSG_REGISTER_CLIENT = 1;
+	static final int MSG_UNREGISTER_CLIENT = 2;
+	static final int MSG_TASKS_UPDATED = 3;
+	static final int MSG_LOCATIONS_UPDATED = 4;
+	static final int MSG_KEYWORDS_UPDATED = 5;
+	final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mMessenger.getBinder();
-    }
-    class IncomingHandler extends Handler { // Handler of incoming messages from clients.
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case MSG_REGISTER_CLIENT:
-                mClients.add(msg.replyTo);
-                Log.i(TAG, "Client registered.");
-                break;
-            case MSG_UNREGISTER_CLIENT:
-                mClients.remove(msg.replyTo);
-                break;
-            case MSG_TASKS_UPDATED:
-            	String tasksData = msg.getData().getString("str1");
-            	//Log.i(TAG, "Data: " + tasksData);
-            	try {
-            		tasks = Util.getTaskListFromString(tasksData);
-            	}
-            	catch (Exception ex) {
-            		Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-            	}
-            	
-            	if (tasks != null) {
-            		Log.i(TAG, "MSG_TASKS_UPDATED received. tasks.size() = " + tasks.size());
-            	} else {
-            		Log.i(TAG, "MSG_TASKS_UPDATED received. tasks = null.");
-            	}
-            	break;
-            default:
-                super.handleMessage(msg);
-            }
-        }
-    }
-    
-	private void sendDatabaseToUI(LocationDatabase db) {
-		 sendMessageToUI(Util.getLocationDatabaseString(db));
+	// we
+	// publish
+	// for
+	// clients
+	// to
+	// send
+	// messages
+	// to
+	// IncomingHandler.
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return mMessenger.getBinder();
 	}
-    
-    private void sendMessageToUI(String value) {
-        for (int i=mClients.size()-1; i>=0; i--) {
-            try {
-                //Send data as a String
-                Bundle b = new Bundle();
-                b.putString("str1", value);
-                Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
-                msg.setData(b);
-                mClients.get(i).send(msg);
-                Log.i(TAG, "Sent message \"" + value + "\" to " + i);
 
-            } catch (RemoteException e) {
-                // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
-                mClients.remove(i);
-            }
-        }
-    }
+	class IncomingHandler extends Handler { // Handler of incoming messages from
+		// clients.
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case MSG_REGISTER_CLIENT:
+				mClients.add(msg.replyTo);
+				Log.i(TAG, "Client registered.");
+				break;
+			case MSG_UNREGISTER_CLIENT:
+				mClients.remove(msg.replyTo);
+				break;
+			case MSG_TASKS_UPDATED:
+				String tasksData = msg.getData().getString("str1");
+				// Log.i(TAG, "Data: " + tasksData);
+				try {
+					tasks = Util.getTaskListFromString(tasksData);
+				} catch (Exception ex) {
+					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+				}
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(TAG, "Service Started.");
-        timer.scheduleAtFixedRate(new TimerTask(){ public void run() {onTimerTick();}}, 0, 100L);
-        isRunning = true;
-    }
-    
-    private void showNotification(Task task, PointOfInterest poi) {
-        nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.notification_icon, task.getName(), System.currentTimeMillis());
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TimePlaceActivity.class), 0);
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, task.getName(), poi.getLocationTypes().get(0), contentIntent);
-        // Send the notification.
-        // We use a layout id because it is a unique number.  We use it later to cancel.
-        nm.notify(R.string.service_started, notification);
-    }
-    
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("MyService", "Received start id " + startId + ": " + intent);
-        return START_STICKY; // run until explicitly stopped.
-    }
+				if (tasks != null) {
+					Log.i(TAG, "MSG_TASKS_UPDATED received. tasks.size() = " + tasks.size());
+				} else {
+					Log.i(TAG, "MSG_TASKS_UPDATED received. tasks = null.");
+				}
+				break;
+			default:
+				super.handleMessage(msg);
+			}
+		}
+	}
 
-    public static boolean isRunning() {
-        return isRunning;
-    }
+	private void sendDatabaseToUI(LocationDatabase db) {
+		sendMessageToUI(Util.getLocationDatabaseString(db));
+	}
 
+	private void sendMessageToUI(String value) {
+		for (int i = mClients.size() - 1; i >= 0; i--) {
+			try {
+				// Send data as a String
+				Bundle b = new Bundle();
+				b.putString("str1", value);
+				Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
+				msg.setData(b);
+				mClients.get(i).send(msg);
+				Log.i(TAG, "Sent message \"" + value + "\" to " + i);
 
-    private void onTimerTick() {
-        //Log.i("TimerTick", "Timer doing work." + counter);
-        try {
-            counter += incrementby;
-            //sendMessageToUI("" + counter);
+			} catch (RemoteException e) {
+				// The client is dead. Remove it from the list; we are going
+				// through the list from back to front so this is safe to do
+				// inside the loop.
+				mClients.remove(i);
+			}
+		}
+	}
 
-        } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
-            Log.e(TAG, "Timer Tick Failed.", t);            
-        }
-    }
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		Log.i(TAG, "Service Started.");
+		timer.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				onTimerTick();
+			}
+		}, 0, 100L);
+		isRunning = true;
+	}
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (timer != null) {timer.cancel();}
-        counter=0;
-        nm.cancel(R.string.service_started); // Cancel the persistent notification.
-        Log.i(TAG, "Service Stopped.");
-        isRunning = false;
-    }
-    
+	private void showNotification(ArrayList<Task> tasks, PointOfInterest poi) {
+		Collections.sort(tasks, new TaskPriorityComparator());
 
-    
+		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		// Set the icon, scrolling text and timestamp
+		Notification notification = new Notification(R.drawable.notification_icon, tasks.get(0).getName(), System.currentTimeMillis());
+		// The PendingIntent to launch our activity if the user selects this
+		// notification
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TimePlaceActivity.class), 0);
+		// Set the info for the views that show in the notification panel.
+		notification.setLatestEventInfo(this, tasks.get(0).getName(), poi.getLocationTypes().get(0), contentIntent);
+		// Send the notification.
+		// We use a layout id because it is a unique number. We use it later to
+		// cancel.
+		nm.notify(R.string.service_started, notification);
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.i("MyService", "Received start id " + startId + ": " + intent);
+		return START_STICKY; // run until explicitly stopped.
+	}
+
+	public static boolean isRunning() {
+		return isRunning;
+	}
+
+	private void onTimerTick() {
+		// Log.i("TimerTick", "Timer doing work." + counter);
+		try {
+			counter += incrementby;
+			// sendMessageToUI("" + counter);
+
+		} catch (Throwable t) { // you should always ultimately catch all
+			// exceptions in timer tasks.
+			Log.e(TAG, "Timer Tick Failed.", t);
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		if (timer != null) {
+			timer.cancel();
+		}
+		counter = 0;
+		nm.cancel(R.string.service_started); // Cancel the persistent
+		// notification.
+		Log.i(TAG, "Service Stopped.");
+		isRunning = false;
+	}
+
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Begining to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
 
@@ -257,23 +284,24 @@ public class ToDoMeService extends Service {
 		Log.i(TAG, "Checking for relevent notifications");
 		updateDatabase(getAllTaskTypes());
 
-		for (Iterator<PointOfInterest> iter = pointsOfInterest.iterator(); iter.hasNext();) {
+		for (Iterator<PointOfInterest> iter = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.5d).iterator(); iter
+				.hasNext();) {
 			PointOfInterest poi = iter.next();
 
 			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi));
 			if (dist < 100) {
 				ArrayList<Task> releventTasks = getReleventTasks(poi);
 				if (releventTasks.size() > 0) {
-					showNotification(releventTasks.get(0), poi);
+					showNotification(releventTasks, poi);
 				}
 			}
 			Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
 		}
 	}
-	
+
 	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
 		ArrayList<Task> releventTasks = new ArrayList<Task>();
-		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext(); ) {
+		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			if (poi.locationTypes.contains(task.getTypes().get(0))) {
 				releventTasks.add(task);
@@ -303,18 +331,4 @@ public class ToDoMeService extends Service {
 		checkForReleventNotifications();
 	}
 
-	public void onProviderDisabled(String provider) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void onProviderEnabled(String provider) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-		// TODO Auto-generated method stub
-
-	}
 }
