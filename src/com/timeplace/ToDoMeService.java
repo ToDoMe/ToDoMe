@@ -230,7 +230,6 @@ public class ToDoMeService extends Service implements LocationListener {
 			JSONArray jsonArray = new JSONArray(builder.toString());
 
 			Log.i(TAG, "Number of entries " + jsonArray.length());
-			tasks.clear();
 
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -294,7 +293,8 @@ public class ToDoMeService extends Service implements LocationListener {
 		ArrayList<Task> releventTasks = new ArrayList<Task>();
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
-			if (poi.locationTypes.contains(task.getTypes().get(0))) {
+			ArrayList<String> types = poi.getLocationTypes();
+			if (types != null && types.contains(task.getTypes().get(0))) {
 				releventTasks.add(task);
 			}
 		}
@@ -319,6 +319,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		//Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
 		checkForReleventNotifications();
+		Log.i(TAG, "tasks.size() = " + tasks.size());
 	}
 
 	public void onProviderDisabled(String provider) {
