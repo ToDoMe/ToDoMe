@@ -15,4 +15,6 @@
     <string name="pref">Pref</string>
     <string name="about">About</string>
     <string name="with">With Contact</string>
+    <string name="time_label">Time</string>
+    <string name="priority">Priority</string>
 </resources>
