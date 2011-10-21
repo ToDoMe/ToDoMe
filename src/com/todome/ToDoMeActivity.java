@@ -3,6 +3,7 @@ package com.todome;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
@@ -12,6 +13,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,32 +28,54 @@ import android.widget.TabHost;
 public class ToDoMeActivity extends TabActivity {
 	private static final String TAG = "ToDoMeActivity";
 	
-	public static final String FILE_PATH = "/data/todome.dat";
+	public static final String FILE_PATH = "todome.dat";
+	private SharedPreferences prefs;
 	private static ToDoMeActivity instance;
+	public static ToDoMeActivity getInstance() {
+		return instance;
+	}
 	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
 	public static KeywordDatabase keywords = new KeywordDatabase();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
 	
-	public static void saveTasks() {
+	public void saveTasks() {
 		try {
+			SharedPreferences.Editor editor = prefs.edit();
+			editor.putString("tasks", Util.getStringFromObject(tasks));
+		} catch (Exception ex) {
+			Log.e(TAG, "", ex);
+		}
+		/*try {
 			FileOutputStream fos = instance.openFileOutput(FILE_PATH, MODE_PRIVATE);
 			fos.write(Util.getStringFromObject(tasks).getBytes());
 			fos.close();
 		} catch (Exception ex) {
-			Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-		}
+			staticMessage(ex.getClass().toString(), ex.getMessage());
+			//Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+		}*/
 	}
 	
-	public static void loadTasks() {
+	public void loadTasks() {
 		try {
+			String str = prefs.getString("tasks", "");
+			if (str != "") {
+				tasks = Util.getTaskListFromString(str);
+			}
+		} catch (Exception ex) {
+			Log.e(TAG, "", ex);
+		}
+		/*try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(instance.openFileInput(FILE_PATH)));
 			tasks = Util.getTaskListFromString(reader.readLine());
 			reader.close();
+		} catch (IOException ex){
+			staticMessage("Welcome!", "Either this is your first time using ToDoMe, or your task list file has been deleted.");
 		} catch (Exception ex) {
-			Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-		}
+			staticMessage(ex.getClass().toString(), ex.getMessage());
+			//Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+		}*/
 	}
 	
 	/*public boolean getLite() {
@@ -65,6 +89,9 @@ public class ToDoMeActivity extends TabActivity {
 		instance = this;
 		try {
 			setContentView(R.layout.main);
+			
+			prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
+			loadTasks();
 
 			Resources res = getResources();	// Resource object to get Drawables
 			TabHost tabHost = getTabHost();	// The activity TabHost
@@ -97,7 +124,7 @@ public class ToDoMeActivity extends TabActivity {
 			message("TimePlaceActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
 		}
 	}
-
+	
 	private void message(String title, String message) {
 		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 		alertDialog.setTitle(title);
