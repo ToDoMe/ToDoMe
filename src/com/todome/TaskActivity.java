@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2011  Chris Baines
+ * Copyright (C) 2011  Rebecca Brannum
+ * Copyright (C) 2011  Harry Cutts
+ * Copyright (C) 2011  John Preston
+ * Copyright (C) 2011  James Robinson
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 package com.todome;
 
 import java.util.ArrayList;
@@ -30,7 +51,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 public class TaskActivity extends Activity {
 	private ToDoMeActivity parent;
 
-	private ArrayList<Task> tasks; // Loaded from TimePlaceActivity for convenience
+	private ArrayList<Task> tasks; // Loaded from ToDoMeActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -275,12 +296,12 @@ public class TaskActivity extends Activity {
 
 	}
 
-	private void message(String title, String message) {
+	/*private void message(String title, String message) {
 		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 		alertDialog.setTitle(title);
 		alertDialog.setMessage(message);
 		alertDialog.show();
-	}
+	}*/
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();

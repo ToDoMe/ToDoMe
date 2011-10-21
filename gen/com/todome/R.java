@@ -72,22 +72,21 @@ public final class R {
         public static final int main_menu=0x7f050000;
     }
     public static final class string {
-        public static final int about=0x7f04000d;
-        public static final int app_name=0x7f040001;
-        public static final int hello=0x7f040000;
-        public static final int mark_complete=0x7f040006;
-        public static final int name=0x7f040002;
-        public static final int notes=0x7f040003;
-        public static final int pref=0x7f04000c;
-        public static final int preferences=0x7f04000b;
-        public static final int priority=0x7f040010;
-        public static final int ready=0x7f040007;
-        public static final int save=0x7f040005;
-        public static final int service_label=0x7f04000a;
-        public static final int service_started=0x7f040008;
-        public static final int service_stopped=0x7f040009;
-        public static final int specific_location=0x7f040004;
-        public static final int time_label=0x7f04000f;
-        public static final int with=0x7f04000e;
+        public static final int about=0x7f04000c;
+        public static final int app_name=0x7f040000;
+        public static final int mark_complete=0x7f040005;
+        public static final int name=0x7f040001;
+        public static final int notes=0x7f040002;
+        public static final int pref=0x7f04000b;
+        public static final int preferences=0x7f04000a;
+        public static final int priority=0x7f04000f;
+        public static final int ready=0x7f040006;
+        public static final int save=0x7f040004;
+        public static final int service_label=0x7f040009;
+        public static final int service_started=0x7f040007;
+        public static final int service_stopped=0x7f040008;
+        public static final int specific_location=0x7f040003;
+        public static final int time_label=0x7f04000e;
+        public static final int with=0x7f04000d;
     }
 }
