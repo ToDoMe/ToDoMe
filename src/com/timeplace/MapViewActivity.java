@@ -33,13 +33,35 @@ public class MapViewActivity extends MapActivity {
 	private boolean haveLocation = false;
 	private MapViewOverlay itemizedOverlay;
 	private List<Overlay> mapOverlays;
+	private Drawable drawable;
 
 	private double hardcodedBeginLat = 50.896996;
 	private double hardcodedBeginLong = -1.40416;
 
+	private static MapViewActivity instance;
+	public static MapViewActivity getInstance() {
+		return instance;
+	}
+	
+	public void notifyLocationsUpdated() {
+		LocationDatabase db = TimePlaceActivity.db;
+		itemizedOverlay = new MapViewOverlay(drawable, this);
+		for (Iterator<PointOfInterest> iter = db.iterator() ; iter.hasNext() ; ) {
+			PointOfInterest poi = iter.next();
+			ArrayList<String> types = poi.getLocationTypes();
+			
+			OverlayItem item = new OverlayItem(poi.toGeoPoint(), (types == null) ? "Point of interest" : types.toString(), "");
+			// TODO Display opening and closing times
+			
+			itemizedOverlay.addOverlay(item);
+		}
+		mapOverlays.clear();
+		mapOverlays.add(itemizedOverlay);
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		// 50.9376967, -1.3980702
+		instance = this;
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
 		tasks = TimePlaceActivity.tasks;
@@ -57,11 +79,9 @@ public class MapViewActivity extends MapActivity {
 
 		// Overlays
 		mapOverlays = mapView.getOverlays();
-		Drawable drawable = this.getResources().getDrawable(
-				R.drawable.androidmarker);
+		drawable = this.getResources().getDrawable(R.drawable.androidmarker);
 		itemizedOverlay = new MapViewOverlay(drawable, this);
-		displayMapAt(new GeoPoint((int) (hardcodedBeginLat * 1e6),
-				(int) (hardcodedBeginLong * 1e6)));
+		displayMapAt(new GeoPoint((int) (hardcodedBeginLat * 1e6), (int) (hardcodedBeginLong * 1e6)));
 	}
 
 	public class GeoUpdateHandler implements LocationListener {
@@ -86,29 +106,24 @@ public class MapViewActivity extends MapActivity {
 
 	void displayMapAt(GeoPoint point) {
 		mapController.animateTo(point); // mapController.setCenter(point);
-		try {
-			locDb = TimePlaceActivity.db;
-			for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
-				Task task = iter.next();
-				if (task.getName() != "New task") {
-					LocationDatabase taskDb = locDb.searchAboutTypes(task.getTypes());
+		locDb = TimePlaceActivity.db;
+		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
+			Task task = iter.next();
+			if (task.getName() != "New task") {
+				LocationDatabase taskDb = locDb.searchAboutTypes(task.getTypes());
 
-					Iterator<PointOfInterest> DBiter = taskDb.iterator();
+				Iterator<PointOfInterest> DBiter = taskDb.iterator();
 
-					while (DBiter.hasNext()) {
-						PointOfInterest poi = DBiter.next();
-						itemizedOverlay.addOverlay(new OverlayItem(poi,
-								poi.getLocationTypes().get(1),
-								poi.getOpeningTimes()[getDayOfWeek()] + " - " + poi.getClosingTimes()[getDayOfWeek()]));
-					}
+				while (DBiter.hasNext()) {
+					PointOfInterest poi = DBiter.next();
+					itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(),
+							poi.getLocationTypes().get(1),
+							poi.getOpeningTimes()[getDayOfWeek()] + " - " + poi.getClosingTimes()[getDayOfWeek()]));
 				}
 			}
-			
-			mapOverlays.add(itemizedOverlay);
-		} catch (Exception ex) {
-			message("onLocationChanged: " + ex.getClass().toString(), ex
-					.getMessage());
 		}
+		
+		mapOverlays.add(itemizedOverlay);
 	}
 	
 	static int getDayOfWeek() {
