@@ -1,6 +1,7 @@
 package com.todome;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -9,6 +10,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RatingBar;
+import android.widget.TimePicker;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
@@ -89,8 +92,9 @@ public class TaskActivity extends Activity {
 								dialog.cancel();
 							}
 						});
+
 		alertDelete = builder.create();
-		
+
 		setUpListView();
 	}
 
@@ -108,11 +112,11 @@ public class TaskActivity extends Activity {
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == 0 || position == (tasks.size() + 1)) { // If
-																		// clicking
-																		// on a
-																		// New
-																		// Task
-																		// item
+					// clicking
+					// on a
+					// New
+					// Task
+					// item
 					showTaskDialog(tasks.size() + 1, false);
 				} else {
 					touchedTask = tasks.get(position - 1);
@@ -128,11 +132,11 @@ public class TaskActivity extends Activity {
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == 0 || position == (tasks.size() + 1)) { // If
-																		// clicking
-																		// on a
-																		// New
-																		// Task
-																		// item
+					// clicking
+					// on a
+					// New
+					// Task
+					// item
 					return false;
 				} else {
 					showTaskDialog(position - 1, true);
@@ -149,11 +153,12 @@ public class TaskActivity extends Activity {
 		dialog.setTitle("New Task");
 
 		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
+		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
+		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
+		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		if (updatingTask) {
-			RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
-			EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
-			EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 
 			Task thisTask = tasks.get(position);
 
@@ -161,6 +166,11 @@ public class TaskActivity extends Activity {
 			ratingEntry.setRating(thisTask.getRating());
 			notesEntry.setText(thisTask.getNotes());
 			postcodeEntry.setText(thisTask.getPostcode());
+			if (thisTask.getAlarmTime() != null) {
+				Log.i(TAG, "AlarmTime hour " + thisTask.getAlarmTime().hour + " min " + thisTask.getAlarmTime().minute);
+				timeEntry.setCurrentHour(thisTask.getAlarmTime().hour);
+				timeEntry.setCurrentMinute(thisTask.getAlarmTime().minute);
+			}
 		}
 
 		dialog.show();
@@ -200,10 +210,16 @@ public class TaskActivity extends Activity {
 		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
 		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		// Create the new task
 		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(), (int) ratingEntry
 				.getRating());
+
+		Calendar c = Calendar.getInstance();
+		Time time = new Time();
+		time.set(0, timeEntry.getCurrentMinute(), timeEntry.getCurrentHour(), c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH), c.get(Calendar.YEAR));
+		task.setAlarmTime(time);
 
 		// Give it a type
 		ArrayList<String> type = ToDoMeActivity.keywords.getTypes(task.getName());
