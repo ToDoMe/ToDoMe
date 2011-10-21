@@ -178,7 +178,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
-		Log.i(TAG, "Begining to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
+		Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
 
 		StringBuilder builder = new StringBuilder();
 		HttpClient client = new DefaultHttpClient();
