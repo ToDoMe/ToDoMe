@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import android.text.format.Time;
 
 public class Task implements Serializable, Comparable<Task> {
+
+	private static final long serialVersionUID = 4693889711884116969L;
+	
 	private String name;
 	private String notes;
 	private String postcode;

@@ -40,6 +40,8 @@ import com.google.android.maps.GeoPoint;
 
 public class LocationDatabase extends HashSet<PointOfInterest> implements Serializable {
 
+	private static final long serialVersionUID = -5156762155694898699L;
+
 	public LocationDatabase() {
 		super();
 	}
