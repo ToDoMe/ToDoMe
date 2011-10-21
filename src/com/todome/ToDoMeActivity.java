@@ -1,10 +1,5 @@
 package com.todome;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
@@ -21,7 +16,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,17 +41,11 @@ public class ToDoMeActivity extends TabActivity {
 		try {
 			SharedPreferences.Editor editor = prefs.edit();
 			editor.putString("tasks", Util.getStringFromObject(tasks));
+			boolean successfull = editor.commit();
+			Log.i(TAG, "Successfull: " + successfull);
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
-		/*try {
-			FileOutputStream fos = instance.openFileOutput(FILE_PATH, MODE_PRIVATE);
-			fos.write(Util.getStringFromObject(tasks).getBytes());
-			fos.close();
-		} catch (Exception ex) {
-			staticMessage(ex.getClass().toString(), ex.getMessage());
-			//Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-		}*/
 	}
 	//About dialog
 	private AlertDialog aboutDialog;
@@ -67,6 +55,7 @@ public class ToDoMeActivity extends TabActivity {
 	}
 	
 	public void loadTasks() {
+		Log.i(TAG, "Tasks loaded");
 		try {
 			String str = prefs.getString("tasks", "");
 			if (str != "") {
@@ -75,16 +64,7 @@ public class ToDoMeActivity extends TabActivity {
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
-		/*try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(instance.openFileInput(FILE_PATH)));
-			tasks = Util.getTaskListFromString(reader.readLine());
-			reader.close();
-		} catch (IOException ex){
-			staticMessage("Welcome!", "Either this is your first time using ToDoMe, or your task list file has been deleted.");
-		} catch (Exception ex) {
-			staticMessage(ex.getClass().toString(), ex.getMessage());
-			//Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-		}*/
+
 	}
 	
 	/*public boolean getLite() {

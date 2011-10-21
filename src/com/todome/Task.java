@@ -10,7 +10,6 @@ public class Task implements Serializable, Comparable<Task> {
 	private String notes;
 	private String postcode;
 	private ArrayList<String> types;
-	private Time alarmTime;
 
 	private int second;
 	private int minute;
