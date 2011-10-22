@@ -16,7 +16,7 @@ Make the notification link to the map, not the task list
 Allow locational notifications to be switched off for a task
 Allow the user to add and remove specific tags (types) from a task
 Fix map so that locations shop up immediately
-Check the map key will work for ever
-Finish the disable notifications, this needs to disable location updates as well
-Stop the I am here overlay being persistant
+[DONE] Check the map key will work for ever
+[DONE] Finish the disable notifications, this needs to disable location updates as well
+[DONE] Stop the I am here overlay being persistant
 Store the keywords database in the shared preferences
