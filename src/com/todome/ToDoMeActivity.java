@@ -123,7 +123,7 @@ public class ToDoMeActivity extends TabActivity {
 			prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
 			loadTasks();
 			
-			setPreferences(); // Default prefs
+			//setPreferences(); // Default prefs
 			
 			Resources res = getResources();	// Resource object to get Drawables
 			TabHost tabHost = getTabHost();	// The activity TabHost

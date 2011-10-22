@@ -400,8 +400,12 @@ public class ToDoMeService extends Service implements LocationListener {
 	// LocationListener
 	
 	public void onLocationChanged(Location location) {
-		// Log.i(TAG, "Location changed.");
+		Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
+		// Save new location
+		prefs.edit().putLong("lat", (long) (location.getLatitude() * 1e6))
+					.putLong("lon", (long) (location.getLongitude() * 1e6))
+					.commit();
 		//updateNotifiedPOIs();
 		checkForReleventNotifications();
 		Log.i(TAG, "tasks.size() = " + tasks.size());

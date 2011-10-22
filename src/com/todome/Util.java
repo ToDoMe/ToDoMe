@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -155,11 +154,11 @@ public class Util {
 		// http://www.movable-type.co.uk/scripts/latlong.html
 		int R = 6371; // radius of Earth in km
 
-		double lat2 = Math.toRadians(point2.getLatitudeE6() * 10e-6);
-		double lat1 = Math.toRadians(point1.getLatitudeE6() * 10e-6);
+		double lat2 = Math.toRadians(point2.getLatitudeE6() * 1e-6);
+		double lat1 = Math.toRadians(point1.getLatitudeE6() * 1e-6);
 
 		double dLat = lat2 - lat1;
-		double dLon = Math.toRadians((point2.getLongitudeE6() - point1.getLongitudeE6()) * 10e-6);
+		double dLon = Math.toRadians((point2.getLongitudeE6() - point1.getLongitudeE6()) * 1e-6);
 
 		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));

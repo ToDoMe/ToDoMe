@@ -104,8 +104,8 @@ public class LocationDatabase extends HashSet<PointOfInterest> implements Serial
 	}
 	
 	public static long calculateTimeDeltaInMilliseconds(GeoPoint location, PointOfInterest POI) throws MalformedURLException, IOException, JSONException {
-		String origin = Double.toString((location.getLatitudeE6() * 10e-6)) + "," + Double.toString((location.getLongitudeE6() * 10e-6));
-		String destination = Double.toString((POI.getLatitudeE6() * 10e-6)) + "," + Double.toString((POI.getLongitudeE6() * 10e-6));
+		String origin = Double.toString((location.getLatitudeE6() * 1e-6)) + "," + Double.toString((location.getLongitudeE6() * 1e-6));
+		String destination = Double.toString((POI.getLatitudeE6() * 1e-6)) + "," + Double.toString((POI.getLongitudeE6() * 1e-6));
 		
 		URL query = new URL("http://maps.googleapis.com/maps/api/distancematrix/json?origins=" + origin + "&destinations=" + destination + "&mode=walking&units=metric&sensor=true");
 		InputStreamReader reader = new InputStreamReader(query.openStream());

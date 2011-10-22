@@ -22,7 +22,6 @@
 package com.todome;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import android.text.format.Time;
