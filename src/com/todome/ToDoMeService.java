@@ -21,22 +21,11 @@
  */
 package com.todome;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +36,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -64,9 +54,32 @@ import com.google.android.maps.GeoPoint;
 
 public class ToDoMeService extends Service implements LocationListener {
 	private final String TAG = "ToDoMeService";
+	
+	private SharedPreferences prefs;
 
 	// Data
 	private ArrayList<Task> tasks;
+	
+	public void loadTasks() {
+		try {
+			String str = prefs.getString("tasks", "");
+			if (str != "") {
+				tasks = Util.getTaskListFromString(str);
+			}
+		} catch (Exception ex) {
+			Log.e(TAG, "", ex);
+		}
+		
+		if (this.tasks.size() == 0) {
+			// Disable GPS to save battery
+			locationManager.removeUpdates(this);
+		} else {
+			// Enable GPS again
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+		}
+	}
+	
 	private LocationDatabase pointsOfInterest;
 	private Location userCurrentLocation;
 
@@ -80,17 +93,13 @@ public class ToDoMeService extends Service implements LocationListener {
 	 */
 	HashSet<PointOfInterest> notifiedPOIs = new HashSet<PointOfInterest>();
 
-	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
-	// of all
-	// current
-	// registered
-	// clients.
+	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
 	int mValue = 0; // Holds last value set by a client.
-	static final int MSG_REGISTER_CLIENT = 1;
-	static final int MSG_UNREGISTER_CLIENT = 2;
-	static final int MSG_TASKS_UPDATED = 3;
-	static final int MSG_LOCATIONS_UPDATED = 4;
-	static final int MSG_KEYWORDS_UPDATED = 5;
+	public static final int MSG_REGISTER_CLIENT = 1;
+	public static final int MSG_UNREGISTER_CLIENT = 2;
+	public static final int MSG_LOCATIONS_UPDATED = 3;
+	public static final int MSG_KEYWORDS_UPDATED = 4;
+	public static final int MSG_TASKS_UPDATED = 5;
 	final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target
 
 	// we publish for clients to send messages to IncomingHandler.
@@ -113,34 +122,12 @@ public class ToDoMeService extends Service implements LocationListener {
 				mClients.remove(msg.replyTo);
 				break;
 			case MSG_TASKS_UPDATED:
-				String tasksData = msg.getData().getString("str1");
-				try {
-					updateTasks(Util.getTaskListFromString(tasksData));
-				} catch (Exception ex) {
-					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-				}
-
-				if (tasks != null) {
-					Log.i(TAG, "MSG_TASKS_UPDATED received. tasks.size() = " + tasks.size());
-				} else {
-					Log.i(TAG, "MSG_TASKS_UPDATED received. tasks = null.");
-				}
+				loadTasks();
+				Log.i(TAG, "MSG_TASKS_UPDATED received.");
 				break;
 			default:
 				super.handleMessage(msg);
 			}
-		}
-	}
-
-	private void updateTasks(ArrayList<Task> tasks) {
-		this.tasks = tasks;
-		if (this.tasks.size() == 0) {
-			// Disable GPS to save battery
-			locationManager.removeUpdates(this);
-		} else {
-			// Enable GPS again
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		}
 	}
 
@@ -160,8 +147,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				// Log.i(TAG, "Sent message \"" + value + "\" to " + i);
 
 			} catch (RemoteException e) {
-				// The client is dead. Remove it from the list; we are going
-				// through the list from back to front
+				// The client is dead. Remove it from the list; we are going through the list from back to front
 				// so this is safe to do inside the loop.
 				mClients.remove(i);
 			}
@@ -173,11 +159,15 @@ public class ToDoMeService extends Service implements LocationListener {
 		super.onCreate();
 		Log.i(TAG, "Service Started.");
 		isRunning = true;
-
+		
 		// Register LocationListener
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+		
+		// Load tasks
+		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
+		loadTasks();
 	}
 
 	@Override
@@ -227,40 +217,17 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
-
-		StringBuilder builder = new StringBuilder();
-		HttpClient client = new DefaultHttpClient();
+		
 		double lat = point.getLatitudeE6() / 1e6;
 		double lng = point.getLongitudeE6() / 1e6;
-		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius
-				+ "&type=" + type;
-		HttpGet httpGet = new HttpGet(request);
-		Log.i(TAG, "Request used: " + request);
-		try {
-			HttpResponse response = client.execute(httpGet);
-			StatusLine statusLine = response.getStatusLine();
-			int statusCode = statusLine.getStatusCode();
-			if (statusCode == 200) {
-				HttpEntity entity = response.getEntity();
-				InputStream content = entity.getContent();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-				String line;
-				while ((line = reader.readLine()) != null) {
-					builder.append(line);
-				}
-			} else {
-				Log.e("", "Failed to download file");
-			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
+		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius + "&type=" + type;
+		String file = Util.getFileFromServer(request);
+		
 		LocationDatabase newLocDatabase = new LocationDatabase();
 
 		try {
-			JSONArray jsonArray = new JSONArray(builder.toString());
+			JSONArray jsonArray = new JSONArray(file);
 
 			Log.i(TAG, "Number of entries " + jsonArray.length());
 
@@ -404,7 +371,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onLocationChanged(Location location) {
 		// Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
-		updateNotifiedPOIs();
+		//updateNotifiedPOIs();
 		checkForReleventNotifications();
 		Log.i(TAG, "tasks.size() = " + tasks.size());
 	}

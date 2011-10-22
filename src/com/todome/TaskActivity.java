@@ -86,7 +86,7 @@ public class TaskActivity extends Activity {
 						touchedTask.setComplete(true);
 						setUpTasksWithNewTasks();
 						taskAdapter.notifyDataSetChanged();
-						parent.sendTasksToService();
+						parent.notifyTasksChanged();
 						ToDoMeActivity.getInstance().saveTasks();
 					}
 				}).setNegativeButton("No",
@@ -104,7 +104,7 @@ public class TaskActivity extends Activity {
 								tasks.remove(touchedTask);
 								setUpTasksWithNewTasks();
 								taskAdapter.notifyDataSetChanged();
-								parent.sendTasksToService();
+								parent.notifyTasksChanged();
 								ToDoMeActivity.getInstance().saveTasks();
 							}
 						}).setNegativeButton("No",
@@ -262,7 +262,7 @@ public class TaskActivity extends Activity {
 		// Notify the taskAdaptor of the change
 		taskAdapter.notifyDataSetChanged();
 
-		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + (tasks.size() - 1) + " tasks");
+		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + tasks.size() + " tasks");
 		Log.i(TAG, "Tasks: " + tasks.toString());
 
 		// message("", type);
@@ -284,7 +284,7 @@ public class TaskActivity extends Activity {
 		 */
 
 		taskNameEntry.setText("");
-		parent.sendTasksToService();
+		parent.notifyTasksChanged();
 		ToDoMeActivity.getInstance().saveTasks();
 		
 		dialog.hide();

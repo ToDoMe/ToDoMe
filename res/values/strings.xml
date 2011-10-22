@@ -18,6 +18,15 @@
     <string name="priority">Priority</string>
     <string name="app_version">0.1</string>
     <string name="created_by">Created by: Chris Baines, Rebecca Brannum, Harry Cutts, John Preston, and James Robinson</string>
-    <string name="github">GitHub: https://github.com/Fodaro/TimePlace</string>
-    <string name="license">Licensed under GPLv2</string>
+    <string name="github">GitHub: https://github.com/ToDoMe/ToDoMe</string>
+    <string name="license">Copyright 2011 Chris Baines, Rebecca Brannum, Harry Cutts, John Preston, and James Robinson. All rights reserved.</string>
+    <string name="findwithin"> Find POIs within </string>
+    <string name="giveme"> Give me </string>
+    <string name="updategps"> Update GPS every </string>
+    <string name="minutes"> minutes </string>
+    <string name="oflocation"> km of my location </string>
+    <string name="minutesbefore"> minutes extra before POIs close </string>
+    <string name="poi"> n.b: POI means Point Of Interest</string>
+    <string name="cancel">Cancel</string>
+    <string name="max_radius"> Maximum search radius is 10km</string>
 </resources>
