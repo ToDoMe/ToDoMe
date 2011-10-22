@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayoutRadius" android:layout_width="match_parent">
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/textViewfindwithin" android:text="@string/findwithin"></TextView>
+        <EditText android:id="@+id/search_radius" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="wrap_content" android:inputType="number">
+            <requestFocus></requestFocus>
+        </EditText>
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/textViewoflocation" android:text="@string/oflocation"></TextView>
+    </LinearLayout>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayoutextratime" android:layout_width="match_parent">
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/textViewgiveme" android:text="@string/giveme"></TextView>
+        <EditText android:id="@+id/extra_time" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="wrap_content" android:inputType="number"></EditText>
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/textViewminutesbefore" android:text="@string/minutesbefore"></TextView>
+    </LinearLayout>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayoutgpstimeout" android:layout_width="match_parent">
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/textViewupdategps" android:text="@string/updategps"></TextView>
+        <EditText android:id="@+id/gps_timeout" android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="wrap_content" android:inputType="number"></EditText>
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/textViewminutes" android:text="@string/minutes"></TextView>
+    </LinearLayout>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayoutpropbuttons" android:layout_width="match_parent">
+        <Button android:layout_weight="1" android:layout_height="wrap_content" android:layout_width="0dp" android:text="@string/save" android:id="@+id/buttonSave"></Button>
+        <Button android:layout_weight="1" android:layout_height="wrap_content" android:layout_width="0dp" android:text="@string/cancel" android:id="@+id/buttonCancel"></Button>
+    </LinearLayout>
+    <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/textViewPOI" android:text="@string/poi"></TextView>
+    <TextView android:id="@+id/textView1" android:layout_height="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="wrap_content" android:text="@string/max_radius"></TextView>
+    
+</LinearLayout>

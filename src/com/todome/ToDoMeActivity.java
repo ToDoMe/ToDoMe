@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,13 +48,32 @@ public class ToDoMeActivity extends TabActivity {
 	private static final String TAG = "ToDoMeActivity";
 	
 	public static final String FILE_PATH = "todome.dat";
-	private SharedPreferences prefs;
+	private static SharedPreferences prefs;
 	private static ToDoMeActivity instance;
 	public static ToDoMeActivity getInstance() {
 		return instance;
 	}
 	
 	public static final long LOC_INTERVAL = 60000;
+
+	// Create preferences setting method, and overload with defaults.
+	public static void setPreferences(Float search_radius, Long extra_time, Long gps_timeout) {
+		prefs.edit().putFloat("search_radius", search_radius > 10 ? 10 : search_radius)
+					.putLong("extra_time", extra_time)
+					.putLong("gps_timeout", gps_timeout)
+					.commit();
+	}
+	
+	private static void setPreferences() {
+		prefs.edit().putFloat("search_radius", 10)
+					.putLong("extra_time", 5 * 60 * 1000)
+					.putLong("gps_timeout", ToDoMeActivity.LOC_INTERVAL)
+					.commit();
+	}
+	
+	public static SharedPreferences getPreferences() {
+		return prefs;
+	}
 	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
@@ -104,7 +124,9 @@ public class ToDoMeActivity extends TabActivity {
 			
 			prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
 			loadTasks();
-
+			
+			setPreferences(); // Default prefs
+			
 			Resources res = getResources();	// Resource object to get Drawables
 			TabHost tabHost = getTabHost();	// The activity TabHost
 			TabHost.TabSpec spec;			// Reusable TabSpec for each tab
@@ -273,21 +295,20 @@ public class ToDoMeActivity extends TabActivity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection 	
+        // Handle item selection
+    	Intent myIntent = new Intent();
+    	
         switch (item.getItemId()) {
 	        case R.id.about_menu_button:
-	            
-	        	Intent myIntent = new Intent();
 	        	myIntent.setClassName("com.todome", "com.todome.AboutActivity");
 	        	startActivity(myIntent);   
-	        	
-	            Log.v(TAG, "shhi1t");
 	            return true;
 	        case R.id.preferences_menu_button:
-	            //prefsDialog();
+	        	myIntent.setClassName("com.todome", "com.todome.PreferencesActivity");
+	        	startActivity(myIntent);
 	            return true;
 	        default:
-	        	Log.v(TAG, "shhit");
+	        	
 	            return super.onOptionsItemSelected(item);
         }
     }
