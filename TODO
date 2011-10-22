@@ -13,3 +13,8 @@ Send user data back about freqency any amount of use, and location (All opt in i
 Check that the service starts when the device starts
 Make the service get the tasks from the preferences store
 Make the notification link to the map, not the task list
+Allow locational notifications to be switched off for a task
+Allow the user to add and remove specific tags (types) from a task
+Fix map so that locations shop up immediately
+Check the map key will work for ever
+Finish the disable notifications, this needs to disable location updates as well

@@ -49,9 +49,9 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 
 public class Util {
-	
+
 	// Server comms
-	
+
 	public static String getFileFromServer(String request) {
 		StringBuilder builder = new StringBuilder();
 		HttpClient client = new DefaultHttpClient();
@@ -75,10 +75,10 @@ public class Util {
 		} catch (Exception ex) {
 			Log.e("Util.getFileFromServer", ex.getClass().toString() + " " + ex.getMessage());
 		}
-		
+
 		return builder.toString();
 	}
-	
+
 	// Data conversion
 
 	public static int doubleToIntE6(double dub) {
@@ -101,7 +101,7 @@ public class Util {
 	}
 
 	// Serialization
-	
+
 	public static String getTaskArrayString(ArrayList<Task> tasks) {
 		return getStringFromObject(tasks);
 	}
@@ -151,6 +151,10 @@ public class Util {
 	}
 
 	public static boolean isPointsWithinRange(GeoPoint point1, GeoPoint point2, double radius) {
+		return (getDistanceBetween(point1, point2) <= radius);
+	}
+
+	public static double getDistanceBetween(GeoPoint point1, GeoPoint point2) {
 		// Implemented from code at
 		// http://www.movable-type.co.uk/scripts/latlong.html
 		int R = 6371; // radius of Earth in km
@@ -165,6 +169,6 @@ public class Util {
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double d = R * c;
 
-		return (d <= radius);
+		return d;
 	}
 }

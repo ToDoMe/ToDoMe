@@ -118,6 +118,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onCreate() {
 		super.onCreate();
 		Log.i(TAG, "Service Started.");
+
 		isRunning = true;
 
 		// Register LocationListener
@@ -161,7 +162,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		// Set the info for the views that show in the notification panel.
 		String message = "";
 
-		message = "You are nearby a ";
+		message = "You are near a ";
 
 		HashSet<String> taskTypes = notifyTasks.get(0).getTypes();
 		HashSet<String> locationTypes = poi.getLocationTypes();
@@ -169,14 +170,14 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		typesIntersection.addAll(taskTypes);
 		typesIntersection.retainAll(locationTypes);
-		
+
 		for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
 			message = message + iter.next() + " ";
 		}
 		notification.setLatestEventInfo(this, notifyTasks.get(0).getName(), message, contentIntent);
+
 		// Send the notification.
-		// We use a layout id because it is a unique number. We use it later to
-		// cancel.
+		// We use a layout id because it is a unique number. We use it later to cancel.
 		nm.notify(R.string.service_started, notification);
 	}
 
@@ -265,6 +266,7 @@ public class ToDoMeService extends Service implements LocationListener {
 					// ArrayList<Task> releventTasks = getReleventTasks(poi);
 					Log.i(TAG, "Distance from " + poi.toString() + " is " + dist + ". "/* + releventTasks.size() + " relevent tasks." */);
 					// if (releventTasks.size() > 0) {
+					Log.w(TAG, "Added " + poi.getLatitudeE6() + " " + poi.getLongitudeE6() + " " + notifiedPOIs.size());
 					notifiedPOIs.add(poi);
 					showNotification(/* releventTasks */tasks, poi); // TODO Make releventTasks work
 					// }
@@ -278,7 +280,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
-		Log.i(TAG, "getReleventTasktypes != nulls(" + poi.toString() + ")");
+		// Log.i(TAG, "getReleventTasktypes != nulls(" + poi.toString() + ")");
 
 		ArrayList<Task> releventTasks = new ArrayList<Task>();
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
@@ -305,17 +307,18 @@ public class ToDoMeService extends Service implements LocationListener {
 	 * This method removes all poi's that are not close to the users current location
 	 */
 	private void updateNotifiedPOIs() {
-		float distance = 0.1f; // meters
+		double distance = 0.1d; // meters
 
 		if (pointsOfInterest == null)
 			return;
 
 		// Look at each of the points of interest that have been notified for
-		for (Iterator<PointOfInterest> iter = pointsOfInterest.iterator(); iter.hasNext();) {
+		for (Iterator<PointOfInterest> iter = notifiedPOIs.iterator(); iter.hasNext();) {
 			PointOfInterest poi = iter.next();
 
 			// If the point of interest is now "distance" or more away from the users current location, then remove it so more notifications can be given
 			if (!Util.isPointsWithinRange(Util.locationToGeoPoint(userCurrentLocation), poi.toGeoPoint(), distance)) {
+				Log.e(TAG, "Removed " + poi.toGeoPoint() + " dist " + Util.getDistanceBetween(Util.locationToGeoPoint(userCurrentLocation), poi.toGeoPoint()));
 				iter.remove();
 			}
 		}
@@ -323,18 +326,18 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	HashSet<String> getAllTaskTypes() {
 
-		Log.i(TAG, "Finding all task types " + tasks.size());
+		// Log.i(TAG, "Finding all task types " + tasks.size());
 		HashSet<String> taskTypes = new HashSet<String>();
 
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
-			Log.i(TAG, "The task named \"" + task.getName() + "\" has types " + task.getTypes());
+			// Log.i(TAG, "The task named \"" + task.getName() + "\" has types " + task.getTypes());
 			HashSet<String> thisTaskTypes = task.getTypes();
 			if (thisTaskTypes != null) {
 				taskTypes.addAll(task.getTypes());
 			}
 		}
-		Log.i(TAG, "Total of " + taskTypes.size() + " types returned");
+		// Log.i(TAG, "Total of " + taskTypes.size() + " types returned");
 		return taskTypes;
 	}
 
@@ -413,7 +416,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onLocationChanged(Location location) {
 		// Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
-		// updateNotifiedPOIs();
+		updateNotifiedPOIs();
 		checkForReleventNotifications();
 		Log.i(TAG, "tasks.size() = " + tasks.size());
 	}

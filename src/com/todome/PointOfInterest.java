@@ -30,21 +30,27 @@ import android.text.format.Time;
 import com.google.android.maps.GeoPoint;
 
 public class PointOfInterest implements Serializable {
-	
+
 	private static final long serialVersionUID = -2191091420442969579L;
-	
+
 	final HashSet<String> locationTypes;
 	final double radiusOfEffect;
-	
+
 	final Time[] openingTimes;
 	final Time[] closingTimes;
-	
+
 	int latitudeE6, longitudeE6;
-	public int getLatitudeE6() { return latitudeE6; }
-	public int getLongitudeE6() { return longitudeE6; }
-	
+
+	public int getLatitudeE6() {
+		return latitudeE6;
+	}
+
+	public int getLongitudeE6() {
+		return longitudeE6;
+	}
+
 	public PointOfInterest(int latitude, int longitude, HashSet<String> locationTypes, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
-		//super(latitude,longitude);
+		// super(latitude,longitude);
 		this.latitudeE6 = latitude;
 		this.longitudeE6 = longitude;
 		this.locationTypes = locationTypes;
@@ -52,15 +58,15 @@ public class PointOfInterest implements Serializable {
 		this.closingTimes = closingTimes;
 		this.radiusOfEffect = radiusOfEffect;
 	}
-	
+
 	public GeoPoint toGeoPoint() {
 		return new GeoPoint(latitudeE6, longitudeE6);
 	}
-	
+
 	public String toString() {
 		return latitudeE6 + ", " + longitudeE6;
 	}
-	
+
 	public HashSet<String> getLocationTypes() {
 		return locationTypes;
 	}
@@ -76,6 +82,13 @@ public class PointOfInterest implements Serializable {
 	public Time[] getClosingTimes() {
 		return closingTimes;
 	}
+
+	public boolean equals(Object obj) {
+		return (obj.hashCode() == this.hashCode());
+	}
+
+	public int hashCode() {
+		return latitudeE6 - longitudeE6;
+	}
+
 }
-
-
