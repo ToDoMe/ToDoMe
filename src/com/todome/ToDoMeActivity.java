@@ -74,7 +74,7 @@ public class ToDoMeActivity extends TabActivity {
 	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
-	public static KeywordDatabase keywords = KeywordDatabase.fromServer();
+	public static KeywordDatabase keywords = new KeywordDatabase();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
 	
 	private boolean notificationsEnabled = true;
@@ -153,7 +153,8 @@ public class ToDoMeActivity extends TabActivity {
 			sendMessageToService(ToDoMeService.MSG_QUERY_ENABLED);
 			checkIfServiceIsRunning();
 			notifyTasksChanged();
-
+			
+			keywords = Util.getKeywordDatabaseFromString((prefs.getString("keywords", "")));
 		} catch (Exception ex) {
 			message("ToDoMeActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
 		}

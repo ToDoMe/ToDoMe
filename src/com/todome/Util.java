@@ -33,6 +33,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -48,6 +50,28 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 
 public class Util {
+	
+	public static ArrayList<Task> getReleventTasks(ArrayList<Task> tasks, PointOfInterest poi) {
+		ArrayList<Task> releventTasks = new ArrayList<Task>();
+		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
+			Task task = iter.next();
+
+			HashSet<String> poiTypes = poi.getLocationTypes();
+			HashSet<String> taskTypes = task.getTypes();
+
+			if (poiTypes != null && taskTypes != null && taskTypes.size() != 0 && poiTypes.size() != 0) {
+				for (Iterator<String> taskTypesIter = taskTypes.iterator(); taskTypesIter.hasNext();) {
+
+					String taskType = taskTypesIter.next();
+					if (poiTypes.contains(taskType)) {
+						releventTasks.add(task);
+						break;
+					}
+				}
+			}
+		}
+		return releventTasks;
+	}
 
 	// Server comms
 
@@ -135,7 +159,7 @@ public class Util {
 		return (ArrayList<Task>) getObjectFromString(str);
 	}
 
-	public static KeywordDatabase getKeyboardDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
+	public static KeywordDatabase getKeywordDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (KeywordDatabase) getObjectFromString(str);
 	}
 

@@ -132,8 +132,7 @@ public class TaskActivity extends Activity {
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If
-					// clicking on a New Task item
+				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
 					showTaskDialog(tasks.size() + 1, false);
 
 				} else {
@@ -149,17 +148,10 @@ public class TaskActivity extends Activity {
 
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If
-					// clicking
-					// on a
-					// New
-					// Task
-					// item
+				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
 					return false;
 				} else {
 					showTaskDialog(position - 1, true);
-					
-					
 					return true;
 				}
 			}
@@ -198,11 +190,10 @@ public class TaskActivity extends Activity {
 		final Button okButton = (Button) dialog.findViewById(R.id.okButton);
 		okButton.setEnabled(updatingTask);
 
-		// if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check
-		// if a task is being clicked on
-		// Task task = tasks.get(position);
+		// if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check if a task is being clicked on
+		//	Task task = tasks.get(position);
 
-		// taskNameEntry.setText(task.getName());
+		//	taskNameEntry.setText(task.getName());
 		// }
 
 		taskNameEntry.addTextChangedListener(new TextWatcher() {
@@ -267,21 +258,6 @@ public class TaskActivity extends Activity {
 
 		// message("", type);
 		Log.d(TAG, "Its here!");
-
-		/*
-		 * ArrayList<String> typez = new ArrayList<String>();
-		 * 
-		 * Time LOL = new Time(); LOL.set(1319155174000l); Time[] time = {LOL,
-		 * LOL, LOL, LOL, LOL, LOL, LOL}; typez.add("postbox");
-		 * 
-		 * PointOfInterest poi = new PointOfInterest(4143206, -8038992, typez,
-		 * null, time, 1.0);
-		 * 
-		 * try { message("",
-		 * Long.toString(LocationDatabase.calculateTimeDeltaInMilliseconds(new
-		 * GeoPoint(4043206,-8038992), poi))); } catch (Throwable e) {
-		 * e.printStackTrace(); }
-		 */
 
 		taskNameEntry.setText("");
 		parent.notifyTasksChanged();

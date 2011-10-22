@@ -278,7 +278,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 			if (!notifiedPOIs.contains(poi)) {
 
-				ArrayList<Task> releventTasks = getReleventTasks(poi);
+				ArrayList<Task> releventTasks = Util.getReleventTasks(tasks, poi);
 				Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
 				if (releventTasks.size() > 0) {
 					showNotification(releventTasks, poi);
@@ -291,28 +291,6 @@ public class ToDoMeService extends Service implements LocationListener {
 				Log.i(TAG, "Not notifying for " + poi.getLatitudeE6() + " " + poi.getLongitudeE6() + " as it has been notified for in this location already");
 			}
 		}
-	}
-
-	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
-		ArrayList<Task> releventTasks = new ArrayList<Task>();
-		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
-			Task task = iter.next();
-
-			HashSet<String> poiTypes = poi.getLocationTypes();
-			HashSet<String> taskTypes = task.getTypes();
-
-			if (poiTypes != null && taskTypes != null && taskTypes.size() != 0 && poiTypes.size() != 0) {
-				for (Iterator<String> taskTypesIter = taskTypes.iterator(); taskTypesIter.hasNext();) {
-
-					String taskType = taskTypesIter.next();
-					if (poiTypes.contains(taskType)) {
-						releventTasks.add(task);
-						break;
-					}
-				}
-			}
-		}
-		return releventTasks;
 	}
 
 	/*
