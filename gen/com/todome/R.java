@@ -97,6 +97,7 @@ public final class R {
         public static final int app_version=0x7f040010;
         public static final int cancel=0x7f04001b;
         public static final int created_by=0x7f040011;
+        public static final int disable_notifications=0x7f04001d;
         public static final int findwithin=0x7f040014;
         public static final int github=0x7f040012;
         public static final int giveme=0x7f040015;
@@ -119,7 +120,6 @@ public final class R {
         public static final int service_stopped=0x7f040008;
         public static final int specific_location=0x7f040003;
         public static final int time_label=0x7f04000e;
-        public static final int toggle_notifications=0x7f04001d;
         public static final int updategps=0x7f040016;
         public static final int with=0x7f04000d;
     }

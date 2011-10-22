@@ -77,6 +77,8 @@ public class ToDoMeActivity extends TabActivity {
 	public static KeywordDatabase keywords = KeywordDatabase.fromServer();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
 	
+	private boolean notificationsEnabled = true; 
+	
 	public void saveTasks() {
 		try {
 			SharedPreferences.Editor editor = prefs.edit();
@@ -147,6 +149,7 @@ public class ToDoMeActivity extends TabActivity {
 			tabHost.setCurrentTab(0);
 
 			// Service interaction
+			queryNotificationsEnabled();
 			checkIfServiceIsRunning();
 			notifyTasksChanged();
 
@@ -205,6 +208,9 @@ public class ToDoMeActivity extends TabActivity {
 					MapViewActivity.getInstance().notifyLocationsUpdated();
 				}
 				break;
+			case ToDoMeService.MSG_QUERY_ENABLED:
+				notificationsEnabled = (msg.arg1 > 0);
+				break;
 			default:
 				super.handleMessage(msg);
 			}
@@ -220,6 +226,20 @@ public class ToDoMeActivity extends TabActivity {
         	doBindService();
         }
     }
+	
+	private void queryNotificationsEnabled() {
+        if (mIsBound) {
+			if (mService != null) {
+                try {
+                    // Send data as a String
+                    Message msg = Message.obtain(null, ToDoMeService.MSG_QUERY_ENABLED);
+                    mService.send(msg);
+                } catch (RemoteException ex) {
+                	Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+                }
+            }
+        }
+	}
 	
 	public void notifyTasksChanged() {
         if (mIsBound) {
@@ -293,6 +313,7 @@ public class ToDoMeActivity extends TabActivity {
 	        	startActivity(myIntent);
 	            return true;
 	        case R.id.toggle_notifications_menu_button:
+	        	// TODO toggle notifications button
 	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);

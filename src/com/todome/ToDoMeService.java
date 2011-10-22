@@ -363,11 +363,8 @@ public class ToDoMeService extends Service implements LocationListener {
 	private void sendQueryResponse() {
 		for (int i = mClients.size() - 1; i >= 0; i--) {
 			try {
-				// Send data as a String
-				Bundle b = new Bundle();
-				b.putBoolean("enabled", enabled);
 				Message msg = Message.obtain(null, MSG_QUERY_ENABLED);
-				msg.setData(b);
+				msg.arg1 = enabled ? 1 : 0;
 				mClients.get(i).send(msg);
 
 			} catch (RemoteException e) {
