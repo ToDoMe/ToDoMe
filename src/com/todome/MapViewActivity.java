@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -49,14 +50,15 @@ public class MapViewActivity extends MapActivity {
 	private MapController mapController;
 	private MapView mapView;
 	private LocationManager locationManager;
-	private LocationDatabase locDb;
+	//private LocationDatabase locDb;
 	private GeoUpdateHandler guh;
 	private MapViewOverlay itemizedOverlay, locOverlay;
 	private List<Overlay> mapOverlays;
 	private Drawable drawable;
+	private SharedPreferences prefs;
 
-	private double hardcodedBeginLat = 50.896996;
-	private double hardcodedBeginLong = -1.40416;
+	private long hardcodedBeginLat = (long) (50.896996 * 1e6);
+	private long hardcodedBeginLong = (long) (-1.40416 * 1e6);
 
 	private static MapViewActivity instance;
 
@@ -88,6 +90,8 @@ public class MapViewActivity extends MapActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
 		tasks = ToDoMeActivity.tasks;
+		
+		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
 
 		// Enable zoom
 		mapView = (MapView) findViewById(R.id.mapview);
@@ -105,7 +109,9 @@ public class MapViewActivity extends MapActivity {
 		mapOverlays = mapView.getOverlays();
 		drawable = this.getResources().getDrawable(R.drawable.androidmarker);
 		itemizedOverlay = new MapViewOverlay(drawable, this);
-		displayMapAt(new GeoPoint((int) (hardcodedBeginLat * 1e6), (int) (hardcodedBeginLong * 1e6)));
+		GeoPoint lastLocation = new GeoPoint((int) (prefs.getLong("lat", hardcodedBeginLat)),
+									  		 (int) (prefs.getLong("lon", hardcodedBeginLong)));
+		displayMapAt(lastLocation);
 	}
 
 	@Override
@@ -126,13 +132,17 @@ public class MapViewActivity extends MapActivity {
 	public class GeoUpdateHandler implements LocationListener {
 
 		public void onLocationChanged(Location location) {
-			int lat = (int) (location.getLatitude() * 1E6);
-			int lng = (int) (location.getLongitude() * 1E6);
+			int lat = (int) (location.getLatitude() * 1e6);
+			int lng = (int) (location.getLongitude() * 1e6);
 			GeoPoint point = new GeoPoint(lat, lng);
 			mapController.animateTo(point); // mapController.setCenter(point);
 			locOverlay = new MapViewOverlay(getResources().getDrawable(R.drawable.current_location), MapViewActivity.this);
 			locOverlay.addOverlay(new OverlayItem(point, "You are here", ""));
 			mapOverlays.add(locOverlay);
+			
+			prefs.edit().putLong("lat", (long) (lat))
+						.putLong("lon", (long) (lng))
+						.commit();
 			displayMapAt(point);
 		}
 
@@ -148,7 +158,6 @@ public class MapViewActivity extends MapActivity {
 
 	void displayMapAt(GeoPoint point) {
 		Log.i("MapViewActivity", "Begining drawingMapAt");
-		mapController.animateTo(point);
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			Log.i("MapViewActivity", "Looking at task, " + task.getName());
@@ -188,6 +197,7 @@ public class MapViewActivity extends MapActivity {
 		Log.i("MapViewActivity", "mapOverlays " + ((mapOverlays == null) ? "true" : "false"));
 
 		mapOverlays.add(itemizedOverlay);
+		mapController.animateTo(point);
 	}
 
 	static int getDayOfWeek() {

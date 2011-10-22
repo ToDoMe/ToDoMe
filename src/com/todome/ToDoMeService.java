@@ -158,7 +158,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		notification.defaults |= Notification.DEFAULT_SOUND;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
 		// The PendingIntent to launch our activity if the user selects this notification
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class), 0);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class).putExtra("displayMap", true), 0);
 		// Set the info for the views that show in the notification panel.
 		String message = "";
 
@@ -414,9 +414,15 @@ public class ToDoMeService extends Service implements LocationListener {
 	// LocationListener
 
 	public void onLocationChanged(Location location) {
-		// Log.i(TAG, "Location changed.");
+		Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
 		updateNotifiedPOIs();
+		
+		// Save new location
+		prefs.edit().putLong("lat", (long) (location.getLatitude() * 1e6))
+					.putLong("lon", (long) (location.getLongitude() * 1e6))
+					.commit();
+
 		checkForReleventNotifications();
 		Log.i(TAG, "tasks.size() = " + tasks.size());
 	}

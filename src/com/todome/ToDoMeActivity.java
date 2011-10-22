@@ -123,7 +123,7 @@ public class ToDoMeActivity extends TabActivity {
 			prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
 			loadTasks();
 			
-			setPreferences(); // Default prefs
+			//setPreferences(); // Default prefs
 			
 			Resources res = getResources();	// Resource object to get Drawables
 			TabHost tabHost = getTabHost();	// The activity TabHost
@@ -146,8 +146,12 @@ public class ToDoMeActivity extends TabActivity {
 			//spec = tabHost.newTabSpec("map").setIndicator("Test", res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
 			//tabHost.addTab(spec);
 
-			tabHost.setCurrentTab(0);
-
+			if (getIntent().getBooleanExtra("displayMap", false)) {
+				tabHost.setCurrentTab(1);
+			} else {
+				tabHost.setCurrentTab(0);
+			}
+			
 			// Service interaction
 			queryNotificationsEnabled();
 			checkIfServiceIsRunning();
