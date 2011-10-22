@@ -184,16 +184,22 @@ public class ToDoMeService extends Service implements LocationListener {
 		return isRunning;
 	}
 
+	/**
+	 * Fetch's locations about the given arguments, returns null if a error occurs
+	 */
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
 
-		double lat = point.getLatitudeE6() / 1e6;
-		double lng = point.getLongitudeE6() / 1e6;
+		double lat = Util.E6IntToDouble(point.getLatitudeE6());
+		double lng = Util.E6IntToDouble(point.getLongitudeE6());
 
 		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius
 				+ "&type=" + type;
 		String file = Util.getFileFromServer(request);
-		Log.i(TAG, "File for " + type + " is " + file.length());
+		if (file.length() == 2) {
+			Log.e(TAG, "File size for request " + request + " returned " + file);
+			return null;
+		}
 
 		LocationDatabase newLocDatabase = new LocationDatabase();
 
@@ -222,10 +228,11 @@ public class ToDoMeService extends Service implements LocationListener {
 				}
 			}
 		} catch (JSONException e1) {
-			e1.printStackTrace();
+			Log.e(TAG, "Error", e1);
+			return null;
 		}
 
-		Log.i(TAG, pointsOfInterest.print());
+		Log.i(TAG, "Updated locations database \n" + newLocDatabase.print());
 
 		return newLocDatabase;
 
@@ -234,54 +241,52 @@ public class ToDoMeService extends Service implements LocationListener {
 	/**
 	 * This updates the central database with the relevant data from the server
 	 */
-	private void updateDatabase(HashSet<String> taskTypes) {
-		if (pointsOfInterest == null) {
-			pointsOfInterest = new LocationDatabase();
-		} else {
-			pointsOfInterest.clear();
-		}
-		Log.i(TAG, "Location database cleared");
+	private boolean updateDatabase(HashSet<String> taskTypes) {
+		LocationDatabase newDatabase = new LocationDatabase();
 
-		if (taskTypes.size() == 0) {
-			/*keywords = KeywordDatabase.fromServer();
-			for (Iterator<String> iter = keywords.getAllTypes().iterator(); iter.hasNext();) {
-				String type = iter.next();
-				Log.i(TAG, "Getting POIs for " + type);
-				pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
-			}*/
-		} else {
-			for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
-				String type = iter.next();
-				Log.i(TAG, "Getting POIs for " + type);
-				pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
+		for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
+			String type = iter.next();
+			Log.i(TAG, "Getting POIs for " + type);
+			LocationDatabase tempDatabase = getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type);
+			if (tempDatabase != null) {
+				newDatabase.addAll(tempDatabase);
 			}
 		}
 
-		sendDatabaseToUI(pointsOfInterest);
+		if (newDatabase.size() > 0) {
+
+			pointsOfInterest = newDatabase; // TODO At the moment new location data replaces old data, this needs to be fixed
+			Log.i(TAG, "Location database replaced with new data");
+
+			sendDatabaseToUI(pointsOfInterest);
+			return true;
+		} else {
+			Log.e(TAG, "updateDatabase got a empty database");
+			return false;
+		}
 	}
 
 	void checkForReleventNotifications() {
 		Log.i(TAG, "Checking for relevent notifications");
-		updateDatabase(getAllTaskTypes());
+		if (!updateDatabase(getAllTaskTypes())) {
+			Log.e(TAG, "checkForReleventNotifications errored, falling back to old database");
+		}
 
-		for (Iterator<PointOfInterest> iter = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.5d).iterator(); iter
+		for (Iterator<PointOfInterest> iter = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.1d).iterator(); iter
 				.hasNext();) {
 			PointOfInterest poi = iter.next();
 
 			if (!notifiedPOIs.contains(poi)) {
 
-				float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi.toGeoPoint()));
-				if (dist < 100f) {
-					// ArrayList<Task> releventTasks = getReleventTasks(poi);
-					Log.i(TAG, "Distance from " + poi.toString() + " is " + dist + ". "/* + releventTasks.size() + " relevent tasks." */);
-					// if (releventTasks.size() > 0) {
-					Log.w(TAG, "Added " + poi.getLatitudeE6() + " " + poi.getLongitudeE6() + " " + notifiedPOIs.size());
+				ArrayList<Task> releventTasks = getReleventTasks(poi);
+				Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
+				if (releventTasks.size() > 0) {
+					showNotification(releventTasks, poi);
 					notifiedPOIs.add(poi);
-					showNotification(/* releventTasks */tasks, poi); // TODO Make releventTasks work
-					// }
 				} else {
-					Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
+					Log.e(TAG, "getReleventTasks has returned 0, this should not happen!");
 				}
+
 			} else {
 				Log.i(TAG, "Not notifying for " + poi.getLatitudeE6() + " " + poi.getLongitudeE6() + " as it has been notified for in this location already");
 			}
@@ -289,8 +294,6 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
-		// Log.i(TAG, "getReleventTasktypes != nulls(" + poi.toString() + ")");
-
 		ArrayList<Task> releventTasks = new ArrayList<Task>();
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();

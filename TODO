@@ -20,3 +20,4 @@ Fix map so that locations shop up immediately
 [DONE] Finish the disable notifications, this needs to disable location updates as well
 [DONE] Stop the I am here overlay being persistant
 Store the keywords database in the shared preferences
+Custom audio alerts and vibration alerts per type
