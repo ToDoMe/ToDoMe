@@ -26,7 +26,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -126,7 +126,7 @@ public class LocationDatabase extends HashSet<PointOfInterest> implements Serial
 			
 		Time closingTime = POI.closingTimes[getDayOfWeek()];
 		
-		return ((closingTime.toMillis(false) - Calendar.getInstance().getTimeInMillis()));
+		return ((closingTime.toMillis(false) - Calendar.getInstance().getTimeInMillis()) - time);
 	}
 	
 	public static int getDayOfWeek() {
