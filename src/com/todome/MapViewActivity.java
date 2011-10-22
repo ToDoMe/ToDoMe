@@ -158,8 +158,6 @@ public class MapViewActivity extends MapActivity {
 
 	void displayMapAt(GeoPoint point) {
 		Log.i("MapViewActivity", "Begining drawingMapAt");
-		Log.v("llool", Double.toString(point.getLatitudeE6() * 1e-6));
-		mapController.animateTo(point);
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			Log.i("MapViewActivity", "Looking at task, " + task.getName());
@@ -199,6 +197,7 @@ public class MapViewActivity extends MapActivity {
 		Log.i("MapViewActivity", "mapOverlays " + ((mapOverlays == null) ? "true" : "false"));
 
 		mapOverlays.add(itemizedOverlay);
+		mapController.animateTo(point);
 	}
 
 	static int getDayOfWeek() {

@@ -146,8 +146,12 @@ public class ToDoMeActivity extends TabActivity {
 			//spec = tabHost.newTabSpec("map").setIndicator("Test", res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
 			//tabHost.addTab(spec);
 
-			tabHost.setCurrentTab(0);
-
+			if (getIntent().getBooleanExtra("displayMap", false)) {
+				tabHost.setCurrentTab(1);
+			} else {
+				tabHost.setCurrentTab(0);
+			}
+			
 			// Service interaction
 			queryNotificationsEnabled();
 			checkIfServiceIsRunning();
