@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,12 +55,12 @@ import com.google.android.maps.GeoPoint;
 
 public class ToDoMeService extends Service implements LocationListener {
 	private final String TAG = "ToDoMeService";
-	
+
 	private SharedPreferences prefs;
 
 	// Data
 	private ArrayList<Task> tasks;
-	
+
 	public void loadTasks() {
 		try {
 			String str = prefs.getString("tasks", "");
@@ -69,7 +70,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
-		
+
 		if (this.tasks.size() == 0) {
 			// Disable GPS to save battery
 			disableNotifications();
@@ -78,14 +79,14 @@ public class ToDoMeService extends Service implements LocationListener {
 			enableNotifications();
 		}
 	}
-	
+
 	private LocationDatabase pointsOfInterest;
 	private Location userCurrentLocation;
 
 	private NotificationManager nm;
 	private LocationManager locationManager;
 	private static boolean isRunning = false;
-	
+
 	private boolean enabled = true;
 
 	/*
@@ -118,12 +119,12 @@ public class ToDoMeService extends Service implements LocationListener {
 		super.onCreate();
 		Log.i(TAG, "Service Started.");
 		isRunning = true;
-		
+
 		// Register LocationListener
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
-		
+
 		// Load tasks
 		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
 		loadTasks();
@@ -144,26 +145,35 @@ public class ToDoMeService extends Service implements LocationListener {
 		isRunning = false;
 	}
 
-	private void showNotification(ArrayList<Task> tasks, PointOfInterest poi) {
+	private void showNotification(ArrayList<Task> notifyTasks, PointOfInterest poi) {
 		Log.i(TAG, "Showing notification");
-		Collections.sort(tasks, new TaskPriorityComparator());
+		Collections.sort(notifyTasks, new TaskPriorityComparator());
+
+		Log.i(TAG, "Got " + notifyTasks.size() + " tasks");
 
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		// Set the icon, scrolling text and timestamp
-		Notification notification = new Notification(R.drawable.notification_icon, tasks.get(0).getName(), System.currentTimeMillis());
+		Notification notification = new Notification(R.drawable.notification_icon, notifyTasks.get(0).getName(), System.currentTimeMillis());
 		notification.defaults |= Notification.DEFAULT_SOUND;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
-		// The PendingIntent to launch our activity if the user selects this
-		// notification
+		// The PendingIntent to launch our activity if the user selects this notification
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class), 0);
 		// Set the info for the views that show in the notification panel.
-		HashSet<String> types = poi.getLocationTypes();
-		String location = "";
-		for (Iterator<String> iter = types.iterator(); iter.hasNext();) {
-			location = iter.next();
-			break;
+		String message = "";
+
+		message = "You are nearby a ";
+
+		HashSet<String> taskTypes = notifyTasks.get(0).getTypes();
+		HashSet<String> locationTypes = poi.getLocationTypes();
+		HashSet<String> typesIntersection = new HashSet<String>();
+
+		typesIntersection.addAll(taskTypes);
+		typesIntersection.retainAll(locationTypes);
+		
+		for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
+			message = message + iter.next() + " ";
 		}
-		notification.setLatestEventInfo(this, tasks.get(0).getName(), (types == null) ? "" : location, contentIntent);
+		notification.setLatestEventInfo(this, notifyTasks.get(0).getName(), message, contentIntent);
 		// Send the notification.
 		// We use a layout id because it is a unique number. We use it later to
 		// cancel.
@@ -176,13 +186,14 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
-		
+
 		double lat = point.getLatitudeE6() / 1e6;
 		double lng = point.getLongitudeE6() / 1e6;
 
-		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius + "&type=" + type;
+		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius
+				+ "&type=" + type;
 		String file = Util.getFileFromServer(request);
-		
+
 		LocationDatabase newLocDatabase = new LocationDatabase();
 
 		try {
@@ -328,7 +339,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	// Messaging
-	
+
 	class IncomingHandler extends Handler { // Handler of incoming messages from
 		// clients.
 		@Override
@@ -374,7 +385,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			}
 		}
 	}
-	
+
 	private void sendDatabaseToUI(LocationDatabase db) {
 		sendMessageToUI(Util.getLocationDatabaseString(db));
 	}
@@ -396,9 +407,9 @@ public class ToDoMeService extends Service implements LocationListener {
 			}
 		}
 	}
-	
+
 	// LocationListener
-	
+
 	public void onLocationChanged(Location location) {
 		Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
@@ -427,12 +438,12 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	// Enable/disable notifications
-	
+
 	private void disableNotifications() {
 		locationManager.removeUpdates(this);
 		enabled = true;
 	}
-	
+
 	private void enableNotifications() {
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
