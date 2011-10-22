@@ -131,7 +131,7 @@ public class KeywordDatabase implements Serializable {
 		return types;
 	}
 
-	private class Keyword {
+	private class Keyword implements Serializable {
 		String keyword;
 		String type;
 

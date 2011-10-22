@@ -117,6 +117,7 @@ public class ToDoMeActivity extends TabActivity {
 			setContentView(R.layout.main);
 			
 			prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
+			prefs.edit().putString("keywords", Util.getKeywordDatabaseString(keywords)).commit();
 			loadTasks();
 			
 			//setPreferences(); // Default prefs
