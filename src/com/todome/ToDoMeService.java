@@ -74,7 +74,17 @@ public class ToDoMeService extends Service implements LocationListener {
 	private LocationManager locationManager;
 	private static boolean isRunning = false;
 
-	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
+	/*
+	 * This array list contains the id's of the point of interests, that have been notified for the current location. To keep this up to date, id's are added as
+	 * notifications are shown, and removed when the user location is updated.
+	 */
+	HashSet<PointOfInterest> notifiedPOIs = new HashSet<PointOfInterest>();
+
+	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
+	// of all
+	// current
+	// registered
+	// clients.
 	int mValue = 0; // Holds last value set by a client.
 	static final int MSG_REGISTER_CLIENT = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
@@ -121,7 +131,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			}
 		}
 	}
-	
+
 	private void updateTasks(ArrayList<Task> tasks) {
 		this.tasks = tasks;
 		if (this.tasks.size() == 0) {
@@ -129,7 +139,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			locationManager.removeUpdates(this);
 		} else {
 			// Enable GPS again
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 	 ToDoMeActivity.LOC_INTERVAL, 0, this);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		}
 	}
@@ -150,7 +160,8 @@ public class ToDoMeService extends Service implements LocationListener {
 				// Log.i(TAG, "Sent message \"" + value + "\" to " + i);
 
 			} catch (RemoteException e) {
-				// The client is dead. Remove it from the list; we are going through the list from back to front
+				// The client is dead. Remove it from the list; we are going
+				// through the list from back to front
 				// so this is safe to do inside the loop.
 				mClients.remove(i);
 			}
@@ -165,7 +176,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		// Register LocationListener
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 	 ToDoMeActivity.LOC_INTERVAL, 0, this);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 	}
 
@@ -193,13 +204,15 @@ public class ToDoMeService extends Service implements LocationListener {
 		Notification notification = new Notification(R.drawable.notification_icon, tasks.get(0).getName(), System.currentTimeMillis());
 		notification.defaults |= Notification.DEFAULT_SOUND;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
-		// The PendingIntent to launch our activity if the user selects this notification
+		// The PendingIntent to launch our activity if the user selects this
+		// notification
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class), 0);
 		// Set the info for the views that show in the notification panel.
 		ArrayList<String> types = poi.getLocationTypes();
 		notification.setLatestEventInfo(this, tasks.get(0).getName(), (types == null) ? "" : types.get(0), contentIntent);
 		// Send the notification.
-		// We use a layout id because it is a unique number. We use it later to cancel.
+		// We use a layout id because it is a unique number. We use it later to
+		// cancel.
 		nm.notify(R.string.service_started, notification);
 	}
 
@@ -214,7 +227,8 @@ public class ToDoMeService extends Service implements LocationListener {
 		HttpClient client = new DefaultHttpClient();
 		double lat = point.getLatitudeE6() / 1e6;
 		double lng = point.getLongitudeE6() / 1e6;
-		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius + "&type=" + type;
+		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius
+				+ "&type=" + type;
 		HttpGet httpGet = new HttpGet(request);
 		Log.i(TAG, "Request used: " + request);
 		try {
@@ -248,7 +262,8 @@ public class ToDoMeService extends Service implements LocationListener {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				try {
-					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), null, null, null, 10));
+					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), null, null,
+							null, 10));
 				} catch (JSONException e) {
 					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
 				}
@@ -287,35 +302,42 @@ public class ToDoMeService extends Service implements LocationListener {
 		Log.i(TAG, "Checking for relevent notifications");
 		updateDatabase(getAllTaskTypes());
 
-		for (Iterator<PointOfInterest> iter = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.5d).iterator(); iter.hasNext();) {
+		for (Iterator<PointOfInterest> iter = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.5d).iterator(); iter
+				.hasNext();) {
 			PointOfInterest poi = iter.next();
 
-			float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi.toGeoPoint()));
-			if (dist < 100f) {
-				//ArrayList<Task> releventTasks = getReleventTasks(poi);
-				Log.i(TAG, "Distance from " + poi.toString() + " is " + dist + ". "/* + releventTasks.size() + " relevent tasks."*/);
-				//if (releventTasks.size() > 0) {
-					showNotification(/*releventTasks*/ tasks, poi);	// TODO Make releventTasks work
-				//}
+			if (!notifiedPOIs.contains(poi)) {
+
+				float dist = userCurrentLocation.distanceTo(Util.geoPointToLocation(poi.toGeoPoint()));
+				if (dist < 100f) {
+					// ArrayList<Task> releventTasks = getReleventTasks(poi);
+					Log.i(TAG, "Distance from " + poi.toString() + " is " + dist + ". "/* + releventTasks.size() + " relevent tasks." */);
+					// if (releventTasks.size() > 0) {
+					notifiedPOIs.add(poi);
+					showNotification(/* releventTasks */tasks, poi); // TODO Make releventTasks work
+					// }
+				} else {
+					Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
+				}
 			} else {
-				Log.i(TAG, "Distance from " + poi.toString() + " is " + dist);
+				Log.i(TAG, "Not notifying for " + poi.getLatitudeE6() + " " + poi.getLongitudeE6() + " as it has been notified for in this location already");
 			}
 		}
 	}
 
 	ArrayList<Task> getReleventTasks(PointOfInterest poi) {
 		Log.i(TAG, "getReleventTasktypes != nulls(" + poi.toString() + ")");
-		
+
 		ArrayList<Task> releventTasks = new ArrayList<Task>();
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
-			
+
 			ArrayList<String> poiTypes = poi.getLocationTypes();
 			ArrayList<String> taskTypes = task.getTypes();
-			
+
 			if (poiTypes != null && taskTypes != null && taskTypes.size() != 0 && poiTypes.size() != 0) {
 				for (Iterator<String> taskTypesIter = taskTypes.iterator(); taskTypesIter.hasNext();) {
-					
+
 					String taskType = taskTypesIter.next();
 					if (poiTypes.contains(taskType)) {
 						releventTasks.add(task);
@@ -325,6 +347,23 @@ public class ToDoMeService extends Service implements LocationListener {
 			}
 		}
 		return releventTasks;
+	}
+
+	/*
+	 * This method removes all poi's that are not close to the users current location
+	 */
+	private void updateNotifiedPOIs() {
+		float distance = 0.1f; // meters
+
+		// Look at each of the points of interest that have been notified for
+		for (Iterator<PointOfInterest> iter = pointsOfInterest.iterator(); iter.hasNext();) {
+			PointOfInterest poi = iter.next();
+
+			// If the point of interest is now "distance" or more away from the users current location, then remove it so more notifications can be given
+			if (!Util.isPointsWithinRange(Util.locationToGeoPoint(userCurrentLocation), poi.toGeoPoint(), distance)) {
+				iter.remove();
+			}
+		}
 	}
 
 	HashSet<String> getAllTaskTypes() {
@@ -344,6 +383,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onLocationChanged(Location location) {
 		// Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
+		updateNotifiedPOIs();
 		checkForReleventNotifications();
 		Log.i(TAG, "tasks.size() = " + tasks.size());
 	}
