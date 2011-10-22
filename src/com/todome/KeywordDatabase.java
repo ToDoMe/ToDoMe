@@ -109,6 +109,23 @@ public class KeywordDatabase implements Serializable {
 		return types;
 	}
 	
+	public String getDescriptionForType(String type) {
+		String withoutDot;
+		if (type.contains(".")) {
+			String[] splitOnDot = type.split("\\.");
+			Log.i(TAG, "Bit after dot: " + splitOnDot[1]);
+			withoutDot = splitOnDot[1];
+		} else {
+			withoutDot = type;
+		}
+		
+		String replacingUnderscore = withoutDot.replace('_', ' ');
+		
+		Log.i(TAG, "Description: " + replacingUnderscore);
+		
+		return replacingUnderscore;
+	}
+	
 	private class Keyword {
 		String keyword;
 		String type;

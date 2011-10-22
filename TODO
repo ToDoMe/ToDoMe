@@ -12,3 +12,4 @@ About Screen      -|
 Send user data back about freqency any amount of use, and location (All opt in in the preferences)
 Check that the service starts when the device starts
 Make the service get the tasks from the preferences store
+Make the notification link to the map, not the task list
