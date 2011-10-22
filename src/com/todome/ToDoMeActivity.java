@@ -288,6 +288,18 @@ public class ToDoMeActivity extends TabActivity {
         return true;
     }
     
+    public boolean onPrepareOptionsMenu (Menu menu) {
+    	MenuItem item = menu.findItem(R.id.toggle_notifications_menu_button);
+    	
+    	if (notificationsEnabled) {
+    		item.setTitle(R.string.disable_notifications);
+    	} else {
+    		item.setTitle(R.string.enable_notifications);
+    	}
+    	
+    	return true;
+    }
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -306,11 +318,11 @@ public class ToDoMeActivity extends TabActivity {
 	        	if (notificationsEnabled) {
 	        		sendMessageToService(ToDoMeService.MSG_DISABLE);
 	        		notificationsEnabled = false;
-	        		item.setTitle(R.string.enable_notifications);
+	        		item.setTitle(R.string.disable_notifications);
 	        	} else {
 	        		sendMessageToService(ToDoMeService.MSG_ENABLE);
 	        		notificationsEnabled = true;
-	        		item.setTitle(R.string.disable_notifications);
+	        		item.setTitle(R.string.enable_notifications);
 	        	}
 	        	return true;
 	        default:
