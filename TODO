@@ -10,5 +10,4 @@ Custom locations and end times
 Preferences Menu  -| Both of these should be accessed from the menu key
 About Screen      -|
 Send user data back about freqency any amount of use, and location (All opt in in the preferences)
-Turn off GPS when the user selects silent mode.
 Reduce data consumption by streamlining keyword database JSON.
