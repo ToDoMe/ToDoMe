@@ -48,21 +48,17 @@ public class LocationDatabase extends HashSet<PointOfInterest> implements Serial
 	
 	//public int userLatitudeE6, userLongitudeE6;
 
-	public LocationDatabase searchAboutTypes(ArrayList<String> type) {
+	public LocationDatabase searchAboutTypes(HashSet<String> types) {
 		LocationDatabase subset = new LocationDatabase();
 
-		for (Iterator<PointOfInterest> iter = this.iterator(); iter.hasNext();) {
-			PointOfInterest poi = iter.next();
+		for (Iterator<PointOfInterest> thisIter = this.iterator(); thisIter.hasNext();) {
+			PointOfInterest thisPOI = thisIter.next();
 
-			for (int i = 0; i < type.size(); i++) {
-				ArrayList<String> types = poi.getLocationTypes();
-				if (types != null) {
-					for (int j = 0; j < types.size(); j++) {
-	
-						if (types.get(j).equals(type.get(i))) {
-							subset.add(poi);
-						}
-					}
+			for (Iterator<String> thisTypesIter = thisPOI.locationTypes.iterator(); thisTypesIter.hasNext();) {
+				String thisType = thisTypesIter.next();
+				
+				if (types.contains(thisType)) {
+					subset.add(thisPOI);
 				}
 			}
 		}

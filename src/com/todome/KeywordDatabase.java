@@ -22,7 +22,7 @@
 package com.todome;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.json.JSONArray;
@@ -34,9 +34,11 @@ import android.util.Log;
 public class KeywordDatabase implements Serializable {
 
 	private static final long serialVersionUID = -8902088060528474897L;
+
+	HashSet<Keyword> keywords = new HashSet<Keyword>();
+
 	private static final String TAG = "KeywordDatabase";
 	
-	ArrayList<Keyword> keywords = new ArrayList<Keyword>();
 	public void add(String keyword, String type) {
 		keywords.add(new Keyword(keyword, type));
 	}
@@ -83,32 +85,26 @@ public class KeywordDatabase implements Serializable {
 		keywords.add(new Keyword("train", "train station"));
 		keywords.add(new Keyword("bus", "bct"));*/
 	}
-	
+
 	public int size() {
 		return keywords.size();
 	}
-	
-	public ArrayList<String> getTypes(String name) {
-		ArrayList<String> types = new ArrayList<String>();
+
+	public HashSet<String> getTypes(String name) {
+		HashSet<String> types = new HashSet<String>();
 		String lowerName = name.toLowerCase();
 		for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
 			Keyword keywordObj = iter.next();
-			if (lowerName.contains(keywordObj.keyword))
-			{
+			if (lowerName.contains(keywordObj.keyword)) {
 				types.add(keywordObj.type);
 			}
 		}
-		/*String[] words = name.split(" ");
-		for (int i = 0; i < words.length; i++)
-		{
-			for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
-				Keyword keywordObj = iter.next();
-	
-				if (keywordObj.keyword == words[i].toLowerCase()) {
-					return keywordObj.keyword;
-				}
-			}
-		}*/
+		/*
+		 * String[] words = name.split(" "); for (int i = 0; i < words.length; i++) { for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
+		 * Keyword keywordObj = iter.next();
+		 * 
+		 * if (keywordObj.keyword == words[i].toLowerCase()) { return keywordObj.keyword; } } }
+		 */
 
 		return types;
 	}

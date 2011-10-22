@@ -23,6 +23,7 @@ package com.todome;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class MapViewActivity extends MapActivity {
 		itemizedOverlay = new MapViewOverlay(drawable, this);
 		for (Iterator<PointOfInterest> iter = db.iterator(); iter.hasNext();) {
 			PointOfInterest poi = iter.next();
-			ArrayList<String> types = poi.getLocationTypes();
+			HashSet<String> types = poi.getLocationTypes();
 
 			OverlayItem item = new OverlayItem(poi.toGeoPoint(), (types == null) ? "Point of interest" : types.toString(), "");
 			// TODO Display opening and closing times
@@ -76,7 +77,8 @@ public class MapViewActivity extends MapActivity {
 			itemizedOverlay.addOverlay(item);
 		}
 		mapOverlays.clear();
-		if (locOverlay != null) mapOverlays.add(locOverlay);
+		if (locOverlay != null)
+			mapOverlays.add(locOverlay);
 		mapOverlays.add(itemizedOverlay);
 	}
 
@@ -96,7 +98,7 @@ public class MapViewActivity extends MapActivity {
 		// Get LocationManager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		guh = new GeoUpdateHandler();
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,	 0, 0, guh);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, guh);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
 
 		// Overlays
@@ -105,18 +107,18 @@ public class MapViewActivity extends MapActivity {
 		itemizedOverlay = new MapViewOverlay(drawable, this);
 		displayMapAt(new GeoPoint((int) (hardcodedBeginLat * 1e6), (int) (hardcodedBeginLong * 1e6)));
 	}
-	
+
 	@Override
 	public void onPause() {
 		// Disable GPS to save battery
 		locationManager.removeUpdates(guh);
 		super.onPause();
 	}
-	
+
 	@Override
 	public void onResume() {
 		// Enable GPS again
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,	 0, 0, guh);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, guh);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
 		super.onResume();
 	}
@@ -134,30 +136,56 @@ public class MapViewActivity extends MapActivity {
 			displayMapAt(point);
 		}
 
-		public void onProviderDisabled(String provider) { }
+		public void onProviderDisabled(String provider) {
+		}
 
-		public void onProviderEnabled(String provider) { }
+		public void onProviderEnabled(String provider) {
+		}
 
-		public void onStatusChanged(String provider, int status, Bundle extras) { }
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
 	}
 
 	void displayMapAt(GeoPoint point) {
-		mapController.animateTo(point); // mapController.setCenter(point);
-		locDb = ToDoMeActivity.db;
+		Log.i("MapViewActivity", "Begining drawingMapAt");
+		mapController.animateTo(point);
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
-			if (task.getName() != "New task") {
-				LocationDatabase taskDb = locDb.searchAboutTypes(task.getTypes());
+			Log.i("MapViewActivity", "Looking at task, " + task.getName());
+			LocationDatabase releventPOIs = ToDoMeActivity.db.searchAboutTypes(task.getTypes());
 
-				Iterator<PointOfInterest> DBiter = taskDb.iterator();
+			for (Iterator<PointOfInterest> releventPOIsIter = releventPOIs.iterator(); releventPOIsIter.hasNext();) {
+				PointOfInterest poi = releventPOIsIter.next();
+				Log.i("MapViewActivity", "Found relevent POI: " + poi.getLatitudeE6() + " " + poi.getLongitudeE6());
 
-				while (DBiter.hasNext()) {
-					PointOfInterest poi = DBiter.next();
-					itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), poi.getLocationTypes().get(1), poi.getOpeningTimes()[getDayOfWeek()] + " - "
+				String types = "";
+				for (Iterator<String> typesIter = poi.getLocationTypes().iterator(); typesIter.hasNext();) {
+					String type = typesIter.next();
+					Log.i("MapViewActivity", "Found type " + type);
+					types = types + " " + type;
+				}
+
+				Log.i("MapViewActivity", "Types: " + types);
+
+				Log.i("MapViewActivity", "itemizedOverlay " + ((itemizedOverlay == null) ? "true" : "false"));
+
+				Log.i("MapViewActivity", "poi.getClosingTimes() " + ((poi.getClosingTimes() == null) ? "true" : "false"));
+
+				//Log.i("MapViewActivity", "poi.getOpeningTimes()[getDayOfWeek()] " + ((poi.getOpeningTimes()[getDayOfWeek()] == null) ? "true" : "false"));
+
+				//Log.i("MapViewActivity", "poi.getClosingTimes()[getDayOfWeek()] " + ((poi.getClosingTimes()[getDayOfWeek()] == null) ? "true" : "false"));
+
+				if (poi.getClosingTimes() != null) {
+					itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), types, poi.getOpeningTimes()[getDayOfWeek()] + " - "
 							+ poi.getClosingTimes()[getDayOfWeek()]));
+				} else {
+					itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), types, ""));
 				}
 			}
+
 		}
+
+		Log.i("MapViewActivity", "mapOverlays " + ((mapOverlays == null) ? "true" : "false"));
 
 		mapOverlays.add(itemizedOverlay);
 	}
@@ -166,7 +194,7 @@ public class MapViewActivity extends MapActivity {
 		Calendar rightNow = Calendar.getInstance();
 
 		int DOW = rightNow.get(Calendar.DAY_OF_WEEK) - 2; // fix to get Monday =
-															// 0
+		// 0
 
 		if (DOW > -1)
 			return DOW;
