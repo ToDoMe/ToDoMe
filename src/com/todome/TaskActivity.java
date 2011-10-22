@@ -23,6 +23,7 @@ package com.todome;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -241,7 +242,7 @@ public class TaskActivity extends Activity {
 		task.setAlarmTime(time);
 
 		// Give it a type
-		ArrayList<String> type = ToDoMeActivity.keywords.getTypes(task.getName());
+		HashSet<String> type = ToDoMeActivity.keywords.getTypes(task.getName());
 		task.setTypes(type);
 
 		if (updatingTask) {

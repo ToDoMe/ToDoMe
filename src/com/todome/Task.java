@@ -23,6 +23,7 @@ package com.todome;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import android.text.format.Time;
 
@@ -33,7 +34,7 @@ public class Task implements Serializable, Comparable<Task> {
 	private String name;
 	private String notes;
 	private String postcode;
-	private ArrayList<String> types;
+	private HashSet<String> types;
 
 	private int second;
 	private int minute;
@@ -81,15 +82,15 @@ public class Task implements Serializable, Comparable<Task> {
 		this.postcode = postcode;
 	}
 
-	public ArrayList<String> getTypes() { // Returns an empty array for completed tasks
+	public HashSet<String> getTypes() { // Returns an empty array for completed tasks
 		if (!complete) {
 			return types;
 		} else {
-			return new ArrayList<String>();
+			return new HashSet<String>();
 		}
 	}
 
-	public void setTypes(ArrayList<String> types) {
+	public void setTypes(HashSet<String> types) {
 		this.types = types;
 	}
 

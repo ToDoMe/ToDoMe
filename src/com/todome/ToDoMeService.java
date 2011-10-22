@@ -208,8 +208,13 @@ public class ToDoMeService extends Service implements LocationListener {
 		// notification
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class), 0);
 		// Set the info for the views that show in the notification panel.
-		ArrayList<String> types = poi.getLocationTypes();
-		notification.setLatestEventInfo(this, tasks.get(0).getName(), (types == null) ? "" : types.get(0), contentIntent);
+		HashSet<String> types = poi.getLocationTypes();
+		String location = "";
+		for (Iterator<String> iter = types.iterator(); iter.hasNext();) {
+			location = iter.next();
+			break;
+		}
+		notification.setLatestEventInfo(this, tasks.get(0).getName(), (types == null) ? "" : location, contentIntent);
 		// Send the notification.
 		// We use a layout id because it is a unique number. We use it later to
 		// cancel.
@@ -262,7 +267,17 @@ public class ToDoMeService extends Service implements LocationListener {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				try {
-					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), null, null,
+					JSONObject locationTypes = jsonObject.getJSONObject("location_type");
+					HashSet<String> types = new HashSet<String>();
+					// Log.i(TAG, "About to parse location types");
+					for (Iterator<String> iter = locationTypes.keys(); iter.hasNext();) {
+						String key = iter.next();
+						// Log.i(TAG, "Got key " + key);
+						String value = locationTypes.get(key).toString();
+						// Log.i(TAG, "Got value " + value);
+						types.add(value);
+					}
+					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), types, null,
 							null, 10));
 				} catch (JSONException e) {
 					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
@@ -332,8 +347,8 @@ public class ToDoMeService extends Service implements LocationListener {
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 
-			ArrayList<String> poiTypes = poi.getLocationTypes();
-			ArrayList<String> taskTypes = task.getTypes();
+			HashSet<String> poiTypes = poi.getLocationTypes();
+			HashSet<String> taskTypes = task.getTypes();
 
 			if (poiTypes != null && taskTypes != null && taskTypes.size() != 0 && poiTypes.size() != 0) {
 				for (Iterator<String> taskTypesIter = taskTypes.iterator(); taskTypesIter.hasNext();) {
@@ -355,6 +370,9 @@ public class ToDoMeService extends Service implements LocationListener {
 	private void updateNotifiedPOIs() {
 		float distance = 0.1f; // meters
 
+		if (pointsOfInterest == null)
+			return;
+
 		// Look at each of the points of interest that have been notified for
 		for (Iterator<PointOfInterest> iter = pointsOfInterest.iterator(); iter.hasNext();) {
 			PointOfInterest poi = iter.next();
@@ -374,7 +392,10 @@ public class ToDoMeService extends Service implements LocationListener {
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			Log.i(TAG, "The task named \"" + task.getName() + "\" has types " + task.getTypes());
-			taskTypes.addAll(task.getTypes());
+			HashSet<String> thisTaskTypes = task.getTypes();
+			if (thisTaskTypes != null) {
+				taskTypes.addAll(task.getTypes());
+			}
 		}
 		Log.i(TAG, "Total of " + taskTypes.size() + " types returned");
 		return taskTypes;

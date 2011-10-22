@@ -23,6 +23,7 @@ package com.todome;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import android.text.format.Time;
 
@@ -32,7 +33,7 @@ public class PointOfInterest implements Serializable {
 	
 	private static final long serialVersionUID = -2191091420442969579L;
 	
-	final ArrayList<String> locationTypes;
+	final HashSet<String> locationTypes;
 	final double radiusOfEffect;
 	
 	final Time[] openingTimes;
@@ -42,7 +43,7 @@ public class PointOfInterest implements Serializable {
 	public int getLatitudeE6() { return latitudeE6; }
 	public int getLongitudeE6() { return longitudeE6; }
 	
-	public PointOfInterest(int latitude, int longitude, ArrayList<String> locationTypes, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
+	public PointOfInterest(int latitude, int longitude, HashSet<String> locationTypes, Time[] openingTimes, Time[] closingTimes, double radiusOfEffect) {
 		//super(latitude,longitude);
 		this.latitudeE6 = latitude;
 		this.longitudeE6 = longitude;
@@ -60,7 +61,7 @@ public class PointOfInterest implements Serializable {
 		return latitudeE6 + ", " + longitudeE6;
 	}
 	
-	public ArrayList<String> getLocationTypes() {
+	public HashSet<String> getLocationTypes() {
 		return locationTypes;
 	}
 
