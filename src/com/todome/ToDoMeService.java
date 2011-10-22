@@ -66,7 +66,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void loadTasks() {
 		try {
 			String str = prefs.getString("tasks", "");
-			if (str != "") {
+			if (str != null && str != "") {
 				tasks = Util.getTaskListFromString(str);
 			}
 		} catch (Exception ex) {
