@@ -81,19 +81,19 @@ public class Util {
 	
 	// Data conversion
 
-	static int doubleToIntE6(double dub) {
+	public static int doubleToIntE6(double dub) {
 		return (int) (dub * 1e6);
 	}
 
-	static double E6IntToDouble(int integer) {
+	public static double E6IntToDouble(int integer) {
 		return (double) (integer / 1e6);
 	}
 
-	static GeoPoint locationToGeoPoint(Location loc) {
+	public static GeoPoint locationToGeoPoint(Location loc) {
 		return new GeoPoint(doubleToIntE6(loc.getLatitude()), doubleToIntE6(loc.getLongitude()));
 	}
 
-	static Location geoPointToLocation(GeoPoint point) {
+	public static Location geoPointToLocation(GeoPoint point) {
 		Location loc = new Location("");
 		loc.setLatitude(E6IntToDouble(point.getLatitudeE6()));
 		loc.setLongitude(E6IntToDouble(point.getLongitudeE6()));
@@ -102,19 +102,19 @@ public class Util {
 
 	// Serialization
 	
-	static String getTaskArrayString(ArrayList<Task> tasks) {
+	public static String getTaskArrayString(ArrayList<Task> tasks) {
 		return getStringFromObject(tasks);
 	}
 
-	static String getLocationDatabaseString(LocationDatabase ld) {
+	public static String getLocationDatabaseString(LocationDatabase ld) {
 		return getStringFromObject(ld);
 	}
 
-	static String getKeywordDatabaseString(KeywordDatabase kd) {
+	public static String getKeywordDatabaseString(KeywordDatabase kd) {
 		return getStringFromObject(kd);
 	}
 
-	static String getStringFromObject(Serializable obj) {
+	public static String getStringFromObject(Serializable obj) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		try {
@@ -127,20 +127,20 @@ public class Util {
 		return null;
 	}
 
-	static LocationDatabase getLocationDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
+	public static LocationDatabase getLocationDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (LocationDatabase) getObjectFromString(str);
 	}
 
 	@SuppressWarnings("unchecked")
-	static ArrayList<Task> getTaskListFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
+	public static ArrayList<Task> getTaskListFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (ArrayList<Task>) getObjectFromString(str);
 	}
 
-	static KeywordDatabase getKeyboardDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
+	public static KeywordDatabase getKeyboardDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		return (KeywordDatabase) getObjectFromString(str);
 	}
 
-	static Object getObjectFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
+	public static Object getObjectFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
 		ObjectInputStream ois = null;
 		try {
 			ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(str, Base64.DEFAULT)));
@@ -148,5 +148,23 @@ public class Util {
 			Log.i("Util.getObjectFromString", "EOFException");
 		}
 		return ois.readObject();
+	}
+
+	public static boolean isPointsWithinRange(GeoPoint point1, GeoPoint point2, double radius) {
+		// Implemented from code at
+		// http://www.movable-type.co.uk/scripts/latlong.html
+		int R = 6371; // radius of Earth in km
+
+		double lat2 = Math.toRadians(point2.getLatitudeE6() * 10e-6);
+		double lat1 = Math.toRadians(point1.getLatitudeE6() * 10e-6);
+
+		double dLat = lat2 - lat1;
+		double dLon = Math.toRadians((point2.getLongitudeE6() - point1.getLongitudeE6()) * 10e-6);
+
+		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		double d = R * c;
+
+		return (d <= radius);
 	}
 }

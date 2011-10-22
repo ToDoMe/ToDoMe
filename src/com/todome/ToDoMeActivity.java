@@ -129,7 +129,7 @@ public class ToDoMeActivity extends TabActivity {
 
 			// Service interaction
 			checkIfServiceIsRunning();
-			sendTasksToService();
+			notifyTasksChanged();
 
 		} catch (Exception ex) {
 			message("ToDoMeActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
@@ -153,7 +153,7 @@ public class ToDoMeActivity extends TabActivity {
 	private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mService = new Messenger(service);
-            sendTasksToService();
+            notifyTasksChanged();
             //textStatus.setText("Attached.");
             try {
                 Message msg = Message.obtain(null, ToDoMeService.MSG_REGISTER_CLIENT);
@@ -165,9 +165,9 @@ public class ToDoMeActivity extends TabActivity {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            // This is called when the connection with the service has been unexpectedly disconnected - process crashed.
-            mService = null;
-            //textStatus.setText("Disconnected.");
+			// This is called when the connection with the service has been unexpectedly disconnected - process crashed.
+			mService = null;
+			//textStatus.setText("Disconnected.");
         }
     };
 	
@@ -202,34 +202,23 @@ public class ToDoMeActivity extends TabActivity {
         }
     }
 	
-	public void sendTasksToService() {
-		sendMessageToService(Util.getTaskArrayString(tasks));
-	}
-
-    private void sendMessageToService(String value) {
+	public void notifyTasksChanged() {
         if (mIsBound) {
 			if (mService != null) {
                 try {
                     // Send data as a String
-                    Bundle b = new Bundle();
-                    b.putString("str1", value);
                     Message msg = Message.obtain(null, ToDoMeService.MSG_TASKS_UPDATED);
-                    msg.setData(b);
                     mService.send(msg);
-                    
-                    //ArrayList<Task> reTasks = Util.getTaskListFromString(msg.getData().getString("str1"));
-                    //Log.i(TAG, "Sending " + value);
                 } catch (RemoteException ex) {
                 	Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
                 }
             }
         }
-    }
+	}
 
-
-    void doBindService() {
-        this.bindService(new Intent(this, ToDoMeService.class), mConnection, Context.BIND_AUTO_CREATE);
-        mIsBound = true;
+	void doBindService() {
+		this.bindService(new Intent(this, ToDoMeService.class), mConnection, Context.BIND_AUTO_CREATE);
+		mIsBound = true;
         //textStatus.setText("Binding.");
     }
     void doUnbindService() {
