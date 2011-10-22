@@ -50,7 +50,7 @@ public class MapViewActivity extends MapActivity {
 	private MapController mapController;
 	private MapView mapView;
 	private LocationManager locationManager;
-	//private LocationDatabase locDb;
+	// private LocationDatabase locDb;
 	private GeoUpdateHandler guh;
 	private MapViewOverlay itemizedOverlay, locOverlay;
 	private List<Overlay> mapOverlays;
@@ -90,7 +90,7 @@ public class MapViewActivity extends MapActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
 		tasks = ToDoMeActivity.tasks;
-		
+
 		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
 
 		// Enable zoom
@@ -109,8 +109,7 @@ public class MapViewActivity extends MapActivity {
 		mapOverlays = mapView.getOverlays();
 		drawable = this.getResources().getDrawable(R.drawable.androidmarker);
 		itemizedOverlay = new MapViewOverlay(drawable, this);
-		GeoPoint lastLocation = new GeoPoint((int) (prefs.getLong("lat", hardcodedBeginLat)),
-									  		 (int) (prefs.getLong("lon", hardcodedBeginLong)));
+		GeoPoint lastLocation = new GeoPoint((int) (prefs.getLong("lat", hardcodedBeginLat)), (int) (prefs.getLong("lon", hardcodedBeginLong)));
 		displayMapAt(lastLocation);
 	}
 
@@ -136,13 +135,12 @@ public class MapViewActivity extends MapActivity {
 			int lng = (int) (location.getLongitude() * 1e6);
 			GeoPoint point = new GeoPoint(lat, lng);
 			mapController.animateTo(point); // mapController.setCenter(point);
+			mapOverlays.clear();
 			locOverlay = new MapViewOverlay(getResources().getDrawable(R.drawable.current_location), MapViewActivity.this);
 			locOverlay.addOverlay(new OverlayItem(point, "You are here", ""));
 			mapOverlays.add(locOverlay);
 			
-			prefs.edit().putLong("lat", (long) (lat))
-						.putLong("lon", (long) (lng))
-						.commit();
+			prefs.edit().putLong("lat", (long) (lat)).putLong("lon", (long) (lng)).commit();
 			displayMapAt(point);
 		}
 
@@ -158,46 +156,41 @@ public class MapViewActivity extends MapActivity {
 
 	void displayMapAt(GeoPoint point) {
 		Log.i("MapViewActivity", "Begining drawingMapAt");
+
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			Log.i("MapViewActivity", "Looking at task, " + task.getName());
 			LocationDatabase releventPOIs = ToDoMeActivity.db.searchAboutTypes(task.getTypes());
 
-			for (Iterator<PointOfInterest> releventPOIsIter = releventPOIs.iterator(); releventPOIsIter.hasNext();) {
-				PointOfInterest poi = releventPOIsIter.next();
-				Log.i("MapViewActivity", "Found relevent POI: " + poi.getLatitudeE6() + " " + poi.getLongitudeE6());
-
-				String types = "";
-				for (Iterator<String> typesIter = poi.getLocationTypes().iterator(); typesIter.hasNext();) {
-					String type = typesIter.next();
-					Log.i("MapViewActivity", "Found type " + type);
-					types = types + " " + type;
-				}
-
-				Log.i("MapViewActivity", "Types: " + types);
-
-				Log.i("MapViewActivity", "itemizedOverlay " + ((itemizedOverlay == null) ? "true" : "false"));
-
-				Log.i("MapViewActivity", "poi.getClosingTimes() " + ((poi.getClosingTimes() == null) ? "true" : "false"));
-
-				//Log.i("MapViewActivity", "poi.getOpeningTimes()[getDayOfWeek()] " + ((poi.getOpeningTimes()[getDayOfWeek()] == null) ? "true" : "false"));
-
-				//Log.i("MapViewActivity", "poi.getClosingTimes()[getDayOfWeek()] " + ((poi.getClosingTimes()[getDayOfWeek()] == null) ? "true" : "false"));
-
-				if (poi.getClosingTimes() != null) {
-					itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), types, poi.getOpeningTimes()[getDayOfWeek()] + " - "
-							+ poi.getClosingTimes()[getDayOfWeek()]));
-				} else {
-					itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), types, ""));
-				}
-			}
-
+			displayPOIs(releventPOIs);
 		}
 
 		Log.i("MapViewActivity", "mapOverlays " + ((mapOverlays == null) ? "true" : "false"));
 
 		mapOverlays.add(itemizedOverlay);
 		mapController.animateTo(point);
+	}
+
+	private void displayPOIs(HashSet<PointOfInterest> releventPOIs) {
+		for (Iterator<PointOfInterest> releventPOIsIter = releventPOIs.iterator(); releventPOIsIter.hasNext();) {
+			PointOfInterest poi = releventPOIsIter.next();
+			Log.i("MapViewActivity", "Found relevent POI: " + poi.getLatitudeE6() + " " + poi.getLongitudeE6());
+
+			String types = "";
+			for (Iterator<String> typesIter = poi.getLocationTypes().iterator(); typesIter.hasNext();) {
+				String type = typesIter.next();
+				Log.i("MapViewActivity", "Found type " + type);
+				types = types + " " + type;
+			}
+
+			if (poi.getClosingTimes() != null) {
+				itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), types, poi.getOpeningTimes()[getDayOfWeek()] + " - "
+						+ poi.getClosingTimes()[getDayOfWeek()]));
+			} else {
+				itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), types, ""));
+			}
+		}
+
 	}
 
 	static int getDayOfWeek() {

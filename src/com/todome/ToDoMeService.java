@@ -60,6 +60,8 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	// Data
 	private ArrayList<Task> tasks;
+	private LocationDatabase pointsOfInterest;
+	private KeywordDatabase keywords;
 
 	public void loadTasks() {
 		try {
@@ -80,7 +82,6 @@ public class ToDoMeService extends Service implements LocationListener {
 		}
 	}
 
-	private LocationDatabase pointsOfInterest;
 	private Location userCurrentLocation;
 
 	private NotificationManager nm;
@@ -194,6 +195,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius
 				+ "&type=" + type;
 		String file = Util.getFileFromServer(request);
+		Log.i(TAG, "File for " + type + " is " + file.length());
 
 		LocationDatabase newLocDatabase = new LocationDatabase();
 
@@ -242,10 +244,19 @@ public class ToDoMeService extends Service implements LocationListener {
 		}
 		Log.i(TAG, "Location database cleared");
 
-		for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
-			String type = iter.next();
-			Log.i(TAG, "Getting POIs for " + type);
-			pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
+		if (taskTypes.size() == 0) {
+			/*keywords = KeywordDatabase.fromServer();
+			for (Iterator<String> iter = keywords.getAllTypes().iterator(); iter.hasNext();) {
+				String type = iter.next();
+				Log.i(TAG, "Getting POIs for " + type);
+				pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
+			}*/
+		} else {
+			for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
+				String type = iter.next();
+				Log.i(TAG, "Getting POIs for " + type);
+				pointsOfInterest.addAll(getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type));
+			}
 		}
 
 		sendDatabaseToUI(pointsOfInterest);
@@ -417,11 +428,9 @@ public class ToDoMeService extends Service implements LocationListener {
 		Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
 		updateNotifiedPOIs();
-		
+
 		// Save new location
-		prefs.edit().putLong("lat", (long) (location.getLatitude() * 1e6))
-					.putLong("lon", (long) (location.getLongitude() * 1e6))
-					.commit();
+		prefs.edit().putLong("lat", (long) (location.getLatitude() * 1e6)).putLong("lon", (long) (location.getLongitude() * 1e6)).commit();
 
 		checkForReleventNotifications();
 		Log.i(TAG, "tasks.size() = " + tasks.size());

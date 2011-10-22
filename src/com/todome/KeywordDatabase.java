@@ -38,18 +38,17 @@ public class KeywordDatabase implements Serializable {
 	HashSet<Keyword> keywords = new HashSet<Keyword>();
 
 	private static final String TAG = "KeywordDatabase";
-	
+
 	public void add(String keyword, String type) {
 		keywords.add(new Keyword(keyword, type));
 	}
-	
-	
+
 	public static KeywordDatabase fromServer() {
 		Log.i(TAG, "Getting KeywordDatabase from http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
 		String file = Util.getFileFromServer("http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
-		
+
 		KeywordDatabase db = new KeywordDatabase();
-		
+
 		try {
 			JSONArray jsonArray = new JSONArray(file);
 
@@ -64,7 +63,7 @@ public class KeywordDatabase implements Serializable {
 						String name = tags.getJSONObject(j).getString("name");
 						db.add(name, type);
 					}
-					
+
 				} catch (JSONException e) {
 					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
 				}
@@ -72,18 +71,16 @@ public class KeywordDatabase implements Serializable {
 		} catch (JSONException ex) {
 			Log.e(TAG, "", ex);
 		}
-		
+
 		return db;
 	}
 
-	public KeywordDatabase() {	// TODO Get from server (http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json)
-		/*keywords.add(new Keyword("post", "postbox"));
-		keywords.add(new Keyword("letter", "postbox"));
-		keywords.add(new Keyword("stamp", "post office"));
-		keywords.add(new Keyword("withdraw", "bank"));
-		keywords.add(new Keyword("money", "bank"));
-		keywords.add(new Keyword("train", "train station"));
-		keywords.add(new Keyword("bus", "bct"));*/
+	public KeywordDatabase() { // TODO Get from server (http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json)
+		/*
+		 * keywords.add(new Keyword("post", "postbox")); keywords.add(new Keyword("letter", "postbox")); keywords.add(new Keyword("stamp", "post office"));
+		 * keywords.add(new Keyword("withdraw", "bank")); keywords.add(new Keyword("money", "bank")); keywords.add(new Keyword("train", "train station"));
+		 * keywords.add(new Keyword("bus", "bct"));
+		 */
 	}
 
 	public int size() {
@@ -108,7 +105,7 @@ public class KeywordDatabase implements Serializable {
 
 		return types;
 	}
-	
+
 	public String getDescriptionForType(String type) {
 		String withoutDot;
 		if (type.contains(".")) {
@@ -118,14 +115,22 @@ public class KeywordDatabase implements Serializable {
 		} else {
 			withoutDot = type;
 		}
-		
+
 		String replacingUnderscore = withoutDot.replace('_', ' ');
-		
+
 		Log.i(TAG, "Description: " + replacingUnderscore);
-		
+
 		return replacingUnderscore;
 	}
-	
+
+	public HashSet<String> getAllTypes() {
+		HashSet<String> types = new HashSet<String>();
+		for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
+			types.add(iter.next().type);
+		}
+		return types;
+	}
+
 	private class Keyword {
 		String keyword;
 		String type;
