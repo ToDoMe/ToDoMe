@@ -77,7 +77,7 @@ public class ToDoMeActivity extends TabActivity {
 	public static KeywordDatabase keywords = KeywordDatabase.fromServer();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
 	
-	private boolean notificationsEnabled = true; 
+	private boolean notificationsEnabled = true;
 	
 	public void saveTasks() {
 		try {
@@ -107,10 +107,6 @@ public class ToDoMeActivity extends TabActivity {
 			Log.e(TAG, "", ex);
 		}
 	}
-	
-	/*public boolean getLite() {
-		return false;
-	}*/
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -153,7 +149,7 @@ public class ToDoMeActivity extends TabActivity {
 			}
 			
 			// Service interaction
-			queryNotificationsEnabled();
+			sendMessageToService(ToDoMeService.MSG_QUERY_ENABLED);
 			checkIfServiceIsRunning();
 			notifyTasksChanged();
 
@@ -231,12 +227,12 @@ public class ToDoMeActivity extends TabActivity {
         }
     }
 	
-	private void queryNotificationsEnabled() {
+	private void sendMessageToService(int msgType) {
         if (mIsBound) {
 			if (mService != null) {
                 try {
                     // Send data as a String
-                    Message msg = Message.obtain(null, ToDoMeService.MSG_QUERY_ENABLED);
+                    Message msg = Message.obtain(null, msgType);
                     mService.send(msg);
                 } catch (RemoteException ex) {
                 	Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
@@ -244,19 +240,9 @@ public class ToDoMeActivity extends TabActivity {
             }
         }
 	}
-	
+
 	public void notifyTasksChanged() {
-        if (mIsBound) {
-			if (mService != null) {
-                try {
-                    // Send data as a String
-                    Message msg = Message.obtain(null, ToDoMeService.MSG_TASKS_UPDATED);
-                    mService.send(msg);
-                } catch (RemoteException ex) {
-                	Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-                }
-            }
-        }
+        sendMessageToService(ToDoMeService.MSG_TASKS_UPDATED);
 	}
 
 	void doBindService() {
@@ -317,7 +303,15 @@ public class ToDoMeActivity extends TabActivity {
 	        	startActivity(myIntent);
 	            return true;
 	        case R.id.toggle_notifications_menu_button:
-	        	// TODO toggle notifications button
+	        	if (notificationsEnabled) {
+	        		sendMessageToService(ToDoMeService.MSG_DISABLE);
+	        		notificationsEnabled = false;
+	        		item.setTitle(R.string.enable_notifications);
+	        	} else {
+	        		sendMessageToService(ToDoMeService.MSG_ENABLE);
+	        		notificationsEnabled = true;
+	        		item.setTitle(R.string.disable_notifications);
+	        	}
 	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);

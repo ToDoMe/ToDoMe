@@ -98,6 +98,7 @@ public final class R {
         public static final int cancel=0x7f04001b;
         public static final int created_by=0x7f040011;
         public static final int disable_notifications=0x7f04001d;
+        public static final int enable_notifications=0x7f04001e;
         public static final int findwithin=0x7f040014;
         public static final int github=0x7f040012;
         public static final int giveme=0x7f040015;
