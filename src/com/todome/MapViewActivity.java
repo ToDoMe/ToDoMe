@@ -96,9 +96,8 @@ public class MapViewActivity extends MapActivity {
 		// Get LocationManager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		guh = new GeoUpdateHandler();
-		Log.i("MapViewActivity", "Just created the guh, its null? " + (guh==null));
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,	 ToDoMeActivity.LOC_INTERVAL, 0, guh);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, guh);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,	 0, 0, guh);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
 
 		// Overlays
 		mapOverlays = mapView.getOverlays();
@@ -117,8 +116,8 @@ public class MapViewActivity extends MapActivity {
 	@Override
 	public void onResume() {
 		// Enable GPS again
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,	 ToDoMeActivity.LOC_INTERVAL, 0, guh);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, guh);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,	 0, 0, guh);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
 		super.onResume();
 	}
 

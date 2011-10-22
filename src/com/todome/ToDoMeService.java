@@ -160,14 +160,14 @@ public class ToDoMeService extends Service implements LocationListener {
 		Log.i(TAG, "Service Started.");
 		isRunning = true;
 		
-		// Load tasks
-		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
-		loadTasks();
-
 		// Register LocationListener
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+		
+		// Load tasks
+		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
+		loadTasks();
 	}
 
 	@Override
@@ -350,7 +350,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	public void onLocationChanged(Location location) {
 		// Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
-		updateNotifiedPOIs();
+		//updateNotifiedPOIs();
 		checkForReleventNotifications();
 		Log.i(TAG, "tasks.size() = " + tasks.size());
 	}
