@@ -26,3 +26,4 @@ Custom audio alerts and vibration alerts per type
  -------------------------- For Next Release --------------------------
 Full database for storing tasks and locations
 Language Translations
+Store human-readable descriptions in the location types database for display on map points.
