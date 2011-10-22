@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -342,7 +340,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
-			// Log.i(TAG, "The task named \"" + task.getName() + "\" has types " + task.getTypes());
+			Log.i(TAG, "The task named \"" + task.getName() + "\" has types " + task.getTypes());
 			HashSet<String> thisTaskTypes = task.getTypes();
 			if (thisTaskTypes != null) {
 				taskTypes.addAll(task.getTypes());
@@ -354,8 +352,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	// Messaging
 
-	class IncomingHandler extends Handler { // Handler of incoming messages from
-		// clients.
+	class IncomingHandler extends Handler { // Handler of incoming messages from clients.
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {

@@ -196,8 +196,7 @@ public class MapViewActivity extends MapActivity {
 	static int getDayOfWeek() {
 		Calendar rightNow = Calendar.getInstance();
 
-		int DOW = rightNow.get(Calendar.DAY_OF_WEEK) - 2; // fix to get Monday =
-		// 0
+		int DOW = rightNow.get(Calendar.DAY_OF_WEEK) - 2; // fix to get Monday = 0
 
 		if (DOW > -1)
 			return DOW;

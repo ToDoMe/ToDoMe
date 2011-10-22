@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 import android.text.format.Time;
+import android.util.Log;
 
 public class Task implements Serializable, Comparable<Task> {
 
