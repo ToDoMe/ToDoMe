@@ -21,22 +21,11 @@
  */
 package com.todome;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +36,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -64,9 +54,23 @@ import com.google.android.maps.GeoPoint;
 
 public class ToDoMeService extends Service implements LocationListener {
 	private final String TAG = "ToDoMeService";
+	
+	private SharedPreferences prefs;
 
 	// Data
 	private ArrayList<Task> tasks;
+	
+	public void loadTasks() {
+		try {
+			String str = prefs.getString("tasks", "");
+			if (str != "") {
+				tasks = Util.getTaskListFromString(str);
+			}
+		} catch (Exception ex) {
+			Log.e(TAG, "", ex);
+		}
+	}
+	
 	private LocationDatabase pointsOfInterest;
 	private Location userCurrentLocation;
 
@@ -102,7 +106,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			case MSG_UNREGISTER_CLIENT:
 				mClients.remove(msg.replyTo);
 				break;
-			case MSG_TASKS_UPDATED:
+			/*case MSG_TASKS_UPDATED:
 				String tasksData = msg.getData().getString("str1");
 				try {
 					updateTasks(Util.getTaskListFromString(tasksData));
@@ -115,7 +119,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				} else {
 					Log.i(TAG, "MSG_TASKS_UPDATED received. tasks = null.");
 				}
-				break;
+				break;*/
 			default:
 				super.handleMessage(msg);
 			}
@@ -162,6 +166,10 @@ public class ToDoMeService extends Service implements LocationListener {
 		super.onCreate();
 		Log.i(TAG, "Service Started.");
 		isRunning = true;
+		
+		// Load tasks
+		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
+		loadTasks();
 
 		// Register LocationListener
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -209,39 +217,16 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
-
-		StringBuilder builder = new StringBuilder();
-		HttpClient client = new DefaultHttpClient();
+		
 		double lat = point.getLatitudeE6() / 1e6;
 		double lng = point.getLongitudeE6() / 1e6;
 		String request = "http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/locations.json?lat=" + lat + "&long=" + lng + "&radius=" + radius + "&type=" + type;
-		HttpGet httpGet = new HttpGet(request);
-		Log.i(TAG, "Request used: " + request);
-		try {
-			HttpResponse response = client.execute(httpGet);
-			StatusLine statusLine = response.getStatusLine();
-			int statusCode = statusLine.getStatusCode();
-			if (statusCode == 200) {
-				HttpEntity entity = response.getEntity();
-				InputStream content = entity.getContent();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-				String line;
-				while ((line = reader.readLine()) != null) {
-					builder.append(line);
-				}
-			} else {
-				Log.e("", "Failed to download file");
-			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		String file = Util.getFileFromServer(request);
+		
 		LocationDatabase newLocDatabase = new LocationDatabase();
 
 		try {
-			JSONArray jsonArray = new JSONArray(builder.toString());
+			JSONArray jsonArray = new JSONArray(request);
 
 			Log.i(TAG, "Number of entries " + jsonArray.length());
 

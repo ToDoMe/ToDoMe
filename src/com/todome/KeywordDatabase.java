@@ -25,20 +25,63 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.util.Log;
+
 public class KeywordDatabase implements Serializable {
 
 	private static final long serialVersionUID = -8902088060528474897L;
+	private static final String TAG = "KeywordDatabase";
 	
 	ArrayList<Keyword> keywords = new ArrayList<Keyword>();
+	public void add(String keyword, String type) {
+		keywords.add(new Keyword(keyword, type));
+	}
+	
+	
+	public static KeywordDatabase fromServer() {
+		Log.i(TAG, "Getting KeywordDatabase from http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
+		String file = Util.getFileFromServer("http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
+		
+		KeywordDatabase db = new KeywordDatabase();
+		
+		try {
+			JSONArray jsonArray = new JSONArray(file);
 
-	public KeywordDatabase() {	// TODO Get from server (http://.../location_types.json)
-		keywords.add(new Keyword("post", "postbox"));
+			Log.i(TAG, "Number of entries " + jsonArray.length());
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jsonObject = jsonArray.getJSONObject(i);
+				try {
+					String type = jsonObject.getString("name");
+					JSONArray tags = jsonObject.getJSONArray("tags");
+					for (int j = 0; j < tags.length(); j++) {
+						String name = tags.getJSONObject(j).getString("name");
+						db.add(name, type);
+					}
+					
+				} catch (JSONException e) {
+					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
+				}
+			}
+		} catch (JSONException ex) {
+			Log.e(TAG, "", ex);
+		}
+		
+		return db;
+	}
+
+	public KeywordDatabase() {	// TODO Get from server (http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json)
+		/*keywords.add(new Keyword("post", "postbox"));
 		keywords.add(new Keyword("letter", "postbox"));
 		keywords.add(new Keyword("stamp", "post office"));
 		keywords.add(new Keyword("withdraw", "bank"));
 		keywords.add(new Keyword("money", "bank"));
 		keywords.add(new Keyword("train", "train station"));
-		keywords.add(new Keyword("bus", "bct"));
+		keywords.add(new Keyword("bus", "bct"));*/
 	}
 	
 	public int size() {
@@ -69,7 +112,7 @@ public class KeywordDatabase implements Serializable {
 
 		return types;
 	}
-
+	
 	private class Keyword {
 		String keyword;
 		String type;
@@ -79,5 +122,4 @@ public class KeywordDatabase implements Serializable {
 			this.type = type;
 		}
 	}
-
 }

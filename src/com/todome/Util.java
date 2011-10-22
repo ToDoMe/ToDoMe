@@ -21,15 +21,26 @@
  */
 package com.todome;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.location.Location;
 import android.util.Base64;
@@ -38,6 +49,37 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 
 public class Util {
+	
+	// Server comms
+	
+	public static String getFileFromServer(String request) {
+		StringBuilder builder = new StringBuilder();
+		HttpClient client = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(request);
+		Log.i("Util.getFileFromServer", "Request used: " + request);
+		try {
+			HttpResponse response = client.execute(httpGet);
+			StatusLine statusLine = response.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode == 200) {
+				HttpEntity entity = response.getEntity();
+				InputStream content = entity.getContent();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					builder.append(line);
+				}
+			} else {
+				Log.e("", "Failed to download file");
+			}
+		} catch (Exception ex) {
+			Log.e("Util.getFileFromServer", ex.getClass().toString() + " " + ex.getMessage());
+		}
+		
+		return builder.toString();
+	}
+	
+	// Data conversion
 
 	static int doubleToIntE6(double dub) {
 		return (int) (dub * 1e6);
@@ -58,6 +100,8 @@ public class Util {
 		return loc;
 	}
 
+	// Serialization
+	
 	static String getTaskArrayString(ArrayList<Task> tasks) {
 		return getStringFromObject(tasks);
 	}

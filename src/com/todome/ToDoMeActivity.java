@@ -57,7 +57,7 @@ public class ToDoMeActivity extends TabActivity {
 	
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
-	public static KeywordDatabase keywords = new KeywordDatabase();
+	public static KeywordDatabase keywords = KeywordDatabase.fromServer();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
 	
 	public void saveTasks() {
@@ -87,7 +87,6 @@ public class ToDoMeActivity extends TabActivity {
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
-
 	}
 	
 	/*public boolean getLite() {
