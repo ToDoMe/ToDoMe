@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,9 +49,7 @@ public class ToDoMeActivity extends TabActivity {
 	public static final String FILE_PATH = "todome.dat";
 	private static SharedPreferences prefs;
 	private static ToDoMeActivity instance;
-	public static ToDoMeActivity getInstance() {
-		return instance;
-	}
+	public static ToDoMeActivity getInstance() { return instance; }
 	
 	public static final long LOC_INTERVAL = 60000;
 
@@ -268,7 +265,7 @@ public class ToDoMeActivity extends TabActivity {
         try {
             doUnbindService();
         } catch (Throwable t) {
-            Log.e("TestTabActivity", "Failed to unbind from the service", t);
+            Log.e(TAG, "Failed to unbind from the service", t);
         }
     }
     
@@ -295,8 +292,9 @@ public class ToDoMeActivity extends TabActivity {
 	        	myIntent.setClassName("com.todome", "com.todome.PreferencesActivity");
 	        	startActivity(myIntent);
 	            return true;
+	        case R.id.toggle_notifications_menu_button:
+	        	return true;
 	        default:
-	        	
 	            return super.onOptionsItemSelected(item);
         }
     }

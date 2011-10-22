@@ -31,7 +31,7 @@ public final class R {
     }
     public static final class id {
         public static final int RelativeLayout03=0x7f060027;
-        public static final int about_menu_button=0x7f06002d;
+        public static final int about_menu_button=0x7f06002e;
         public static final int btnBind=0x7f060022;
         public static final int btnStart=0x7f060021;
         public static final int btnStop=0x7f060020;
@@ -52,7 +52,7 @@ public final class R {
         public static final int notesEntry=0x7f06000a;
         public static final int okButton=0x7f06000f;
         public static final int postcodeEntry=0x7f06000b;
-        public static final int preferences_menu_button=0x7f06002c;
+        public static final int preferences_menu_button=0x7f06002d;
         public static final int ratingEntry=0x7f060009;
         public static final int search_radius=0x7f060012;
         public static final int sv=0x7f060006;
@@ -75,6 +75,7 @@ public final class R {
         public static final int textViewupdategps=0x7f060019;
         public static final int timeEntry=0x7f06000d;
         public static final int timeLabel=0x7f06000c;
+        public static final int toggle_notifications_menu_button=0x7f06002c;
         public static final int widget0=0x7f06002a;
     }
     public static final class layout {
@@ -118,6 +119,7 @@ public final class R {
         public static final int service_stopped=0x7f040008;
         public static final int specific_location=0x7f040003;
         public static final int time_label=0x7f04000e;
+        public static final int toggle_notifications=0x7f04001d;
         public static final int updategps=0x7f040016;
         public static final int with=0x7f04000d;
     }

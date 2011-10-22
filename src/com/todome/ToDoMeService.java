@@ -72,11 +72,10 @@ public class ToDoMeService extends Service implements LocationListener {
 		
 		if (this.tasks.size() == 0) {
 			// Disable GPS to save battery
-			locationManager.removeUpdates(this);
+			disableNotifications();
 		} else {
 			// Enable GPS again
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+			enableNotifications();
 		}
 	}
 	
@@ -86,6 +85,8 @@ public class ToDoMeService extends Service implements LocationListener {
 	private NotificationManager nm;
 	private LocationManager locationManager;
 	private static boolean isRunning = false;
+	
+	private boolean enabled = true;
 
 	/*
 	 * This array list contains the id's of the point of interests, that have been notified for the current location. To keep this up to date, id's are added as
@@ -100,6 +101,9 @@ public class ToDoMeService extends Service implements LocationListener {
 	public static final int MSG_LOCATIONS_UPDATED = 3;
 	public static final int MSG_KEYWORDS_UPDATED = 4;
 	public static final int MSG_TASKS_UPDATED = 5;
+	public static final int MSG_QUERY_ENABLED = 6;
+	public static final int MSG_ENABLE = 7;
+	public static final int MSG_DISABLE = 8;
 	final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target
 
 	// we publish for clients to send messages to IncomingHandler.
@@ -107,51 +111,6 @@ public class ToDoMeService extends Service implements LocationListener {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return mMessenger.getBinder();
-	}
-
-	class IncomingHandler extends Handler { // Handler of incoming messages from
-		// clients.
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case MSG_REGISTER_CLIENT:
-				mClients.add(msg.replyTo);
-				Log.i(TAG, "Client registered.");
-				break;
-			case MSG_UNREGISTER_CLIENT:
-				mClients.remove(msg.replyTo);
-				break;
-			case MSG_TASKS_UPDATED:
-				loadTasks();
-				Log.i(TAG, "MSG_TASKS_UPDATED received.");
-				break;
-			default:
-				super.handleMessage(msg);
-			}
-		}
-	}
-
-	private void sendDatabaseToUI(LocationDatabase db) {
-		sendMessageToUI(Util.getLocationDatabaseString(db));
-	}
-
-	private void sendMessageToUI(String value) {
-		for (int i = mClients.size() - 1; i >= 0; i--) {
-			try {
-				// Send data as a String
-				Bundle b = new Bundle();
-				b.putString("str1", value);
-				Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
-				msg.setData(b);
-				mClients.get(i).send(msg);
-				// Log.i(TAG, "Sent message \"" + value + "\" to " + i);
-
-			} catch (RemoteException e) {
-				// The client is dead. Remove it from the list; we are going through the list from back to front
-				// so this is safe to do inside the loop.
-				mClients.remove(i);
-			}
-		}
 	}
 
 	@Override
@@ -347,6 +306,81 @@ public class ToDoMeService extends Service implements LocationListener {
 		return taskTypes;
 	}
 
+	// Messaging
+	
+	class IncomingHandler extends Handler { // Handler of incoming messages from
+		// clients.
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case MSG_REGISTER_CLIENT:
+				mClients.add(msg.replyTo);
+				Log.i(TAG, "Client registered.");
+				break;
+			case MSG_UNREGISTER_CLIENT:
+				mClients.remove(msg.replyTo);
+				break;
+			case MSG_TASKS_UPDATED:
+				loadTasks();
+				Log.i(TAG, "MSG_TASKS_UPDATED received.");
+				break;
+			case MSG_QUERY_ENABLED:
+				sendQueryResponse();
+				break;
+			case MSG_ENABLE:
+				enableNotifications();
+				break;
+			case MSG_DISABLE:
+				disableNotifications();
+				break;
+			default:
+				super.handleMessage(msg);
+			}
+		}
+	}
+
+	private void sendQueryResponse() {
+		for (int i = mClients.size() - 1; i >= 0; i--) {
+			try {
+				// Send data as a String
+				Bundle b = new Bundle();
+				b.putBoolean("enabled", enabled);
+				Message msg = Message.obtain(null, MSG_QUERY_ENABLED);
+				msg.setData(b);
+				mClients.get(i).send(msg);
+
+			} catch (RemoteException e) {
+				// The client is dead. Remove it from the list; we are going through the list from back to front
+				// so this is safe to do inside the loop.
+				mClients.remove(i);
+			}
+		}
+	}
+	
+	private void sendDatabaseToUI(LocationDatabase db) {
+		sendMessageToUI(Util.getLocationDatabaseString(db));
+	}
+
+	private void sendMessageToUI(String value) {
+		for (int i = mClients.size() - 1; i >= 0; i--) {
+			try {
+				// Send data as a String
+				Bundle b = new Bundle();
+				b.putString("str1", value);
+				Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
+				msg.setData(b);
+				mClients.get(i).send(msg);
+
+			} catch (RemoteException e) {
+				// The client is dead. Remove it from the list; we are going through the list from back to front
+				// so this is safe to do inside the loop.
+				mClients.remove(i);
+			}
+		}
+	}
+	
+	// LocationListener
+	
 	public void onLocationChanged(Location location) {
 		// Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
@@ -370,4 +404,16 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	}
 
+	// Enable/disable notifications
+	
+	private void disableNotifications() {
+		locationManager.removeUpdates(this);
+		enabled = true;
+	}
+	
+	private void enableNotifications() {
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+		enabled = false;
+	}
 }

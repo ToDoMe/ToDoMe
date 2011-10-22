@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:enabled="true" android:title="@string/preferences" android:id="@+id/preferences_menu_button" android:visible="true" android:titleCondensed="@string/pref"></item>
+    <item android:title="@string/toggle_notifications" android:id="@+id/toggle_notifications_menu_button"></item><item android:enabled="true" android:title="@string/preferences" android:id="@+id/preferences_menu_button" android:visible="true"></item>
     <item android:enabled="true" android:title="@string/about" android:id="@+id/about_menu_button" android:visible="true"></item>
+    
     
 </menu>
