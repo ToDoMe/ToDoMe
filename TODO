@@ -19,3 +19,4 @@ Fix map so that locations shop up immediately
 Check the map key will work for ever
 Finish the disable notifications, this needs to disable location updates as well
 Stop the I am here overlay being persistant
+Store the keywords database in the shared preferences
