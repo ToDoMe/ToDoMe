@@ -10,7 +10,6 @@ Custom locations and end times
 Preferences Menu  -| Both of these should be accessed from the menu key
 About Screen      -|
 Send user data back about freqency any amount of use, and location (All opt in in the preferences)
-<<<<<<< HEAD
 Check that the service starts when the device starts
 Make the service get the tasks from the preferences store
 Make the notification link to the map, not the task list
@@ -23,11 +22,10 @@ Fix map so that locations shop up immediately
 Store the keywords database in the shared preferences
 Custom audio alerts and vibration alerts per type
 Clear data and reset setting option in preferences
+Remove the All Rights Reserved Notice from the about page.
 
  -------------------------- For Next Release --------------------------
 Full database for storing tasks and locations
 Language Translations
 Store human-readable descriptions in the location types database for display on map points.
-=======
 Reduce data consumption by streamlining keyword database JSON.
->>>>>>> 80dc61e10d89f02ee7f33cf0367bcfee20ec84dd
