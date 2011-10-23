@@ -194,4 +194,10 @@ public class Util {
 
 		return d;
 	}
+	
+	public static <E> HashSet<E> intersection (HashSet<E> x, HashSet<E> y) {
+		HashSet<E> t = new HashSet<E>(x);
+		t.retainAll(y);
+		return t;
+	}
 }

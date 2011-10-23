@@ -7,27 +7,27 @@ More info about tasks (Specific location reminder, notes, ...)
 [DONE] Write service, so it can run in the background
 No GPS message
 Custom locations and end times
-Preferences Menu  -| Both of these should be accessed from the menu key
-About Screen      -|
-Send user data back about freqency any amount of use, and location (All opt in in the preferences)
+[DONE] Preferences Menu  -| Both of these should be accessed from the menu key
+[DONE] About Screen      -|
 Check that the service starts when the device starts
-Make the service get the tasks from the preferences store
-Make the notification link to the map, not the task list
+[DONE] Make the service get the tasks from the preferences store
+[DONE] Make the notification link to the map, not the task list
 Allow locational notifications to be switched off for a task
 Allow the user to add and remove specific tags (types) from a task
 Fix map so that locations shop up immediately
 [DONE] Check the map key will work for ever
 [DONE] Finish the disable notifications, this needs to disable location updates as well
 [DONE] Stop the I am here overlay being persistant
-Store the keywords database in the shared preferences
-Custom audio alerts and vibration alerts per type
-Clear data and reset setting option in preferences
+[DONE] Store the keywords database in the shared preferences
+[DONE] Clear data and reset setting option in preferences
 Blacklist the baby box and the sexual items in the database, we need more analisis before these can be implemented
 	We dont want someone putting on, buy baby powder, and it sujesting they get rid of their child! 
 Put up a message, about the app, and its basic usage on the first start on a device
 [DONE] Remove the All Rights Reserved Notice from the about page. (replace with all wrongs reserved?).
 
  -------------------------- For Next Release --------------------------
+Custom audio alerts and vibration alerts per type
+Send user data back about freqency any amount of use, and location (All opt in in the preferences)
 Full database for storing tasks and locations
 Language Translations
 Store human-readable descriptions in the location types database for display on map points.
