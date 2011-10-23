@@ -355,13 +355,14 @@ public class ToDoMeService extends Service implements LocationListener {
 		} catch (JSONException ex) {
 			Log.e(TAG, "", ex);
 		}
-		
+
 		if (db != null) {
 			// Save the date
 			Time now = new Time();
 			now.setToNow();
 			data.edit().putLong("keywordsDate", now.toMillis(false)).commit();
 
+			keywords = db;
 			writeKeywords(db);
 		} else {
 			Log.e(TAG, "Got null keywords database from server");
@@ -590,7 +591,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	// Messaging
-	
+
 	private void sendQueryResponse() {
 		for (int i = mClients.size() - 1; i >= 0; i--) {
 			try {
@@ -643,7 +644,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			}
 		}
 	}
-	
+
 	// LocationListener
 
 	public void onLocationChanged(Location location) {
