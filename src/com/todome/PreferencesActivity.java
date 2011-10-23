@@ -24,7 +24,7 @@ public class PreferencesActivity extends Activity {
     	EditText extra_time = (EditText) findViewById(R.id.extra_time);
     	EditText gps_timeout = (EditText) findViewById(R.id.gps_timeout);
         
-    	SharedPreferences preferences = ToDoMeActivity.getPreferences();
+    	SharedPreferences preferences = ToDoMeActivity.prefs;
     	
     	search_radius.setText(Float.toString(preferences.getFloat("search_radius", 10)));
     	extra_time.setText(Long.toString(preferences.getLong("extra_time", 10) / (60 * 1000)));

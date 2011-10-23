@@ -43,38 +43,6 @@ public class KeywordDatabase implements Serializable {
 		keywords.add(new Keyword(keyword, type));
 	}
 
-	public static KeywordDatabase fromServer() {
-		Log.i(TAG, "Getting KeywordDatabase from http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
-		String file = Util.getFileFromServer("http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
-
-		KeywordDatabase db = new KeywordDatabase();
-
-		try {
-			JSONArray jsonArray = new JSONArray(file);
-
-			Log.i(TAG, "Number of entries " + jsonArray.length());
-
-			for (int i = 0; i < jsonArray.length(); i++) {
-				JSONObject jsonObject = jsonArray.getJSONObject(i);
-				try {
-					String type = jsonObject.getString("name");
-					JSONArray tags = jsonObject.getJSONArray("tags");
-					for (int j = 0; j < tags.length(); j++) {
-						String name = tags.getJSONObject(j).getString("name");
-						db.add(name, type);
-					}
-
-				} catch (JSONException e) {
-					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
-				}
-			}
-		} catch (JSONException ex) {
-			Log.e(TAG, "", ex);
-		}
-
-		return db;
-	}
-
 	public KeywordDatabase() { // TODO Get from server (http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json)
 		/*
 		 * keywords.add(new Keyword("post", "postbox")); keywords.add(new Keyword("letter", "postbox")); keywords.add(new Keyword("stamp", "post office"));

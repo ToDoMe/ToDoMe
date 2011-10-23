@@ -36,6 +36,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -54,31 +55,22 @@ import com.google.android.maps.GeoPoint;
 public class ToDoMeService extends Service implements LocationListener {
 	private final String TAG = "ToDoMeService";
 
+	/**
+	 * Used to store preferences for the app
+	 */
 	private SharedPreferences prefs;
+
+	/**
+	 * Used to store data
+	 * 
+	 * "tasks" for the tasks array "keywords" for the keywords database
+	 */
+	private SharedPreferences data;
 
 	// Data
 	private ArrayList<Task> tasks;
 	private LocationDatabase pointsOfInterest;
 	private KeywordDatabase keywords;
-
-	public void loadTasks() {
-		try {
-			String str = prefs.getString("tasks", "");
-			if (str != null && str != "") {
-				tasks = Util.getTaskListFromString(str);
-			}
-		} catch (Exception ex) {
-			Log.e(TAG, "", ex);
-		}
-
-		if (this.tasks.size() == 0) {
-			// Disable GPS to save battery
-			disableNotifications();
-		} else {
-			// Enable GPS again
-			enableNotifications();
-		}
-	}
 
 	private Location userCurrentLocation;
 
@@ -88,13 +80,16 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private boolean enabled = true;
 
-	/*
+	/**
 	 * This array list contains the id's of the point of interests, that have been notified for the current location. To keep this up to date, id's are added as
 	 * notifications are shown, and removed when the user location is updated.
 	 */
 	HashSet<PointOfInterest> notifiedPOIs = new HashSet<PointOfInterest>();
 
-	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
+	/**
+	 * Keeps track of all current registered clients.
+	 */
+	ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 	int mValue = 0; // Holds last value set by a client.
 	public static final int MSG_REGISTER_CLIENT = 1;
 	public static final int MSG_UNREGISTER_CLIENT = 2;
@@ -104,9 +99,10 @@ public class ToDoMeService extends Service implements LocationListener {
 	public static final int MSG_QUERY_ENABLED = 6;
 	public static final int MSG_ENABLE = 7;
 	public static final int MSG_DISABLE = 8;
-	final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target
-
-	// we publish for clients to send messages to IncomingHandler.
+	/**
+	 * Target we publish for clients to send messages to IncomingHandler.
+	 */
+	final Messenger mMessenger = new Messenger(new IncomingHandler()); //
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -125,9 +121,67 @@ public class ToDoMeService extends Service implements LocationListener {
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
 
-		// Load tasks
-		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
-		loadTasks();
+		prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+		data = getSharedPreferences("data", MODE_PRIVATE);
+		readTasks();
+		readKeywords();
+	}
+
+	private void readTasks() {
+		try {
+			String str = data.getString("tasks", null);
+			if (str != null) {
+				tasks = Util.getTaskListFromString(str);
+
+				if (this.tasks.size() == 0) {
+					// Disable GPS to save battery
+					disableNotifications();
+				} else {
+					// Enable GPS again
+					enableNotifications();
+				}
+			} else {
+				Log.i(TAG, "Loaded tasks, but got null, populating database with empty task list");
+				writeTasks(new ArrayList<Task>());
+			}
+		} catch (Exception ex) {
+			Log.e(TAG, "", ex);
+		}
+
+	}
+
+	private void writeTasks(ArrayList<Task> newTasks) {
+		Editor dataEditor = data.edit();
+
+		dataEditor.putString("tasks", Util.getTaskArrayString(newTasks));
+		dataEditor.commit();
+	}
+
+	private void readKeywords() {
+		try {
+			String str = data.getString("keywords", null);
+			if (str != null) {
+				keywords = Util.getKeywordDatabaseFromString(str);
+			} else {
+				Log.i(TAG, "Loaded keywords, but got null, populating database with keywords from server");
+				KeywordDatabase tempDatabase = getKeywordDatabaseFromServer();
+				if (tempDatabase != null) {
+					writeKeywords(tempDatabase);
+				} else {
+					Log.e(TAG, "Got null keywords database from server");
+					writeKeywords(new KeywordDatabase());
+				}
+			}
+		} catch (Exception ex) {
+			Log.e(TAG, "", ex);
+		}
+	}
+
+	private void writeKeywords(KeywordDatabase newKeywords) {
+		Editor dataEditor = data.edit();
+
+		dataEditor.putString("keywords", Util.getKeywordDatabaseString(newKeywords));
+		dataEditor.commit();
 	}
 
 	@Override
@@ -156,7 +210,8 @@ public class ToDoMeService extends Service implements LocationListener {
 		Notification notification = new Notification(R.drawable.notification_icon, notifyTasks.get(0).getName(), System.currentTimeMillis());
 		notification.defaults |= Notification.DEFAULT_SOUND;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
-		// The PendingIntent to launch our activity if the user selects this notification
+		// The PendingIntent to launch our activity if the user selects this
+		// notification
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class).putExtra("displayMap", true), 0);
 		// Set the info for the views that show in the notification panel.
 		String message = "";
@@ -176,12 +231,45 @@ public class ToDoMeService extends Service implements LocationListener {
 		notification.setLatestEventInfo(this, notifyTasks.get(0).getName(), message, contentIntent);
 
 		// Send the notification.
-		// We use a layout id because it is a unique number. We use it later to cancel.
+		// We use a layout id because it is a unique number. We use it later to
+		// cancel.
 		nm.notify(R.string.service_started, notification);
 	}
 
 	public static boolean isRunning() {
 		return isRunning;
+	}
+
+	public KeywordDatabase getKeywordDatabaseFromServer() {
+		Log.i(TAG, "Getting KeywordDatabase from http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
+		String file = Util.getFileFromServer("http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
+
+		KeywordDatabase db = new KeywordDatabase();
+
+		try {
+			JSONArray jsonArray = new JSONArray(file);
+
+			Log.i(TAG, "Number of entries " + jsonArray.length());
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jsonObject = jsonArray.getJSONObject(i);
+				try {
+					String type = jsonObject.getString("name");
+					JSONArray tags = jsonObject.getJSONArray("tags");
+					for (int j = 0; j < tags.length(); j++) {
+						String name = tags.getJSONObject(j).getString("name");
+						db.add(name, type);
+					}
+
+				} catch (JSONException e) {
+					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
+				}
+			}
+		} catch (JSONException ex) {
+			Log.e(TAG, "", ex);
+		}
+
+		return db;
 	}
 
 	/**
@@ -255,7 +343,9 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		if (newDatabase.size() > 0) {
 
-			pointsOfInterest = newDatabase; // TODO At the moment new location data replaces old data, this needs to be fixed
+			pointsOfInterest = newDatabase; // TODO At the moment new location
+											// data replaces old data, this
+											// needs to be fixed
 			Log.i(TAG, "Location database replaced with new data");
 
 			sendDatabaseToUI(pointsOfInterest);
@@ -306,7 +396,9 @@ public class ToDoMeService extends Service implements LocationListener {
 		for (Iterator<PointOfInterest> iter = notifiedPOIs.iterator(); iter.hasNext();) {
 			PointOfInterest poi = iter.next();
 
-			// If the point of interest is now "distance" or more away from the users current location, then remove it so more notifications can be given
+			// If the point of interest is now "distance" or more away from the
+			// users current location, then remove it so more notifications can
+			// be given
 			if (!Util.isPointsWithinRange(Util.locationToGeoPoint(userCurrentLocation), poi.toGeoPoint(), distance)) {
 				Log.e(TAG, "Removed " + poi.toGeoPoint() + " dist " + Util.getDistanceBetween(Util.locationToGeoPoint(userCurrentLocation), poi.toGeoPoint()));
 				iter.remove();
@@ -333,7 +425,8 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	// Messaging
 
-	class IncomingHandler extends Handler { // Handler of incoming messages from clients.
+	class IncomingHandler extends Handler { // Handler of incoming messages from
+											// clients.
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
@@ -345,7 +438,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				mClients.remove(msg.replyTo);
 				break;
 			case MSG_TASKS_UPDATED:
-				loadTasks();
+				readTasks();
 				Log.i(TAG, "MSG_TASKS_UPDATED received.");
 				break;
 			case MSG_QUERY_ENABLED:
@@ -371,7 +464,8 @@ public class ToDoMeService extends Service implements LocationListener {
 				mClients.get(i).send(msg);
 
 			} catch (RemoteException e) {
-				// The client is dead. Remove it from the list; we are going through the list from back to front
+				// The client is dead. Remove it from the list; we are going
+				// through the list from back to front
 				// so this is safe to do inside the loop.
 				mClients.remove(i);
 			}
@@ -393,7 +487,8 @@ public class ToDoMeService extends Service implements LocationListener {
 				mClients.get(i).send(msg);
 
 			} catch (RemoteException e) {
-				// The client is dead. Remove it from the list; we are going through the list from back to front
+				// The client is dead. Remove it from the list; we are going
+				// through the list from back to front
 				// so this is safe to do inside the loop.
 				mClients.remove(i);
 			}

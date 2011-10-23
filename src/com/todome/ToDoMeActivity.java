@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,63 +46,74 @@ import android.widget.TabHost;
 
 public class ToDoMeActivity extends TabActivity {
 	private static final String TAG = "ToDoMeActivity";
-	
-	public static final String FILE_PATH = "todome.dat";
-	private static SharedPreferences prefs;
+
+	/**
+	 * Used to store preferences for the app
+	 */
+	static SharedPreferences prefs;
+
+	/**
+	 * Used to store data
+	 * 
+	 * "tasks" for the tasks array "keywords" for the keywords database
+	 */
+	static SharedPreferences data;
+
 	private static ToDoMeActivity instance;
-	public static ToDoMeActivity getInstance() { return instance; }
-	
+
+	public static ToDoMeActivity getInstance() {
+		return instance;
+	}
+
 	public static final long LOC_INTERVAL = 60000;
 
 	// Create preferences setting method, and overload with defaults.
 	public static void setPreferences(Float search_radius, Long extra_time, Long gps_timeout) {
-		prefs.edit().putFloat("search_radius", search_radius > 10 ? 10 : search_radius)
-					.putLong("extra_time", extra_time)
-					.putLong("gps_timeout", gps_timeout)
-					.commit();
+		prefs.edit().putFloat("search_radius", search_radius > 10 ? 10 : search_radius).putLong("extra_time", extra_time).putLong("gps_timeout", gps_timeout)
+				.commit();
 	}
-	
-	private static void setPreferences() {
-		prefs.edit().putFloat("search_radius", 10)
-					.putLong("extra_time", 5 * 60 * 1000)
-					.putLong("gps_timeout", ToDoMeActivity.LOC_INTERVAL)
-					.commit();
+
+	private static void setDefaultPreferences() {
+		prefs.edit().putFloat("search_radius", 10).putLong("extra_time", 5 * 60 * 1000).putLong("gps_timeout", ToDoMeActivity.LOC_INTERVAL).commit();
 	}
-	
-	public static SharedPreferences getPreferences() {
-		return prefs;
-	}
-	
+
 	// Data
 	public static LocationDatabase db = new LocationDatabase();
 	public static KeywordDatabase keywords = new KeywordDatabase();
 	public static ArrayList<Task> tasks = new ArrayList<Task>();
-	
+
 	private boolean notificationsEnabled = true;
-	
-	public void saveTasks() {
+
+	// About dialog
+	private AlertDialog aboutDialog;
+
+	private void readTasks() {
 		try {
-			SharedPreferences.Editor editor = prefs.edit();
-			editor.putString("tasks", Util.getStringFromObject(tasks));
-			boolean successfull = editor.commit();
-			Log.i(TAG, "Successful: " + successfull);
+			String str = data.getString("tasks", null);
+			if (str != null) {
+				tasks = Util.getTaskListFromString(str);
+			} else {
+				Log.i(TAG, "Loaded tasks, but got null, populating database with empty task list");
+				writeTasks(new ArrayList<Task>());
+			}
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
+
 	}
-	//About dialog
-	private AlertDialog aboutDialog;
-	
-	public boolean getLite() {
-		return false;
+
+	static void writeTasks(ArrayList<Task> newTasks) {
+		Editor dataEditor = data.edit();
+
+		dataEditor.putString("tasks", Util.getTaskArrayString(newTasks));
+		dataEditor.commit();
 	}
-	
-	public void loadTasks() {
-		Log.i(TAG, "Tasks loaded");
+
+	private void readKeywords() {
 		try {
-			String str = prefs.getString("tasks", "");
-			if (str != "") {
-				tasks = Util.getTaskListFromString(str);
+			String str = data.getString("keywords", null);
+			if (str != null) {
+				keywords = Util.getKeywordDatabaseFromString(str);
 			}
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
@@ -115,17 +127,20 @@ public class ToDoMeActivity extends TabActivity {
 		instance = this;
 		try {
 			setContentView(R.layout.main);
-			
-			prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
-			prefs.edit().putString("keywords", Util.getKeywordDatabaseString(keywords)).commit();
-			loadTasks();
-			
-			//setPreferences(); // Default prefs
-			
-			Resources res = getResources();	// Resource object to get Drawables
-			TabHost tabHost = getTabHost();	// The activity TabHost
-			TabHost.TabSpec spec;			// Reusable TabSpec for each tab
-			Intent intent;					// Reusable Intent for each tab
+
+			// Load the two shared preferences files
+			prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+			data = getSharedPreferences("data", MODE_PRIVATE);
+			// Fill the data structures
+			readTasks();
+			readKeywords();
+
+			// setPreferences(); // Default prefs
+
+			Resources res = getResources(); // Resource object to get Drawables
+			TabHost tabHost = getTabHost(); // The activity TabHost
+			TabHost.TabSpec spec; // Reusable TabSpec for each tab
+			Intent intent; // Reusable Intent for each tab
 
 			// Create an Intent to launch an Activity for the tab (to be reused)
 			intent = new Intent().setClass(this, TaskActivity.class);
@@ -138,63 +153,55 @@ public class ToDoMeActivity extends TabActivity {
 			intent = new Intent().setClass(this, MapViewActivity.class);
 			spec = tabHost.newTabSpec("map").setIndicator("Map", res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
 			tabHost.addTab(spec);
-			
-			//intent = new Intent().setClass(this, TestTabActivity.class);
-			//spec = tabHost.newTabSpec("map").setIndicator("Test", res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
-			//tabHost.addTab(spec);
+
+			// intent = new Intent().setClass(this, TestTabActivity.class);
+			// spec = tabHost.newTabSpec("map").setIndicator("Test", res.getDrawable(R.drawable.ic_tab_map)).setContent(intent);
+			// tabHost.addTab(spec);
 
 			if (getIntent().getBooleanExtra("displayMap", false)) {
 				tabHost.setCurrentTab(1);
 			} else {
 				tabHost.setCurrentTab(0);
 			}
-			
+
 			// Service interaction
 			sendMessageToService(ToDoMeService.MSG_QUERY_ENABLED);
 			checkIfServiceIsRunning();
 			notifyTasksChanged();
-			
-			keywords = Util.getKeywordDatabaseFromString((prefs.getString("keywords", "")));
+
 		} catch (Exception ex) {
-			message("ToDoMeActivity.onCreate: " + ex.getClass().toString(), ex.getMessage());
+			Log.e(TAG, "In onCreate", ex);
 		}
 	}
-	
-	private void message(String title, String message) {
-		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-		alertDialog.setTitle(title);
-		alertDialog.setMessage(message);
-		alertDialog.show();
-	}
-	
+
 	// Service interaction
-	
+
 	final Messenger mMessenger = new Messenger(new IncomingHandler());
-	
+
 	Messenger mService = null;
 	boolean mIsBound;
-	
-	private ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mService = new Messenger(service);
-            notifyTasksChanged();
-            //textStatus.setText("Attached.");
-            try {
-                Message msg = Message.obtain(null, ToDoMeService.MSG_REGISTER_CLIENT);
-                msg.replyTo = mMessenger;
-                mService.send(msg);
-            } catch (RemoteException e) {
-                // In this case the service has crashed before we could even do anything with it
-            }
-        }
 
-        public void onServiceDisconnected(ComponentName className) {
+	private ServiceConnection mConnection = new ServiceConnection() {
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			mService = new Messenger(service);
+			notifyTasksChanged();
+			// textStatus.setText("Attached.");
+			try {
+				Message msg = Message.obtain(null, ToDoMeService.MSG_REGISTER_CLIENT);
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch (RemoteException e) {
+				// In this case the service has crashed before we could even do anything with it
+			}
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
 			// This is called when the connection with the service has been unexpectedly disconnected - process crashed.
 			mService = null;
-			//textStatus.setText("Disconnected.");
-        }
-    };
-	
+			// textStatus.setText("Disconnected.");
+		}
+	};
+
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
@@ -218,129 +225,129 @@ public class ToDoMeActivity extends TabActivity {
 			}
 		}
 	}
-	
+
 	private void checkIfServiceIsRunning() {
-        //If the service is running when the activity starts, we want to automatically bind to it.
-        if (ToDoMeService.isRunning()) {
-            doBindService();
-        } else {
-        	startService(new Intent(this, ToDoMeService.class));
-        	doBindService();
-        }
-    }
-	
+		// If the service is running when the activity starts, we want to automatically bind to it.
+		if (ToDoMeService.isRunning()) {
+			doBindService();
+		} else {
+			startService(new Intent(this, ToDoMeService.class));
+			doBindService();
+		}
+	}
+
 	private void sendMessageToService(int msgType) {
-        if (mIsBound) {
+		if (mIsBound) {
 			if (mService != null) {
-                try {
-                    // Send data as a String
-                    Message msg = Message.obtain(null, msgType);
-                    mService.send(msg);
-                } catch (RemoteException ex) {
-                	Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-                }
-            }
-        }
+				try {
+					// Send data as a String
+					Message msg = Message.obtain(null, msgType);
+					mService.send(msg);
+				} catch (RemoteException ex) {
+					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
+				}
+			}
+		}
 	}
 
 	public void notifyTasksChanged() {
-        sendMessageToService(ToDoMeService.MSG_TASKS_UPDATED);
+		sendMessageToService(ToDoMeService.MSG_TASKS_UPDATED);
 	}
 
 	void doBindService() {
 		this.bindService(new Intent(this, ToDoMeService.class), mConnection, Context.BIND_AUTO_CREATE);
 		mIsBound = true;
-        //textStatus.setText("Binding.");
-    }
-    void doUnbindService() {
-        if (mIsBound) {
-            // If we have received the service, and hence registered with it, then now is the time to unregister.
-            if (mService != null) {
-                try {
-                    Message msg = Message.obtain(null, ToDoMeService.MSG_UNREGISTER_CLIENT);
-                    msg.replyTo = mMessenger;
-                    mService.send(msg);
-                } catch (RemoteException e) {
-                    // There is nothing special we need to do if the service has crashed.
-                }
-            }
-            // Detach our existing connection.
-            unbindService(mConnection);
-            mIsBound = false;
-            //textStatus.setText("Unbinding.");
-        }
-    }
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            doUnbindService();
-        } catch (Throwable t) {
-            Log.e(TAG, "Failed to unbind from the service", t);
-        }
-    }
-    
-    // Menu stuff below here
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
-        return true;
-    }
-    
-    public boolean onPrepareOptionsMenu (Menu menu) {
-    	MenuItem item = menu.findItem(R.id.toggle_notifications_menu_button);
-    	
-    	if (notificationsEnabled) {
-    		item.setTitle(R.string.disable_notifications);
-    	} else {
-    		item.setTitle(R.string.enable_notifications);
-    	}
-    	
-    	return true;
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-    	Intent myIntent = new Intent();
-    	
-        switch (item.getItemId()) {
-	        case R.id.about_menu_button:
-	        	myIntent.setClassName("com.todome", "com.todome.AboutActivity");
-	        	startActivity(myIntent);   
-	            return true;
-	        case R.id.preferences_menu_button:
-	        	myIntent.setClassName("com.todome", "com.todome.PreferencesActivity");
-	        	startActivity(myIntent);
-	            return true;
-	        case R.id.toggle_notifications_menu_button:
-	        	if (notificationsEnabled) {
-	        		sendMessageToService(ToDoMeService.MSG_DISABLE);
-	        		notificationsEnabled = false;
-	        		item.setTitle(R.string.disable_notifications);
-	        	} else {
-	        		sendMessageToService(ToDoMeService.MSG_ENABLE);
-	        		notificationsEnabled = true;
-	        		item.setTitle(R.string.enable_notifications);
-	        	}
-	        	return true;
-	        default:
-	            return super.onOptionsItemSelected(item);
-        }
-    }
-    
-    public void aboutDialog() {
-    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    	
-    	builder.setTitle("About").setCancelable(true).setMessage("ToDoMe v0.1\n" +
-    															 "21/10/11");
+		// textStatus.setText("Binding.");
+	}
+
+	void doUnbindService() {
+		if (mIsBound) {
+			// If we have received the service, and hence registered with it, then now is the time to unregister.
+			if (mService != null) {
+				try {
+					Message msg = Message.obtain(null, ToDoMeService.MSG_UNREGISTER_CLIENT);
+					msg.replyTo = mMessenger;
+					mService.send(msg);
+				} catch (RemoteException e) {
+					// There is nothing special we need to do if the service has crashed.
+				}
+			}
+			// Detach our existing connection.
+			unbindService(mConnection);
+			mIsBound = false;
+			// textStatus.setText("Unbinding.");
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		try {
+			doUnbindService();
+		} catch (Throwable t) {
+			Log.e(TAG, "Failed to unbind from the service", t);
+		}
+	}
+
+	// Menu stuff below here
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
+
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem item = menu.findItem(R.id.toggle_notifications_menu_button);
+
+		if (notificationsEnabled) {
+			item.setTitle(R.string.disable_notifications);
+		} else {
+			item.setTitle(R.string.enable_notifications);
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		Intent myIntent = new Intent();
+
+		switch (item.getItemId()) {
+		case R.id.about_menu_button:
+			myIntent.setClassName("com.todome", "com.todome.AboutActivity");
+			startActivity(myIntent);
+			return true;
+		case R.id.preferences_menu_button:
+			myIntent.setClassName("com.todome", "com.todome.PreferencesActivity");
+			startActivity(myIntent);
+			return true;
+		case R.id.toggle_notifications_menu_button:
+			if (notificationsEnabled) {
+				sendMessageToService(ToDoMeService.MSG_DISABLE);
+				notificationsEnabled = false;
+				item.setTitle(R.string.disable_notifications);
+			} else {
+				sendMessageToService(ToDoMeService.MSG_ENABLE);
+				notificationsEnabled = true;
+				item.setTitle(R.string.enable_notifications);
+			}
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	public void aboutDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+		builder.setTitle("About").setCancelable(true).setMessage("ToDoMe v0.1\n" + "21/10/11");
 		aboutDialog = builder.create();
-		
+
 		aboutDialog.show();
-		
+
 		Log.v(TAG, "yo");
-    }
+	}
 }

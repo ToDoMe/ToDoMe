@@ -58,8 +58,8 @@ public class TaskActivity extends Activity {
 	private Dialog dialog;
 	private AlertDialog alertMarkComplete;
 	private AlertDialog alertDelete;
-	public String taskType;
 
+	// Task array + the "New Task" buttons
 	private ArrayList<Task> tasksWithNewTask;
 
 	private static final String TAG = "TaskActivity";
@@ -75,44 +75,38 @@ public class TaskActivity extends Activity {
 
 		// Build popups
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		
-		builder.setMessage("Mark complete?").setCancelable(false)
-		.setPositiveButton("Yes",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						touchedTask.setName("[Completed] " + touchedTask.getName());
-						tasks.add(touchedTask);
-						tasks.remove(touchedTask);
-						touchedTask.setComplete(true);
-						setUpTasksWithNewTasks();
-						taskAdapter.notifyDataSetChanged();
-						parent.notifyTasksChanged();
-						ToDoMeActivity.getInstance().saveTasks();
-					}
-				}).setNegativeButton("No",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
+
+		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				touchedTask.setName("[Completed] " + touchedTask.getName());
+				tasks.add(touchedTask);
+				tasks.remove(touchedTask);
+				touchedTask.setComplete(true);
+				setUpTasksWithNewTasks();
+				taskAdapter.notifyDataSetChanged();
+				parent.notifyTasksChanged();
+				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
+			}
+		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
 		alertMarkComplete = builder.create();
-		
-		builder.setMessage("Delete?").setCancelable(false)
-				.setPositiveButton("Yes",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								tasks.remove(touchedTask);
-								setUpTasksWithNewTasks();
-								taskAdapter.notifyDataSetChanged();
-								parent.notifyTasksChanged();
-								ToDoMeActivity.getInstance().saveTasks();
-							}
-						}).setNegativeButton("No",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
+
+		builder.setMessage("Delete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				tasks.remove(touchedTask);
+				setUpTasksWithNewTasks();
+				taskAdapter.notifyDataSetChanged();
+				parent.notifyTasksChanged();
+				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
+			}
+		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
 
 		alertDelete = builder.create();
 
@@ -125,7 +119,7 @@ public class TaskActivity extends Activity {
 
 		// Creating list task array
 		setUpTasksWithNewTasks();
-		Log.i("ToDoMe", "Tasks has " + tasks.size() + " list tasks has " + tasksWithNewTask.size());
+		Log.i(TAG, "Displaying " + tasks.size() + " tasks");
 
 		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasksWithNewTask);
 		lv.setAdapter(taskAdapter);
@@ -191,9 +185,9 @@ public class TaskActivity extends Activity {
 		okButton.setEnabled(updatingTask);
 
 		// if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check if a task is being clicked on
-		//	Task task = tasks.get(position);
+		// Task task = tasks.get(position);
 
-		//	taskNameEntry.setText(task.getName());
+		// taskNameEntry.setText(task.getName());
 		// }
 
 		taskNameEntry.addTextChangedListener(new TextWatcher() {
@@ -224,8 +218,8 @@ public class TaskActivity extends Activity {
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		// Create the new task
-		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(), (int) ratingEntry
-				.getRating());
+		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(),
+				(int) ratingEntry.getRating());
 
 		Calendar c = Calendar.getInstance();
 		Time time = new Time();
@@ -239,7 +233,7 @@ public class TaskActivity extends Activity {
 		if (updatingTask) {
 			tasks.remove(position);
 		}
-		
+
 		// Put it in the array, in the right place
 		if (position == tasks.size() + 1) {
 			tasks.add(tasks.size(), task);
@@ -261,8 +255,7 @@ public class TaskActivity extends Activity {
 
 		taskNameEntry.setText("");
 		parent.notifyTasksChanged();
-		ToDoMeActivity.getInstance().saveTasks();
-		
+		ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
 		dialog.hide();
 	}
 
@@ -274,43 +267,36 @@ public class TaskActivity extends Activity {
 			tasksWithNewTask.add(new Task("New Task", "", "", 0));
 
 	}
-	
+
 	private void addStarRating(int position) {
 		TextView tv = (TextView) lv.getChildAt(position);
 		int rating = tasks.get(position - 1).getRating();
 		Drawable img = null;
-		
-		switch (rating) {
-			case 0:
-				img = null;
-				break;
-			case 1:
-				img = getBaseContext().getResources().getDrawable(R.drawable.staricon1);
-				break;
-			case 2:
-				img = getBaseContext().getResources().getDrawable(R.drawable.staricon2);
-				break;
-			case 3:
-				img = getBaseContext().getResources().getDrawable(R.drawable.staricon3);
-				break;
-			case 4:
-				img = getBaseContext().getResources().getDrawable(R.drawable.staricon4);
-				break;
-			case 5:
-				img = getBaseContext().getResources().getDrawable(R.drawable.staricon5);
-				break;
-			default:
-				break;
-		}
-		
-		tv.setCompoundDrawablesWithIntrinsicBounds(null, null, img, null);
-		
-	}
 
-	/*private void message(String title, String message) {
-		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-		alertDialog.setTitle(title);
-		alertDialog.setMessage(message);
-		alertDialog.show();
-	}*/
+		switch (rating) {
+		case 0:
+			img = null;
+			break;
+		case 1:
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon1);
+			break;
+		case 2:
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon2);
+			break;
+		case 3:
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon3);
+			break;
+		case 4:
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon4);
+			break;
+		case 5:
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon5);
+			break;
+		default:
+			break;
+		}
+
+		tv.setCompoundDrawablesWithIntrinsicBounds(null, null, img, null);
+
+	}
 }

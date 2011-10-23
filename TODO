@@ -6,7 +6,6 @@ More info about tasks (Specific location reminder, notes, ...)
 [DONE by John] Task deletion and completion
 [DONE] Write service, so it can run in the background
 No GPS message
-
 Custom locations and end times
 Preferences Menu  -| Both of these should be accessed from the menu key
 About Screen      -|
@@ -22,6 +21,7 @@ Fix map so that locations shop up immediately
 [DONE] Stop the I am here overlay being persistant
 Store the keywords database in the shared preferences
 Custom audio alerts and vibration alerts per type
+Clear data and reset setting option in preferences
 
  -------------------------- For Next Release --------------------------
 Full database for storing tasks and locations
