@@ -196,12 +196,14 @@ public class MapViewActivity extends MapActivity {
 				Log.i("MapViewActivity", "Found type " + type);
 				types = types + " " + type;
 			}
+			
+			String name = ToDoMeActivity.keywords.getDescriptionForType(types.split(" ")[0]);
 
 			if (poi.getClosingTimes() != null) {
-				itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), types, poi.getOpeningTimes()[getDayOfWeek()] + " - "
+				itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), name, poi.getOpeningTimes()[getDayOfWeek()] + " - "
 						+ poi.getClosingTimes()[getDayOfWeek()]));
 			} else {
-				itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), types, ""));
+				itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), name, ""));
 			}
 		}
 
