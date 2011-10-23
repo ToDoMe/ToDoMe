@@ -156,7 +156,7 @@ public class ToDoMeService extends Service implements LocationListener {
 					// Enable GPS again
 					enableNotifications();
 				}
-				
+
 				checkForReleventNotifications();
 			} else {
 				Log.i(TAG, "Loaded tasks, but got null, populating database with empty task list");
@@ -223,9 +223,20 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		Log.i(TAG, "Got " + notifyTasks.size() + " tasks");
 
+		String tickerText = "";
+		for (int i = 0; i < notifyTasks.size(); i++) {
+			if (i != (notifyTasks.size() - 2)) {
+				tickerText += notifyTasks.get(i).getName() + ", ";
+			} else {
+				tickerText += notifyTasks.get(i).getName() + " and ";
+			}
+		}
+		
+		Log.i(TAG, "TickerText " + tickerText);
+
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		// Set the icon, scrolling text and timestamp
-		Notification notification = new Notification(R.drawable.notification_icon, notifyTasks.get(0).getName(), System.currentTimeMillis());
+		Notification notification = new Notification(R.drawable.notification_icon, tickerText, System.currentTimeMillis());
 		notification.defaults |= Notification.DEFAULT_SOUND;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
 		// The PendingIntent to launch our activity if the user selects this
@@ -236,7 +247,10 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		message = "You are near a ";
 
-		HashSet<String> taskTypes = notifyTasks.get(0).getTypes();
+		HashSet<String> taskTypes = new HashSet<String>();
+		for (Iterator<Task> taskIter = notifyTasks.iterator(); taskIter.hasNext();) {
+			taskTypes.addAll(taskIter.next().getTypes());
+		}
 		HashSet<String> locationTypes = poi.getLocationTypes();
 		HashSet<String> typesIntersection = new HashSet<String>();
 
@@ -246,7 +260,44 @@ public class ToDoMeService extends Service implements LocationListener {
 		for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
 			message = message + iter.next() + " ";
 		}
-		notification.setLatestEventInfo(this, notifyTasks.get(0).getName(), message, contentIntent);
+		
+		Log.i(TAG, "Message " + message);
+
+		notification.setLatestEventInfo(this, tickerText, message, contentIntent);
+
+		// Send the notification.
+		// We use a layout id because it is a unique number. We use it later to
+		// cancel.
+		nm.notify(R.string.service_started, notification);
+	}
+
+	private void showNotification(Task notifyTask, PointOfInterest poi) {
+		Log.i(TAG, "Showing notification");
+
+		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		// Set the icon, scrolling text and timestamp
+		Notification notification = new Notification(R.drawable.notification_icon, notifyTask.getName(), System.currentTimeMillis());
+		notification.defaults |= Notification.DEFAULT_SOUND;
+		notification.defaults |= Notification.DEFAULT_VIBRATE;
+		// The PendingIntent to launch our activity if the user selects this
+		// notification
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class).putExtra("displayMap", true), 0);
+		// Set the info for the views that show in the notification panel.
+		String message = "";
+
+		message = "You are near a ";
+
+		HashSet<String> taskTypes = notifyTask.getTypes();
+		HashSet<String> locationTypes = poi.getLocationTypes();
+		HashSet<String> typesIntersection = new HashSet<String>();
+
+		typesIntersection.addAll(taskTypes);
+		typesIntersection.retainAll(locationTypes);
+
+		for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
+			message = message + iter.next() + " ";
+		}
+		notification.setLatestEventInfo(this, notifyTask.getName(), message, contentIntent);
 
 		// Send the notification.
 		// We use a layout id because it is a unique number. We use it later to
@@ -353,7 +404,13 @@ public class ToDoMeService extends Service implements LocationListener {
 		for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
 			String type = iter.next();
 			Log.i(TAG, "Getting POIs for " + type);
-			LocationDatabase tempDatabase = getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type);
+
+			LocationDatabase tempDatabase = null;
+			if (userCurrentLocation != null) {
+				tempDatabase = getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type);
+			} else {
+				Log.i(TAG, "No user location fetch userCurrentLocation==null");
+			}
 			if (tempDatabase != null) {
 				newDatabase.addAll(tempDatabase);
 			}
@@ -377,27 +434,45 @@ public class ToDoMeService extends Service implements LocationListener {
 	void checkForReleventNotifications() {
 		Log.i(TAG, "Checking for relevent notifications");
 		if (!updateDatabase(getAllTaskTypes())) {
-			Log.e(TAG, "checkForReleventNotifications errored, falling back to old database");
+			Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
 		}
 
-		for (Iterator<PointOfInterest> iter = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.1d).iterator(); iter
-				.hasNext();) {
-			PointOfInterest poi = iter.next();
+		if (userCurrentLocation != null) {
+			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.1d);
+			//locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
 
-			if (!notifiedPOIs.contains(poi)) {
+			for (Iterator<PointOfInterest> iter = locDb.iterator(); iter.hasNext();) {
+				PointOfInterest poi = iter.next();
 
-				ArrayList<Task> releventTasks = Util.getReleventTasks(tasks, poi);
-				Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
-				if (releventTasks.size() > 0) {
-					showNotification(releventTasks, poi);
-					notifiedPOIs.add(poi);
+				if (!notifiedPOIs.contains(poi)) {
+
+					ArrayList<Task> releventTasks = Util.getReleventTasks(tasks, poi);
+					Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
+
+					boolean mutipleNotifications = false;
+
+					if (mutipleNotifications) {
+						for (Iterator<Task> taskIter = releventTasks.iterator(); taskIter.hasNext();) {
+							showNotification(taskIter.next(), poi);
+							notifiedPOIs.add(poi);
+						}
+					} else {
+
+						if (releventTasks.size() > 0) {
+							showNotification(releventTasks, poi);
+							notifiedPOIs.add(poi);
+						} else {
+							Log.e(TAG, "getReleventTasks has returned 0, this should not happen!");
+						}
+					}
+
 				} else {
-					Log.e(TAG, "getReleventTasks has returned 0, this should not happen!");
+					Log.i(TAG, "Not notifying for " + poi.getLatitudeE6() + " " + poi.getLongitudeE6()
+							+ " as it has been notified for in this location already");
 				}
-
-			} else {
-				Log.i(TAG, "Not notifying for " + poi.getLatitudeE6() + " " + poi.getLongitudeE6() + " as it has been notified for in this location already");
 			}
+		} else {
+			Log.w(TAG, "Cant check for location triggered notifications as userCurrentLocation==null");
 		}
 	}
 
