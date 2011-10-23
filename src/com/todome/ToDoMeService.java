@@ -149,7 +149,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			String str = data.getString("tasks", null);
 			if (str != null) {
 				tasks = Util.getTaskListFromString(str);
-				Log.i(TAG, "Got " + tasks.size() + " from the shared preferences  " + str);
+				Log.i(TAG, "Got " + tasks.size() + " from the shared preferences");
 
 				if (this.tasks.size() == 0) {
 					// Disable GPS to save battery
@@ -178,11 +178,13 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	private void readKeywords() {
+		Log.i(TAG, "Reading keywords.");
 		try {
 			data = getSharedPreferences("data", MODE_PRIVATE); // Added as per tasks above
 			String str = data.getString("keywords", null);
 			if (str != null) {
 				keywords = Util.getKeywordDatabaseFromString(str);
+				writeKeywords(keywords);
 			} else {
 				Log.i(TAG, "Loaded keywords, but got null, populating database with keywords from server");
 				KeywordDatabase tempDatabase = getKeywordDatabaseFromServer();
@@ -193,6 +195,8 @@ public class ToDoMeService extends Service implements LocationListener {
 					writeKeywords(new KeywordDatabase());
 				}
 			}
+			Log.i(TAG, "keywords.size() = " + keywords.size() + ". Sending MSG_KEYWORDS_UPDATED");
+			sendMessageToUI(MSG_KEYWORDS_UPDATED);
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
@@ -345,7 +349,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	/**
-	 * Fetch's locations about the given arguments, returns null if a error occurs
+	 * Fetches locations about the given arguments. Returns null if a error occurs.
 	 */
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
@@ -533,6 +537,8 @@ public class ToDoMeService extends Service implements LocationListener {
 			case MSG_REGISTER_CLIENT:
 				mClients.add(msg.replyTo);
 				Log.i(TAG, "Client registered.");
+				readTasks();
+				readKeywords();
 				break;
 			case MSG_UNREGISTER_CLIENT:
 				mClients.remove(msg.replyTo);
@@ -564,6 +570,8 @@ public class ToDoMeService extends Service implements LocationListener {
 		}
 	}
 
+	// Messaging
+	
 	private void sendQueryResponse() {
 		for (int i = mClients.size() - 1; i >= 0; i--) {
 			try {
@@ -603,6 +611,20 @@ public class ToDoMeService extends Service implements LocationListener {
 		}
 	}
 
+	private void sendMessageToUI(int msgType) {
+		for (int i = mClients.size() - 1; i >= 0; i--) {
+			try {
+				Message msg = Message.obtain(null, msgType);
+				mClients.get(i).send(msg);
+
+			} catch (RemoteException e) {
+				// The client is dead. Remove it from the list; we are going through the list from back to front
+				// so this is safe to do inside the loop.
+				mClients.remove(i);
+			}
+		}
+	}
+	
 	// LocationListener
 
 	public void onLocationChanged(Location location) {
