@@ -78,28 +78,20 @@ public class TaskActivity extends Activity {
 		// Build popups
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		builder.setMessage("Mark complete?").setCancelable(false)
-				.setPositiveButton("Yes",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								// touchedTask.setName("[Completed] " +
-								// touchedTask.getName());
-								tasks.add(touchedTask); // The add and remove,
-								// re-adds the task at
-								// the bottom of the
-								// list
-								tasks.remove(touchedTask);
-								touchedTask.setComplete(true);
-								setUpTasksWithNewTasks();
-								taskAdapter.notifyDataSetChanged();
-								ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
-							}
-						}).setNegativeButton("No",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
+		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				// touchedTask.setName("[Completed] " + touchedTask.getName());
+				touchedTask.setComplete(true);
+				setUpTasksWithNewTasks();
+				taskAdapter.notifyDataSetChanged();
+				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
+			}
+		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
+
 		alertMarkComplete = builder.create();
 
 		builder.setMessage("Delete?").setCancelable(false).setPositiveButton(
@@ -147,7 +139,7 @@ public class TaskActivity extends Activity {
 
 				} else {
 					touchedTask = tasks.get(position - 1);
-					if (touchedTask.getName().contains("[Completed] ")) {
+					if (touchedTask.isComplete()) {
 						alertDelete.show();
 					} else {
 						alertMarkComplete.show();
@@ -247,8 +239,8 @@ public class TaskActivity extends Activity {
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		// Create the new task
-		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(),
-				(int) ratingEntry.getRating());
+		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(), (int) ratingEntry
+				.getRating());
 
 		Calendar c = Calendar.getInstance();
 		Time currentTime = new Time();
@@ -292,18 +284,22 @@ public class TaskActivity extends Activity {
 	}
 
 	private void setUpTasksWithNewTasks() {
+		HashSet<Task> tasksToAdd = new HashSet<Task>();
 		tasksWithNewTask.clear();
 		tasksWithNewTask.addAll(tasks);
 		for (Iterator<Task> iter = tasksWithNewTask.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			if (task.isComplete()) {
-				task.setName("[Completed] " + task.getName()); // This needs to
-				// be done,
-				// without
-				// changing the
-				// name.
+				iter.remove();
+				Task newTask = task.clone(); // Clone to stop modifying the existing task
+				if (newTask == null) {
+					Log.e(TAG, "newTask == null");
+				}
+				newTask.setName("[Completed] " + newTask.getName());
+				tasksToAdd.add(newTask); // The add and remove, re-adds the task at the bottom of the list
 			}
 		}
+		tasksWithNewTask.addAll(tasksToAdd);
 		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
 		if (tasks.size() != 0)
 			tasksWithNewTask.add(new Task("New Task", "", "", 0));
