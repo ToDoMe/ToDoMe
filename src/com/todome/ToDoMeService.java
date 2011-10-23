@@ -89,7 +89,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	private boolean enabled = true;
 
 	/*
-	 * This array list contains the id's of the point of interests, that have been notified for the current location. To keep this up to date, id's are added as
+	 * This array list contains the ids of the point of interests, that have been notified for the current location. To keep this up to date, ids are added as
 	 * notifications are shown, and removed when the user location is updated.
 	 */
 	HashSet<PointOfInterest> notifiedPOIs = new HashSet<PointOfInterest>();
@@ -149,8 +149,6 @@ public class ToDoMeService extends Service implements LocationListener {
 		Log.i(TAG, "Showing notification");
 		Collections.sort(notifyTasks, new TaskPriorityComparator());
 
-		Log.i(TAG, "Got " + notifyTasks.size() + " tasks");
-
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		// Set the icon, scrolling text and timestamp
 		Notification notification = new Notification(R.drawable.notification_icon, notifyTasks.get(0).getName(), System.currentTimeMillis());
@@ -185,10 +183,10 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	/**
-	 * Fetch's locations about the given arguments, returns null if a error occurs
+	 * Fetches locations about the given arguments. Returns null if an error occurs.
 	 */
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
-		Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
+		//Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
 
 		double lat = Util.E6IntToDouble(point.getLatitudeE6());
 		double lng = Util.E6IntToDouble(point.getLongitudeE6());
@@ -206,8 +204,6 @@ public class ToDoMeService extends Service implements LocationListener {
 		try {
 			JSONArray jsonArray = new JSONArray(file);
 
-			Log.i(TAG, "Number of entries " + jsonArray.length());
-
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				try {
@@ -216,9 +212,7 @@ public class ToDoMeService extends Service implements LocationListener {
 					// Log.i(TAG, "About to parse location types");
 					for (Iterator<String> iter = locationTypes.keys(); iter.hasNext();) {
 						String key = iter.next();
-						// Log.i(TAG, "Got key " + key);
 						String value = locationTypes.get(key).toString();
-						// Log.i(TAG, "Got value " + value);
 						types.add(value);
 					}
 					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), types, null,
@@ -232,21 +226,20 @@ public class ToDoMeService extends Service implements LocationListener {
 			return null;
 		}
 
-		Log.i(TAG, "Updated locations database \n" + newLocDatabase.print());
+		Log.i(TAG, type + ":" + newLocDatabase.toString());
 
 		return newLocDatabase;
 
 	}
 
 	/**
-	 * This updates the central database with the relevant data from the server
+	 * Updates the central database with the relevant data from the server.
 	 */
 	private boolean updateDatabase(HashSet<String> taskTypes) {
 		LocationDatabase newDatabase = new LocationDatabase();
 
 		for (Iterator<String> iter = taskTypes.iterator(); iter.hasNext();) {
 			String type = iter.next();
-			Log.i(TAG, "Getting POIs for " + type);
 			LocationDatabase tempDatabase = getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type);
 			if (tempDatabase != null) {
 				newDatabase.addAll(tempDatabase);
@@ -268,7 +261,9 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	void checkForReleventNotifications() {
 		Log.i(TAG, "Checking for relevent notifications");
-		if (!updateDatabase(getAllTaskTypes())) {
+		HashSet<String> types = getAllTaskTypes();
+		Log.i(TAG, "types: " + types.toString());
+		if (!updateDatabase(types)) {
 			Log.e(TAG, "checkForReleventNotifications errored, falling back to old database");
 		}
 
@@ -279,7 +274,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			if (!notifiedPOIs.contains(poi)) {
 
 				ArrayList<Task> releventTasks = Util.getReleventTasks(tasks, poi);
-				Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
+				Log.i(TAG, poi.toString() + " has " + releventTasks.size() + " relevent tasks: " + releventTasks.toString());
 				if (releventTasks.size() > 0) {
 					showNotification(releventTasks, poi);
 					notifiedPOIs.add(poi);
@@ -294,7 +289,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	/*
-	 * This method removes all poi's that are not close to the users current location
+	 * Removes all POIs that are not close to the users current location
 	 */
 	private void updateNotifiedPOIs() {
 		double distance = 0.1d; // meters
