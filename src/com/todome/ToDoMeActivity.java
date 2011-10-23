@@ -120,12 +120,8 @@ public class ToDoMeActivity extends TabActivity {
 		} else {
 			Log.e(TAG, "ERROR commiting tasks, in ToDoMeActivity.writeTasks(); " + newTasks.size());
 		}
-		
-		if (data.getString("tasks", null) != Util.getTaskArrayString(newTasks)) {
-			Log.e(TAG, "Just put tasks in, but tasks does not come out?!?!");
-		}
 
-		Log.i(TAG, "Now have " + newTasks.size() + " tasks, sending to service " + Util.getTaskArrayString(newTasks));
+		Log.i(TAG, "Now have " + newTasks.size() + " tasks");
 		notifyTasksChanged();
 	}
 

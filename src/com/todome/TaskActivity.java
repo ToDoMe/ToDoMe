@@ -78,35 +78,44 @@ public class TaskActivity extends Activity {
 		// Build popups
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				//touchedTask.setName("[Completed] " + touchedTask.getName());
-				tasks.add(touchedTask); // The add and remove, re-adds the task at the bottom of the list
-				tasks.remove(touchedTask);
-				touchedTask.setComplete(true);
-				setUpTasksWithNewTasks();
-				taskAdapter.notifyDataSetChanged();
-				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
-			}
-		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
+		builder.setMessage("Mark complete?").setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								// touchedTask.setName("[Completed] " +
+								// touchedTask.getName());
+								tasks.add(touchedTask); // The add and remove,
+								// re-adds the task at
+								// the bottom of the
+								// list
+								tasks.remove(touchedTask);
+								touchedTask.setComplete(true);
+								setUpTasksWithNewTasks();
+								taskAdapter.notifyDataSetChanged();
+								ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
+							}
+						}).setNegativeButton("No",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
 		alertMarkComplete = builder.create();
 
-		builder.setMessage("Delete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				tasks.remove(touchedTask);
-				setUpTasksWithNewTasks();
-				taskAdapter.notifyDataSetChanged();
-				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
-			}
-		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
+		builder.setMessage("Delete?").setCancelable(false).setPositiveButton(
+				"Yes", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						tasks.remove(touchedTask);
+						setUpTasksWithNewTasks();
+						taskAdapter.notifyDataSetChanged();
+						ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
+					}
+				}).setNegativeButton("No",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
 
 		alertDelete = builder.create();
 
@@ -121,12 +130,19 @@ public class TaskActivity extends Activity {
 		setUpTasksWithNewTasks();
 		Log.i(TAG, "Displaying " + tasks.size() + " tasks");
 
-		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasksWithNewTask);
+		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item,
+				tasksWithNewTask);
 		lv.setAdapter(taskAdapter);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				if (position == 0 || position == (tasks.size() + 1)) { // If
+					// clicking
+					// on a
+					// New
+					// Task
+					// item
 					showTaskDialog(tasks.size() + 1, false);
 
 				} else {
@@ -141,8 +157,14 @@ public class TaskActivity extends Activity {
 		});
 
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				if (position == 0 || position == (tasks.size() + 1)) { // If
+					// clicking
+					// on a
+					// New
+					// Task
+					// item
 					return false;
 				} else {
 					showTaskDialog(position - 1, true);
@@ -158,10 +180,13 @@ public class TaskActivity extends Activity {
 		dialog.setContentView(R.layout.new_task_dialog);
 		dialog.setTitle("New Task");
 
-		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
-		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
+		EditText taskNameEntry = (EditText) dialog
+				.findViewById(R.id.taskNameEntry);
+		RatingBar ratingEntry = (RatingBar) dialog
+				.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
-		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+		EditText postcodeEntry = (EditText) dialog
+				.findViewById(R.id.postcodeEntry);
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		if (updatingTask) {
@@ -173,7 +198,8 @@ public class TaskActivity extends Activity {
 			notesEntry.setText(thisTask.getNotes());
 			postcodeEntry.setText(thisTask.getPostcode());
 			if (thisTask.getAlarmTime() != null) {
-				Log.i(TAG, "AlarmTime hour " + thisTask.getAlarmTime().hour + " min " + thisTask.getAlarmTime().minute);
+				Log.i(TAG, "AlarmTime hour " + thisTask.getAlarmTime().hour
+						+ " min " + thisTask.getAlarmTime().minute);
 				timeEntry.setCurrentHour(thisTask.getAlarmTime().hour);
 				timeEntry.setCurrentMinute(thisTask.getAlarmTime().minute);
 			}
@@ -184,7 +210,8 @@ public class TaskActivity extends Activity {
 		final Button okButton = (Button) dialog.findViewById(R.id.okButton);
 		okButton.setEnabled(updatingTask);
 
-		// if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check if a task is being clicked on
+		// if (tasks.size() != 0 && tasks.size() != (position - 1)) { // Check
+		// if a task is being clicked on
 		// Task task = tasks.get(position);
 
 		// taskNameEntry.setText(task.getName());
@@ -192,11 +219,13 @@ public class TaskActivity extends Activity {
 
 		taskNameEntry.addTextChangedListener(new TextWatcher() {
 
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
 				okButton.setEnabled(s.length() > 0);
 			}
 
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
 			}
 
 			public void afterTextChanged(Editable s) {
@@ -222,9 +251,13 @@ public class TaskActivity extends Activity {
 				(int) ratingEntry.getRating());
 
 		Calendar c = Calendar.getInstance();
-		Time time = new Time();
-		time.set(0, timeEntry.getCurrentMinute(), timeEntry.getCurrentHour(), c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH), c.get(Calendar.YEAR));
-		task.setAlarmTime(time);
+		Time currentTime = new Time();
+		currentTime.set(System.currentTimeMillis());
+		if ((currentTime.hour != timeEntry.getCurrentHour()) || (currentTime.minute != timeEntry.getCurrentMinute())) {
+			Time time = new Time();
+			time.set(0, timeEntry.getCurrentMinute(), timeEntry.getCurrentHour(), c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH), c.get(Calendar.YEAR));
+			task.setAlarmTime(time);
+		}
 
 		// Give it a type
 		if (ToDoMeActivity.keywords.keywords.size() == 0) {
@@ -264,7 +297,11 @@ public class TaskActivity extends Activity {
 		for (Iterator<Task> iter = tasksWithNewTask.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			if (task.isComplete()) {
-				task.setName("[Completed] " + task.getName()); // This needs to be done, without changing the name. 
+				task.setName("[Completed] " + task.getName()); // This needs to
+				// be done,
+				// without
+				// changing the
+				// name.
 			}
 		}
 		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
@@ -283,19 +320,24 @@ public class TaskActivity extends Activity {
 			img = null;
 			break;
 		case 1:
-			img = getBaseContext().getResources().getDrawable(R.drawable.staricon1);
+			img = getBaseContext().getResources().getDrawable(
+					R.drawable.staricon1);
 			break;
 		case 2:
-			img = getBaseContext().getResources().getDrawable(R.drawable.staricon2);
+			img = getBaseContext().getResources().getDrawable(
+					R.drawable.staricon2);
 			break;
 		case 3:
-			img = getBaseContext().getResources().getDrawable(R.drawable.staricon3);
+			img = getBaseContext().getResources().getDrawable(
+					R.drawable.staricon3);
 			break;
 		case 4:
-			img = getBaseContext().getResources().getDrawable(R.drawable.staricon4);
+			img = getBaseContext().getResources().getDrawable(
+					R.drawable.staricon4);
 			break;
 		case 5:
-			img = getBaseContext().getResources().getDrawable(R.drawable.staricon5);
+			img = getBaseContext().getResources().getDrawable(
+					R.drawable.staricon5);
 			break;
 		default:
 			break;

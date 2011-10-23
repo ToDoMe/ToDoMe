@@ -111,9 +111,13 @@ public class Task implements Serializable, Comparable<Task> {
 	}
 
 	public Time getAlarmTime() {
+		if (year != 0) { // TODO: Hack
 		Time time = new Time();
 		time.set(second, minute, hour, monthDay, month, year);
 		return time;
+		} else {
+			return null;
+		}
 	}
 
 	public void setAlarmTime(Time alarmTime) {
