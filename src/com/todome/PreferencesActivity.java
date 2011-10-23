@@ -63,12 +63,12 @@ public class PreferencesActivity extends Activity {
         	public void onClick(View v) {
         		final AlertDialog alertDialog = new AlertDialog.Builder(PreferencesActivity.this).create();
         		alertDialog.setMessage("Are you sure?");
-        		alertDialog.setButton(alertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+        		alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
         		    public void onClick(DialogInterface dialog, int which) {
         		    	 ToDoMeActivity.setDefaultPreferences();
         		    	 alertDialog.dismiss();
         		     } });
-        		alertDialog.setButton(alertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+        		alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
       		      	public void onClick(DialogInterface dialog, int which) {
       		      		alertDialog.dismiss();
       		      	} }); 
@@ -81,12 +81,12 @@ public class PreferencesActivity extends Activity {
         	public void onClick(View v) {
         		final AlertDialog alertDialog = new AlertDialog.Builder(PreferencesActivity.this).create();
         		alertDialog.setMessage("Are you sure?");
-        		alertDialog.setButton(alertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+        		alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
         		      public void onClick(DialogInterface dialog, int which) {
         		    	  data.edit().clear().commit();
         		    	  alertDialog.dismiss();
         		      } });
-        		alertDialog.setButton(alertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+        		alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
       		      public void onClick(DialogInterface dialog, int which) {
       		    	  alertDialog.dismiss();
       		      } }); 

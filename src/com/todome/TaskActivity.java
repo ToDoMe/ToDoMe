@@ -30,7 +30,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -51,8 +50,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 public class TaskActivity extends Activity {
-	private ToDoMeActivity parent;
-
 	private ArrayList<Task> tasks; // Loaded from ToDoMeActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
@@ -70,7 +67,6 @@ public class TaskActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.todo);
-		parent = (ToDoMeActivity) getParent();
 
 		tasks = ToDoMeActivity.tasks;
 		tasksWithNewTask = new ArrayList<Task>();
@@ -80,9 +76,7 @@ public class TaskActivity extends Activity {
 
 		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				//touchedTask.setName("[Completed] " + touchedTask.getName());
-				tasks.add(touchedTask); // The add and remove, re-adds the task at the bottom of the list
-				tasks.remove(touchedTask);
+				// touchedTask.setName("[Completed] " + touchedTask.getName());
 				touchedTask.setComplete(true);
 				setUpTasksWithNewTasks();
 				taskAdapter.notifyDataSetChanged();
@@ -131,7 +125,7 @@ public class TaskActivity extends Activity {
 
 				} else {
 					touchedTask = tasks.get(position - 1);
-					if (touchedTask.getName().contains("[Completed] ")) {
+					if (touchedTask.isComplete()) {
 						alertDelete.show();
 					} else {
 						alertMarkComplete.show();
@@ -259,14 +253,22 @@ public class TaskActivity extends Activity {
 	}
 
 	private void setUpTasksWithNewTasks() {
+		HashSet<Task> tasksToAdd = new HashSet<Task>();
 		tasksWithNewTask.clear();
 		tasksWithNewTask.addAll(tasks);
 		for (Iterator<Task> iter = tasksWithNewTask.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			if (task.isComplete()) {
-				task.setName("[Completed] " + task.getName()); // This needs to be done, without changing the name. 
+				iter.remove();
+				Task newTask = task.clone(); // Clone to stop modifying the existing task
+				if (newTask == null) {
+					Log.e(TAG, "newTask == null");
+				}
+				newTask.setName("[Completed] " + newTask.getName());
+				tasksToAdd.add(newTask); // The add and remove, re-adds the task at the bottom of the list
 			}
 		}
+		tasksWithNewTask.addAll(tasksToAdd);
 		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
 		if (tasks.size() != 0)
 			tasksWithNewTask.add(new Task("New Task", "", "", 0));

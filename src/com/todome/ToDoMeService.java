@@ -526,7 +526,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				currentTime.set(System.currentTimeMillis());
 				Log.i(TAG, "Task " + task.getName() + " has a alarm time of " + taskTime.hour + ":" + taskTime.minute + ":" + taskTime.second);
 				Log.i(TAG, "Current time is " + currentTime.hour + ":" + currentTime.minute + ":" + currentTime.second);
-				if ((System.currentTimeMillis() - taskTime.toMillis(false)) > -1000) {
+				if ((System.currentTimeMillis() - taskTime.toMillis(false)) > -1000 && (System.currentTimeMillis() - taskTime.toMillis(false)) < 1000) {
 					Log.i(TAG, "Putting up notification for timed task");
 					showNotification(task, null);
 				} else {
