@@ -78,6 +78,8 @@ public class TaskActivity extends Activity {
 			public void onClick(DialogInterface dialog, int id) {
 				// touchedTask.setName("[Completed] " + touchedTask.getName());
 				touchedTask.setComplete(true);
+				tasks.remove(touchedTask);
+				tasks.add(touchedTask);
 				setUpTasksWithNewTasks();
 				taskAdapter.notifyDataSetChanged();
 				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
@@ -90,20 +92,18 @@ public class TaskActivity extends Activity {
 
 		alertMarkComplete = builder.create();
 
-		builder.setMessage("Delete?").setCancelable(false).setPositiveButton(
-				"Yes", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						tasks.remove(touchedTask);
-						setUpTasksWithNewTasks();
-						taskAdapter.notifyDataSetChanged();
-						ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
-					}
-				}).setNegativeButton("No",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
+		builder.setMessage("Delete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				tasks.remove(touchedTask);
+				setUpTasksWithNewTasks();
+				taskAdapter.notifyDataSetChanged();
+				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
+			}
+		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
 
 		alertDelete = builder.create();
 
@@ -118,26 +118,21 @@ public class TaskActivity extends Activity {
 		setUpTasksWithNewTasks();
 		Log.i(TAG, "Displaying " + tasks.size() + " tasks");
 
-		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item,
-				tasksWithNewTask);
+		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasksWithNewTask);
 		lv.setAdapter(taskAdapter);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If
-					// clicking
-					// on a
-					// New
-					// Task
-					// item
-					showTaskDialog(tasks.size() + 1, false);
-
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
+					showTaskDialog(position, false);
 				} else {
 					touchedTask = tasks.get(position - 1);
+					//Log.i(TAG, "Task " + touchedTask.getName() + " " + (position));
 					if (touchedTask.isComplete()) {
+						//Log.i(TAG, "Deleting");
 						alertDelete.show();
-					} else {
+					} else {					
+						//Log.i(TAG, "Completing");
 						alertMarkComplete.show();
 					}
 				}
@@ -145,17 +140,11 @@ public class TaskActivity extends Activity {
 		});
 
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If
-					// clicking
-					// on a
-					// New
-					// Task
-					// item
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a NewTask item
 					return false;
 				} else {
-					showTaskDialog(position - 1, true);
+					showTaskDialog(position, true);
 					return true;
 				}
 			}
@@ -168,27 +157,24 @@ public class TaskActivity extends Activity {
 		dialog.setContentView(R.layout.new_task_dialog);
 		dialog.setTitle("New Task");
 
-		EditText taskNameEntry = (EditText) dialog
-				.findViewById(R.id.taskNameEntry);
-		RatingBar ratingEntry = (RatingBar) dialog
-				.findViewById(R.id.ratingEntry);
+		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
+		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
 
-		//EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+		// EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		if (updatingTask) {
 
-			Task thisTask = tasks.get(position);
+			Task thisTask = tasks.get(position - 1);
 
 			taskNameEntry.setText(thisTask.getName());
 			ratingEntry.setRating(thisTask.getRating());
 			notesEntry.setText(thisTask.getNotes());
-			//postcodeEntry.setText(thisTask.getPostcode());
+			// postcodeEntry.setText(thisTask.getPostcode());
 			if (thisTask.getAlarmTime() != null) {
-				Log.i(TAG, "AlarmTime hour " + thisTask.getAlarmTime().hour
-						+ " min " + thisTask.getAlarmTime().minute);
+				Log.i(TAG, "AlarmTime hour " + thisTask.getAlarmTime().hour + " min " + thisTask.getAlarmTime().minute);
 				timeEntry.setCurrentHour(thisTask.getAlarmTime().hour);
 				timeEntry.setCurrentMinute(thisTask.getAlarmTime().minute);
 			}
@@ -208,13 +194,11 @@ public class TaskActivity extends Activity {
 
 		taskNameEntry.addTextChangedListener(new TextWatcher() {
 
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				okButton.setEnabled(s.length() > 0);
 			}
 
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 			}
 
 			public void afterTextChanged(Editable s) {
@@ -232,12 +216,12 @@ public class TaskActivity extends Activity {
 		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
 		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
-		//EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+		// EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		// Create the new task
-		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), ""/*postcodeEntry.getText().toString()*/,
-				(int) ratingEntry.getRating());
+		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), ""/* postcodeEntry.getText().toString() */, (int) ratingEntry
+				.getRating());
 
 		Calendar c = Calendar.getInstance();
 		Time currentTime = new Time();
@@ -256,14 +240,14 @@ public class TaskActivity extends Activity {
 		task.setTypes(type);
 
 		if (updatingTask) {
-			tasks.remove(position);
+			tasks.remove(position - 1);
 		}
 
 		// Put it in the array, in the right place
-		if (position == tasks.size() + 1) {
-			tasks.add(tasks.size(), task);
+		if (position == 0) {
+			tasks.add(0, task);
 		} else {
-			tasks.add(position, task);
+			tasks.add(task);
 		}
 
 		// Regenerate the list task array
@@ -313,24 +297,19 @@ public class TaskActivity extends Activity {
 			img = null;
 			break;
 		case 1:
-			img = getBaseContext().getResources().getDrawable(
-					R.drawable.staricon1);
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon1);
 			break;
 		case 2:
-			img = getBaseContext().getResources().getDrawable(
-					R.drawable.staricon2);
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon2);
 			break;
 		case 3:
-			img = getBaseContext().getResources().getDrawable(
-					R.drawable.staricon3);
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon3);
 			break;
 		case 4:
-			img = getBaseContext().getResources().getDrawable(
-					R.drawable.staricon4);
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon4);
 			break;
 		case 5:
-			img = getBaseContext().getResources().getDrawable(
-					R.drawable.staricon5);
+			img = getBaseContext().getResources().getDrawable(R.drawable.staricon5);
 			break;
 		default:
 			break;

@@ -347,15 +347,15 @@ public class ToDoMeService extends Service implements LocationListener {
 				try {
 					String type = jsonObject.getString("name");
 					if (!KeywordDatabase.blacklistedTypes.contains(type)) {
-						String description = jsonObject.getString("description");
+						String descr = jsonObject.getString("description");
 						// Log.v(TAG, type);
 						JSONArray tags = jsonObject.getJSONArray("tags");
 						for (int j = 0; j < tags.length(); j++) {
 							String name = tags.getJSONObject(j).getString("name");
-							db.add(name, type, description);
+							db.add(name, type, descr);
 						}
 					}
-
+					
 				} catch (JSONException e) {
 					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
 				}
