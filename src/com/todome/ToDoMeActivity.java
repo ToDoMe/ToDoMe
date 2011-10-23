@@ -96,6 +96,7 @@ public class ToDoMeActivity extends TabActivity {
 				Log.i(TAG, "Loaded tasks, but got null, populating database with empty task list");
 				writeTasks(new ArrayList<Task>());
 			}
+			Log.i(TAG, "tasks.size() = " + tasks.size());
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
@@ -129,6 +130,7 @@ public class ToDoMeActivity extends TabActivity {
 			if (str != null) {
 				keywords = Util.getKeywordDatabaseFromString(str);
 			}
+			Log.i(TAG, "keywords.size() = " + keywords.size());
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
@@ -145,9 +147,14 @@ public class ToDoMeActivity extends TabActivity {
 			// Load the two shared preferences files
 			prefs = getSharedPreferences("prefs", MODE_PRIVATE);
 			data = getSharedPreferences("data", MODE_PRIVATE);
+			
+			// Service interaction
+			checkIfServiceIsRunning();
+			sendMessageToService(ToDoMeService.MSG_QUERY_ENABLED);
+			notifyTasksChanged();
 			// Fill the data structures
-			readTasks();
 			readKeywords();
+			readTasks();
 
 			// setPreferences(); // Default prefs
 
@@ -177,11 +184,6 @@ public class ToDoMeActivity extends TabActivity {
 			} else {
 				tabHost.setCurrentTab(0);
 			}
-
-			// Service interaction
-			sendMessageToService(ToDoMeService.MSG_QUERY_ENABLED);
-			checkIfServiceIsRunning();
-			notifyTasksChanged();
 
 		} catch (Exception ex) {
 			Log.e(TAG, "In onCreate", ex);
@@ -230,6 +232,10 @@ public class ToDoMeActivity extends TabActivity {
 				if (MapViewActivity.getInstance() != null) {
 					MapViewActivity.getInstance().notifyLocationsUpdated();
 				}
+				break;
+			case ToDoMeService.MSG_KEYWORDS_UPDATED:
+				Log.i(TAG, "MSG_KEYWORDS_UPDATED received.");
+				readKeywords();
 				break;
 			case ToDoMeService.MSG_QUERY_ENABLED:
 				notificationsEnabled = (msg.arg1 > 0);

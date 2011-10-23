@@ -62,22 +62,18 @@ public class KeywordDatabase implements Serializable {
 	 */
 	public HashSet<String> getTypes(String name) {
 		HashSet<String> types = new HashSet<String>();
+		
 		String lowerName = name.toLowerCase();
 		String[] words = lowerName.split(" ");
+		
 		for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
 			Keyword keywordObj = iter.next();
 			for (int i = 0; i < words.length; i++) {
-				if (words[i] == keywordObj.keyword) {
+				if (words[i].equals(keywordObj.keyword)) {
 					types.add(keywordObj.type);
 				}
 			}
 		}
-		/*
-		 * String[] words = name.split(" "); for (int i = 0; i < words.length; i++) { for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
-		 * Keyword keywordObj = iter.next();
-		 * 
-		 * if (keywordObj.keyword == words[i].toLowerCase()) { return keywordObj.keyword; } } }
-		 */
 
 		return types;
 	}
