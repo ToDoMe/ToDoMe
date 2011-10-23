@@ -22,7 +22,7 @@ Fix map so that locations shop up immediately
 Store the keywords database in the shared preferences
 Custom audio alerts and vibration alerts per type
 Clear data and reset setting option in preferences
-Remove the All Rights Reserved Notice from the about page.
+[DONE] Remove the All Rights Reserved Notice from the about page.
 
  -------------------------- For Next Release --------------------------
 Full database for storing tasks and locations
