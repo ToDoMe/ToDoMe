@@ -73,7 +73,17 @@ public class MapViewActivity extends MapActivity {
 			PointOfInterest poi = iter.next();
 			HashSet<String> types = poi.getLocationTypes();
 
-			OverlayItem item = new OverlayItem(poi.toGeoPoint(), (types == null) ? "Point of interest" : types.toString(), "");
+			String title = ""; // The title should be the title of the POI, but at the moment we will just have to live with the types
+			for (Iterator<String> typesIter = types.iterator(); iter.hasNext();) {
+				title += ToDoMeActivity.keywords.getDescriptionForType(typesIter.next()) + " ";
+				if (title.length() > 10)
+					break;
+			}
+
+			String snippet = "";
+			snippet = Double.toString(Util.E6IntToDouble(poi.getLatitudeE6())) + " " + Double.toString(Util.E6IntToDouble(poi.getLongitudeE6()));
+
+			OverlayItem item = new OverlayItem(poi.toGeoPoint(), title, snippet);
 			// TODO Display opening and closing times
 
 			itemizedOverlay.addOverlay(item);
@@ -139,7 +149,7 @@ public class MapViewActivity extends MapActivity {
 			locOverlay = new MapViewOverlay(getResources().getDrawable(R.drawable.current_location), MapViewActivity.this);
 			locOverlay.addOverlay(new OverlayItem(point, "You are here", ""));
 			mapOverlays.add(locOverlay);
-			
+
 			prefs.edit().putLong("lat", (long) (lat)).putLong("lon", (long) (lng)).commit();
 			displayMapAt(point);
 		}
