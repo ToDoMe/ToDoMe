@@ -27,6 +27,7 @@ import android.app.AlertDialog;
 import android.app.TabActivity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -73,8 +74,12 @@ public class ToDoMeActivity extends TabActivity {
 				.commit();
 	}
 
-	private static void setDefaultPreferences() {
-		prefs.edit().putFloat("search_radius", 10).putLong("extra_time", 5 * 60 * 1000).putLong("gps_timeout", ToDoMeActivity.LOC_INTERVAL).commit();
+	public static void setDefaultPreferences() {
+		prefs.edit().putFloat("search_radius", 10)
+					.putLong("extra_time", 5 * 60 * 1000)
+					.putLong("gps_timeout", ToDoMeActivity.LOC_INTERVAL)
+					.putBoolean("firstStart", true)
+					.commit();
 	}
 
 	// Data
@@ -147,11 +152,29 @@ public class ToDoMeActivity extends TabActivity {
 			// Load the two shared preferences files
 			prefs = getSharedPreferences("prefs", MODE_PRIVATE);
 			data = getSharedPreferences("data", MODE_PRIVATE);
+
+			if (prefs.getBoolean("firstStart", true)) {
+				final AlertDialog alertDialog = new AlertDialog.Builder(ToDoMeActivity.this).create();
+				alertDialog.setTitle("Welcome to ToDoMe");
+				alertDialog.setMessage("To start using ToDoMe, enter some tasks in the To-Do tab. " +
+									   "ToDoMe picks up certain keywords in the task name to detect " +
+									   "what types of locations will enable you to carry out your task. " +
+									   "Please note that this software is beta, and there are lots of " +
+									   "bugs and stability issues.");
+				alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+				      public void onClick(DialogInterface dialog, int which) {
+				    	  alertDialog.dismiss();
+				      } }); 
+				alertDialog.show();
+				prefs.edit().putBoolean("firstStart", false).commit();
+			}
 			
+
 			// Service interaction
 			checkIfServiceIsRunning();
 			sendMessageToService(ToDoMeService.MSG_QUERY_ENABLED);
 			notifyTasksChanged();
+
 			// Fill the data structures
 			readKeywords();
 			readTasks();
