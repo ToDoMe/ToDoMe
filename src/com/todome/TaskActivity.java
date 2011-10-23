@@ -24,6 +24,7 @@ package com.todome;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -78,13 +79,12 @@ public class TaskActivity extends Activity {
 
 		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				touchedTask.setName("[Completed] " + touchedTask.getName());
-				tasks.add(touchedTask);
+				//touchedTask.setName("[Completed] " + touchedTask.getName());
+				tasks.add(touchedTask); // The add and remove, re-adds the task at the bottom of the list
 				tasks.remove(touchedTask);
 				touchedTask.setComplete(true);
 				setUpTasksWithNewTasks();
 				taskAdapter.notifyDataSetChanged();
-				parent.notifyTasksChanged();
 				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -99,7 +99,6 @@ public class TaskActivity extends Activity {
 				tasks.remove(touchedTask);
 				setUpTasksWithNewTasks();
 				taskAdapter.notifyDataSetChanged();
-				parent.notifyTasksChanged();
 				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -227,6 +226,9 @@ public class TaskActivity extends Activity {
 		task.setAlarmTime(time);
 
 		// Give it a type
+		if (ToDoMeActivity.keywords.keywords.size() == 0) {
+			Log.e(TAG, "Trying to asign keywords to " + task.getName() + " but keywords database is empty");
+		}
 		HashSet<String> type = ToDoMeActivity.keywords.getTypes(task.getName());
 		task.setTypes(type);
 
@@ -250,11 +252,7 @@ public class TaskActivity extends Activity {
 		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + tasks.size() + " tasks");
 		Log.i(TAG, "Tasks: " + tasks.toString());
 
-		// message("", type);
-		Log.d(TAG, "Its here!");
-
 		taskNameEntry.setText("");
-		parent.notifyTasksChanged();
 		ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
 		dialog.hide();
 	}
@@ -262,6 +260,12 @@ public class TaskActivity extends Activity {
 	private void setUpTasksWithNewTasks() {
 		tasksWithNewTask.clear();
 		tasksWithNewTask.addAll(tasks);
+		for (Iterator<Task> iter = tasksWithNewTask.iterator(); iter.hasNext();) {
+			Task task = iter.next();
+			if (task.isComplete()) {
+				task.setName("[Completed] " + task.getName()); // This needs to be done, without changing the name. 
+			}
+		}
 		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
 		if (tasks.size() != 0)
 			tasksWithNewTask.add(new Task("New Task", "", "", 0));

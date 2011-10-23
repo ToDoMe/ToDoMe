@@ -103,12 +103,24 @@ public class ToDoMeActivity extends TabActivity {
 	}
 
 	static void writeTasks(ArrayList<Task> newTasks) {
+		if (newTasks.size() != tasks.size()) {
+			Log.e(TAG, "Oh dear, this shouldn't happen, tasks and newTasks are of a different size in ToDoMeActivity.writeTasks();");
+		}
 		Editor dataEditor = data.edit();
 
 		dataEditor.putString("tasks", Util.getTaskArrayString(newTasks));
-		dataEditor.commit();
+		if (dataEditor.commit()) {
+			Log.i(TAG, "Sucessfuly commited " + newTasks.size());
+		} else {
+			Log.e(TAG, "ERROR commiting tasks, in ToDoMeActivity.writeTasks(); " + newTasks.size());
+		}
+		
+		if (data.getString("tasks", null) != Util.getTaskArrayString(newTasks)) {
+			Log.e(TAG, "Just put tasks in, but tasks does not come out?!?!");
+		}
 
-		ToDoMeActivity.getInstance().sendMessageToService(ToDoMeService.MSG_TASKS_UPDATED);
+		Log.i(TAG, "Now have " + newTasks.size() + " tasks, sending to service " + Util.getTaskArrayString(newTasks));
+		notifyTasksChanged();
 	}
 
 	private void readKeywords() {
@@ -252,8 +264,8 @@ public class ToDoMeActivity extends TabActivity {
 		}
 	}
 
-	public void notifyTasksChanged() {
-		sendMessageToService(ToDoMeService.MSG_TASKS_UPDATED);
+	public static void notifyTasksChanged() {
+		ToDoMeActivity.getInstance().sendMessageToService(ToDoMeService.MSG_TASKS_UPDATED);
 	}
 
 	void doBindService() {

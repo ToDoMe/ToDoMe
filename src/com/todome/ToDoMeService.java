@@ -145,9 +145,11 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private void readTasks() {
 		try {
+			data = getSharedPreferences("data", MODE_PRIVATE); // For some reason this is required for the tasks list to be updated properly
 			String str = data.getString("tasks", null);
 			if (str != null) {
 				tasks = Util.getTaskListFromString(str);
+				Log.i(TAG, "Got " + tasks.size() + " from the shared preferences  " + str);
 
 				if (this.tasks.size() == 0) {
 					// Disable GPS to save battery
@@ -177,6 +179,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private void readKeywords() {
 		try {
+			data = getSharedPreferences("data", MODE_PRIVATE); // Added as per tasks above
 			String str = data.getString("keywords", null);
 			if (str != null) {
 				keywords = Util.getKeywordDatabaseFromString(str);
@@ -231,7 +234,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				tickerText += notifyTasks.get(i).getName() + " and ";
 			}
 		}
-		
+
 		Log.i(TAG, "TickerText " + tickerText);
 
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -260,7 +263,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
 			message = message + iter.next() + " ";
 		}
-		
+
 		Log.i(TAG, "Message " + message);
 
 		notification.setLatestEventInfo(this, tickerText, message, contentIntent);
@@ -435,11 +438,15 @@ public class ToDoMeService extends Service implements LocationListener {
 		Log.i(TAG, "Checking for relevent notifications");
 		if (!updateDatabase(getAllTaskTypes())) {
 			Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
+			if (pointsOfInterest == null) {
+				Log.w(TAG, "pointsOfInterest ==null aswell, giving up");
+			}
+			return;
 		}
 
 		if (userCurrentLocation != null) {
 			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.1d);
-			//locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
+			locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
 
 			for (Iterator<PointOfInterest> iter = locDb.iterator(); iter.hasNext();) {
 				PointOfInterest poi = iter.next();
@@ -531,8 +538,8 @@ public class ToDoMeService extends Service implements LocationListener {
 				mClients.remove(msg.replyTo);
 				break;
 			case MSG_TASKS_UPDATED:
-				readTasks();
 				Log.i(TAG, "MSG_TASKS_UPDATED received.");
+				readTasks();
 				break;
 			case MSG_QUERY_ENABLED:
 				sendQueryResponse();

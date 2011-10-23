@@ -22,7 +22,10 @@ Fix map so that locations shop up immediately
 Store the keywords database in the shared preferences
 Custom audio alerts and vibration alerts per type
 Clear data and reset setting option in preferences
-Remove the All Rights Reserved Notice from the about page.
+Remove the All Rights Reserved Notice from the about page (replace with all wrongs reserved.
+Blacklist the baby box and the sexual items in the database, we need more analisis before these can be implemented
+	We dont want someone putting on, buy baby powder, and it sujesting they get rid of their child! 
+Put up a message, about the app, and its basic usage on the first start on a device
 
  -------------------------- For Next Release --------------------------
 Full database for storing tasks and locations
