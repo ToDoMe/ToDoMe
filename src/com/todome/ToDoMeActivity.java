@@ -66,7 +66,7 @@ public class ToDoMeActivity extends TabActivity {
 		return instance;
 	}
 
-	public static final long LOC_INTERVAL = 60000;
+	public static final long LOC_INTERVAL = 20000;
 
 	// Create preferences setting method, and overload with defaults.
 	public static void setPreferences(Float search_radius, Long extra_time, Long gps_timeout) {

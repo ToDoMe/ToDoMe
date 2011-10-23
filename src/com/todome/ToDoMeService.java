@@ -46,6 +46,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.text.format.Time;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
@@ -184,16 +185,26 @@ public class ToDoMeService extends Service implements LocationListener {
 			String str = data.getString("keywords", null);
 			if (str != null) {
 				keywords = Util.getKeywordDatabaseFromString(str);
-				writeKeywords(keywords);
-			} else {
-				Log.i(TAG, "Loaded keywords, but got null, populating database with keywords from server");
-				KeywordDatabase tempDatabase = getKeywordDatabaseFromServer();
-				if (tempDatabase != null) {
-					writeKeywords(tempDatabase);
+				long keywordsDate = data.getLong("keywordsDate", -1);
+				if (keywordsDate == -1 || keywords.size() == 0) {
+					getKeywordDatabaseFromServer();
 				} else {
-					Log.e(TAG, "Got null keywords database from server");
-					writeKeywords(new KeywordDatabase());
+					// Calculate the time since last update
+					Time lastUpdate = new Time();
+					lastUpdate.set(keywordsDate);
+					Time now = new Time();
+					now.setToNow();
+					if ((now.toMillis(false) - lastUpdate.toMillis(false)) < 1.21E9 /* 2 weeks in ms */) {
+						writeKeywords(keywords);
+					} else {
+						Log.i(TAG, "Keywords out of date. Populating database with keywords from server.");
+						getKeywordDatabaseFromServer();
+					}
 				}
+
+			} else {
+				Log.i(TAG, "Loaded keywords, but got null. Populating database with keywords from server.");
+				getKeywordDatabaseFromServer();
 			}
 			Log.i(TAG, "keywords.size() = " + keywords.size() + ". Sending MSG_KEYWORDS_UPDATED");
 			sendMessageToUI(MSG_KEYWORDS_UPDATED);
@@ -316,7 +327,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		return isRunning;
 	}
 
-	public KeywordDatabase getKeywordDatabaseFromServer() {
+	private void getKeywordDatabaseFromServer() {
 		Log.i(TAG, "Getting KeywordDatabase from http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
 		String file = Util.getFileFromServer("http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json");
 
@@ -347,8 +358,18 @@ public class ToDoMeService extends Service implements LocationListener {
 		} catch (JSONException ex) {
 			Log.e(TAG, "", ex);
 		}
+		
+		if (db != null) {
+			// Save the date
+			Time now = new Time();
+			now.setToNow();
+			data.edit().putLong("keywordsDate", now.toMillis(false)).commit();
 
-		return db;
+			writeKeywords(db);
+		} else {
+			Log.e(TAG, "Got null keywords database from server");
+			writeKeywords(new KeywordDatabase());
+		}
 	}
 
 	/**
@@ -420,7 +441,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 			LocationDatabase tempDatabase = null;
 			if (userCurrentLocation != null) {
-				tempDatabase = getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 100, type);
+				tempDatabase = getLocationDatabase(Util.locationToGeoPoint(userCurrentLocation), 500, type);
 			} else {
 				Log.i(TAG, "No user location fetch userCurrentLocation==null");
 			}
@@ -431,9 +452,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		if (newDatabase.size() > 0) {
 
-			pointsOfInterest = newDatabase; // TODO At the moment new location
-											// data replaces old data, this
-											// needs to be fixed
+			pointsOfInterest = newDatabase; // TODO At the moment new location data replaces old data, this needs to be fixed
 			Log.i(TAG, "Location database replaced with new data");
 
 			sendDatabaseToUI(pointsOfInterest);
