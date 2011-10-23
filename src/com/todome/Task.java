@@ -30,7 +30,7 @@ import android.util.Log;
 public class Task implements Serializable, Comparable<Task> {
 
 	private static final long serialVersionUID = 4693889711884116969L;
-	
+
 	private String name;
 	private String notes;
 	private String postcode;
@@ -128,6 +128,14 @@ public class Task implements Serializable, Comparable<Task> {
 	public int compareTo(Task another) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public Task clone() {
+		// new String() just to be on the safe side (hopefully)
+		Task newTask = new Task(new String(this.name), new String(this.notes), new String(this.postcode), this.rating);
+		newTask.setComplete(this.complete);
+		newTask.setAlarmTime(this.getAlarmTime());
+		return newTask;
 	}
 
 }
