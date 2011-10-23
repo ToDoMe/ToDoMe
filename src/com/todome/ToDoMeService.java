@@ -476,7 +476,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		if (userCurrentLocation != null) {
 			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.1d);
-			locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
+			//locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
 
 			for (Iterator<PointOfInterest> iter = locDb.iterator(); iter.hasNext();) {
 				PointOfInterest poi = iter.next();
