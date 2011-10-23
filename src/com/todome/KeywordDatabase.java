@@ -45,8 +45,8 @@ public class KeywordDatabase implements Serializable {
 	 */
 	public static final HashSet<String> blacklistedTypes = new HashSet<String>();
 
-	public void add(String keyword, String type) {
-		keywords.add(new Keyword(keyword, type));
+	public void add(String keyword, String type, String description) {
+		keywords.add(new Keyword(keyword, type, description));
 	}
 
 	public KeywordDatabase() {
@@ -82,22 +82,21 @@ public class KeywordDatabase implements Serializable {
 
 		return types;
 	}
+	
+	public HashSet<Keyword> getAllKeywords() {
+		return keywords;
+	}
 
 	public String getDescriptionForType(String type) {
-		String withoutDot;
-		if (type.contains(".")) {
-			String[] splitOnDot = type.split("\\.");
-			Log.i(TAG, "Bit after dot: " + splitOnDot[1]);
-			withoutDot = splitOnDot[1];
-		} else {
-			withoutDot = type;
+		for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
+			Keyword keyword = iter.next();
+			
+			if (keyword.type == type) {
+				return keyword.description;
+			}
 		}
-
-		String replacingUnderscore = withoutDot.replace('_', ' ');
-
-		Log.i(TAG, "Description: " + replacingUnderscore);
-
-		return replacingUnderscore;
+		
+		return null;
 	}
 
 	public HashSet<String> getAllTypes() {
@@ -111,10 +110,12 @@ public class KeywordDatabase implements Serializable {
 	private class Keyword implements Serializable {
 		String keyword;
 		String type;
+		String description;
 
-		Keyword(String keyword, String type) {
+		Keyword(String keyword, String type, String description) {
 			this.keyword = keyword;
 			this.type = type;
+			this.description = description;
 		}
 	}
 }

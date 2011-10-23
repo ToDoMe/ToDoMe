@@ -313,7 +313,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		typesIntersection.retainAll(locationTypes);
 
 		for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
-			message = message + iter.next() + " ";
+			message = message + keywords.getDescriptionForType(iter.next()) + " ";
 		}
 		notification.setLatestEventInfo(this, notifyTask.getName(), message, contentIntent);
 
@@ -343,11 +343,12 @@ public class ToDoMeService extends Service implements LocationListener {
 				try {
 					String type = jsonObject.getString("name");
 					if (!KeywordDatabase.blacklistedTypes.contains(type)) {
-						Log.v(TAG, type);
+						String description = jsonObject.getString("description");
+						//Log.v(TAG, type);
 						JSONArray tags = jsonObject.getJSONArray("tags");
 						for (int j = 0; j < tags.length(); j++) {
 							String name = tags.getJSONObject(j).getString("name");
-							db.add(name, type);
+							db.add(name, type, description);
 						}
 					}
 
