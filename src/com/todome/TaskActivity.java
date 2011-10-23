@@ -161,7 +161,7 @@ public class TaskActivity extends Activity {
 		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
 		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
-		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+		//EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		if (updatingTask) {
@@ -171,7 +171,7 @@ public class TaskActivity extends Activity {
 			taskNameEntry.setText(thisTask.getName());
 			ratingEntry.setRating(thisTask.getRating());
 			notesEntry.setText(thisTask.getNotes());
-			postcodeEntry.setText(thisTask.getPostcode());
+			//postcodeEntry.setText(thisTask.getPostcode());
 			if (thisTask.getAlarmTime() != null) {
 				Log.i(TAG, "AlarmTime hour " + thisTask.getAlarmTime().hour + " min " + thisTask.getAlarmTime().minute);
 				timeEntry.setCurrentHour(thisTask.getAlarmTime().hour);
@@ -214,11 +214,11 @@ public class TaskActivity extends Activity {
 		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
 		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
-		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+		//EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		// Create the new task
-		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(),
+		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), ""/*postcodeEntry.getText().toString()*/,
 				(int) ratingEntry.getRating());
 
 		Calendar c = Calendar.getInstance();
