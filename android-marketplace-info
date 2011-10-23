@@ -1,0 +1,5 @@
+Description:
+ToDoMe, is a smart, location based reminder app. You add tasks to your To-Do list, and ToDoMe will remind you when you a near a place that might be useful for the task.
+
+How It Works:
+ToDoMe will check the names of the tasks against a keywords database, and asign them types, if you are nearby a location that is the same type as one of your tasks lists.
