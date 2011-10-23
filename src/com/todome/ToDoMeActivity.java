@@ -127,6 +127,8 @@ public class ToDoMeActivity extends TabActivity {
 
 	private void readKeywords() {
 		try {
+			data = getSharedPreferences("data", MODE_PRIVATE);
+			
 			String str = data.getString("keywords", null);
 			if (str != null) {
 				keywords = Util.getKeywordDatabaseFromString(str);

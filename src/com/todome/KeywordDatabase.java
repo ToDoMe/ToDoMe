@@ -87,7 +87,7 @@ public class KeywordDatabase implements Serializable {
 		for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
 			Keyword keyword = iter.next();
 			
-			if (keyword.type == type) {
+			if (keyword.type.equals(type)) {
 				return keyword.description;
 			}
 		}
