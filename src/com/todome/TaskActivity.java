@@ -30,7 +30,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -51,8 +50,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 public class TaskActivity extends Activity {
-	private ToDoMeActivity parent;
-
 	private ArrayList<Task> tasks; // Loaded from ToDoMeActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
@@ -70,7 +67,6 @@ public class TaskActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.todo);
-		parent = (ToDoMeActivity) getParent();
 
 		tasks = ToDoMeActivity.tasks;
 		tasksWithNewTask = new ArrayList<Task>();
@@ -177,8 +173,9 @@ public class TaskActivity extends Activity {
 		RatingBar ratingEntry = (RatingBar) dialog
 				.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
-		EditText postcodeEntry = (EditText) dialog
-				.findViewById(R.id.postcodeEntry);
+
+		//EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		if (updatingTask) {
@@ -188,7 +185,7 @@ public class TaskActivity extends Activity {
 			taskNameEntry.setText(thisTask.getName());
 			ratingEntry.setRating(thisTask.getRating());
 			notesEntry.setText(thisTask.getNotes());
-			postcodeEntry.setText(thisTask.getPostcode());
+			//postcodeEntry.setText(thisTask.getPostcode());
 			if (thisTask.getAlarmTime() != null) {
 				Log.i(TAG, "AlarmTime hour " + thisTask.getAlarmTime().hour
 						+ " min " + thisTask.getAlarmTime().minute);
@@ -235,12 +232,12 @@ public class TaskActivity extends Activity {
 		EditText taskNameEntry = (EditText) dialog.findViewById(R.id.taskNameEntry);
 		RatingBar ratingEntry = (RatingBar) dialog.findViewById(R.id.ratingEntry);
 		EditText notesEntry = (EditText) dialog.findViewById(R.id.notesEntry);
-		EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
+		//EditText postcodeEntry = (EditText) dialog.findViewById(R.id.postcodeEntry);
 		TimePicker timeEntry = (TimePicker) dialog.findViewById(R.id.timeEntry);
 
 		// Create the new task
-		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), postcodeEntry.getText().toString(), (int) ratingEntry
-				.getRating());
+		Task task = new Task(taskNameEntry.getText().toString(), notesEntry.getText().toString(), ""/*postcodeEntry.getText().toString()*/,
+				(int) ratingEntry.getRating());
 
 		Calendar c = Calendar.getInstance();
 		Time currentTime = new Time();
