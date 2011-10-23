@@ -38,17 +38,22 @@ public class KeywordDatabase implements Serializable {
 	HashSet<Keyword> keywords = new HashSet<Keyword>();
 
 	private static final String TAG = "KeywordDatabase";
+	
+	/*
+	 * Blacklist of certain types such as brothel and baby_box, 
+	 * which could be misinterpreted with the current algorithm.
+	 */
+	public static final HashSet<String> blacklistedTypes = new HashSet<String>();
 
 	public void add(String keyword, String type) {
 		keywords.add(new Keyword(keyword, type));
 	}
 
-	public KeywordDatabase() { // TODO Get from server (http://ec2-176-34-195-131.eu-west-1.compute.amazonaws.com/location_types.json)
-		/*
-		 * keywords.add(new Keyword("post", "postbox")); keywords.add(new Keyword("letter", "postbox")); keywords.add(new Keyword("stamp", "post office"));
-		 * keywords.add(new Keyword("withdraw", "bank")); keywords.add(new Keyword("money", "bank")); keywords.add(new Keyword("train", "train station"));
-		 * keywords.add(new Keyword("bus", "bct"));
-		 */
+	public KeywordDatabase() {
+		blacklistedTypes.add("amenity.baby_hatch");
+		blacklistedTypes.add("amenity.brothel");
+		blacklistedTypes.add("shop.erotic");
+		blacklistedTypes.add("amenity.baby_hatch");
 	}
 
 	public int size() {

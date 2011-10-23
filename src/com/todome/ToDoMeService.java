@@ -125,8 +125,8 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		prefs = getSharedPreferences("prefs", MODE_PRIVATE);
 		data = getSharedPreferences("data", MODE_PRIVATE);
-		readTasks();
 		readKeywords();
+		readTasks();
 	}
 
 	private void setLocationUpdateSettings() {
@@ -331,10 +331,13 @@ public class ToDoMeService extends Service implements LocationListener {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				try {
 					String type = jsonObject.getString("name");
-					JSONArray tags = jsonObject.getJSONArray("tags");
-					for (int j = 0; j < tags.length(); j++) {
-						String name = tags.getJSONObject(j).getString("name");
-						db.add(name, type);
+					if (!KeywordDatabase.blacklistedTypes.contains(type)) {
+						Log.v(TAG, type);
+						JSONArray tags = jsonObject.getJSONArray("tags");
+						for (int j = 0; j < tags.length(); j++) {
+							String name = tags.getJSONObject(j).getString("name");
+							db.add(name, type);
+						}
 					}
 
 				} catch (JSONException e) {
@@ -385,8 +388,11 @@ public class ToDoMeService extends Service implements LocationListener {
 						// Log.i(TAG, "Got value " + value);
 						types.add(value);
 					}
-					newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), types, null,
+					if (Util.intersection(KeywordDatabase.blacklistedTypes, types).size() == 0) {
+						Log.v(TAG, type);
+						newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), types, null,
 							null, 10));
+					}
 				} catch (JSONException e) {
 					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
 				}
