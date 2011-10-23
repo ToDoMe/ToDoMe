@@ -37,4 +37,6 @@ You should have received a copy of the GNU General Public License along with thi
     <string name="max_radius"> Maximum search radius is 10km</string>
     <string name="disable_notifications">Disable notifications</string>
     <string name="enable_notifications">Enable notifications</string>
+    <string name="reset_prefs">Reset preferences</string>
+    <string name="clear_data">Clear data</string>
 </resources>

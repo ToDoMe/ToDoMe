@@ -1,6 +1,8 @@
 package com.todome;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class PreferencesActivity extends Activity {
+	
+	static SharedPreferences data;
 
 	public PreferencesActivity() {
 		// TODO Auto-generated constructor stub
@@ -24,7 +28,8 @@ public class PreferencesActivity extends Activity {
     	EditText extra_time = (EditText) findViewById(R.id.extra_time);
     	EditText gps_timeout = (EditText) findViewById(R.id.gps_timeout);
         
-    	SharedPreferences preferences = ToDoMeActivity.prefs;
+    	SharedPreferences preferences = getSharedPreferences("prefs", MODE_PRIVATE);;
+    	data = getSharedPreferences("data", MODE_PRIVATE);
     	
     	search_radius.setText(Float.toString(preferences.getFloat("search_radius", 10)));
     	extra_time.setText(Long.toString(preferences.getLong("extra_time", 10) / (60 * 1000)));
@@ -52,7 +57,41 @@ public class PreferencesActivity extends Activity {
         		Log.v("121212", search_radius.getText().toString());
         	}
         });
-
+        
+        final Button buttonResetPrefs = (Button) findViewById(R.id.buttonResetPrefs);
+        buttonResetPrefs.setOnClickListener(new View.OnClickListener() {
+        	public void onClick(View v) {
+        		final AlertDialog alertDialog = new AlertDialog.Builder(PreferencesActivity.this).create();
+        		alertDialog.setMessage("Are you sure?");
+        		alertDialog.setButton(alertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+        		    public void onClick(DialogInterface dialog, int which) {
+        		    	 ToDoMeActivity.setDefaultPreferences();
+        		    	 alertDialog.dismiss();
+        		     } });
+        		alertDialog.setButton(alertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+      		      	public void onClick(DialogInterface dialog, int which) {
+      		      		alertDialog.dismiss();
+      		      	} }); 
+        		alertDialog.show();
+        	}
+        });
+        
+        final Button buttonClearData = (Button) findViewById(R.id.buttonClearData);
+        buttonClearData.setOnClickListener(new View.OnClickListener() {
+        	public void onClick(View v) {
+        		final AlertDialog alertDialog = new AlertDialog.Builder(PreferencesActivity.this).create();
+        		alertDialog.setMessage("Are you sure?");
+        		alertDialog.setButton(alertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+        		      public void onClick(DialogInterface dialog, int which) {
+        		    	  data.edit().clear().commit();
+        		    	  alertDialog.dismiss();
+        		      } });
+        		alertDialog.setButton(alertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+      		      public void onClick(DialogInterface dialog, int which) {
+      		    	  alertDialog.dismiss();
+      		      } }); 
+        		alertDialog.show();
+        	}
+        });
     }
-
 }
