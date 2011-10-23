@@ -110,6 +110,8 @@ public class ToDoMeService extends Service implements LocationListener {
 	 */
 	final Messenger mMessenger = new Messenger(new IncomingHandler()); //
 
+	private Handler timedTasksHandler = new Handler();
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		return mMessenger.getBinder();
@@ -303,17 +305,21 @@ public class ToDoMeService extends Service implements LocationListener {
 		// Set the info for the views that show in the notification panel.
 		String message = "";
 
-		message = "You are near a ";
+		if (poi != null) {
+			message = "You are near a ";
 
-		HashSet<String> taskTypes = notifyTask.getTypes();
-		HashSet<String> locationTypes = poi.getLocationTypes();
-		HashSet<String> typesIntersection = new HashSet<String>();
+			HashSet<String> taskTypes = notifyTask.getTypes();
+			HashSet<String> locationTypes = poi.getLocationTypes();
+			HashSet<String> typesIntersection = new HashSet<String>();
 
-		typesIntersection.addAll(taskTypes);
-		typesIntersection.retainAll(locationTypes);
+			typesIntersection.addAll(taskTypes);
+			typesIntersection.retainAll(locationTypes);
 
-		for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
-			message = message + iter.next() + " ";
+			for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
+				message = message + iter.next() + " ";
+			}
+		} else {
+			message = notifyTask.getNotes();
 		}
 		notification.setLatestEventInfo(this, notifyTask.getName(), message, contentIntent);
 
@@ -412,8 +418,8 @@ public class ToDoMeService extends Service implements LocationListener {
 					}
 					if (Util.intersection(KeywordDatabase.blacklistedTypes, types).size() == 0) {
 						Log.v(TAG, type);
-						newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), types, null,
-							null, 10));
+						newLocDatabase.add(new PointOfInterest((int) (jsonObject.getDouble("lat") * 1e6), (int) (jsonObject.getDouble("long") * 1e6), types,
+								null, null, 10));
 					}
 				} catch (JSONException e) {
 					Log.e(TAG, e.getMessage() + " for " + i + "/" + jsonArray.length(), e);
@@ -459,7 +465,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			sendDatabaseToUI(pointsOfInterest);
 			return true;
 		} else {
-			Log.e(TAG, "updateDatabase got a empty database");
+			Log.w(TAG, "updateDatabase got a empty database");
 			return false;
 		}
 	}
@@ -471,12 +477,11 @@ public class ToDoMeService extends Service implements LocationListener {
 			if (pointsOfInterest == null) {
 				Log.w(TAG, "pointsOfInterest ==null aswell, giving up");
 			}
-			return;
 		}
 
 		if (userCurrentLocation != null) {
 			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.1d);
-			//locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
+			// locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
 
 			for (Iterator<PointOfInterest> iter = locDb.iterator(); iter.hasNext();) {
 				PointOfInterest poi = iter.next();
@@ -484,7 +489,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				if (!notifiedPOIs.contains(poi)) {
 
 					ArrayList<Task> releventTasks = Util.getReleventTasks(tasks, poi);
-					Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
+					// Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
 
 					boolean mutipleNotifications = false;
 
@@ -511,7 +516,33 @@ public class ToDoMeService extends Service implements LocationListener {
 		} else {
 			Log.w(TAG, "Cant check for location triggered notifications as userCurrentLocation==null");
 		}
+
+		Log.i(TAG, "Begining to check timed tasks");
+		for (Iterator<Task> tasksIter = tasks.iterator(); tasksIter.hasNext();) {
+			Task task = tasksIter.next();
+			Time taskTime = task.getAlarmTime();
+			if (taskTime != null) {
+				Time currentTime = new Time();
+				currentTime.set(System.currentTimeMillis());
+				Log.i(TAG, "Task " + task.getName() + " has a alarm time of " + taskTime.hour + ":" + taskTime.minute + ":" + taskTime.second);
+				Log.i(TAG, "Current time is " + currentTime.hour + ":" + currentTime.minute + ":" + currentTime.second);
+				if ((System.currentTimeMillis() - taskTime.toMillis(false)) > -1000) {
+					Log.i(TAG, "Putting up notification for timed task");
+					showNotification(task, null);
+				} else {
+					Log.i(TAG, "Regiestering call back");
+					timedTasksHandler.removeCallbacks(mUpdateTimeTask);
+					timedTasksHandler.postDelayed(mUpdateTimeTask, taskTime.toMillis(false));
+				}
+			}
+		}
 	}
+
+	private Runnable mUpdateTimeTask = new Runnable() {
+		public void run() {
+			checkForReleventNotifications();
+		}
+	};
 
 	/*
 	 * This method removes all poi's that are not close to the users current location
