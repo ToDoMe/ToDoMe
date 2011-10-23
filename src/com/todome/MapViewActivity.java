@@ -61,20 +61,22 @@ public class MapViewActivity extends MapActivity {
 	private long hardcodedBeginLong = (long) (-1.40416 * 1e6);
 
 	private static MapViewActivity instance;
+	
+	final static String TAG = "MapViewActivity";
 
 	public static MapViewActivity getInstance() {
 		return instance;
 	}
 
 	public void notifyLocationsUpdated() {
-		LocationDatabase db = ToDoMeActivity.db;
+		LocationDatabase db = (LocationDatabase) ToDoMeActivity.db.clone();
 		itemizedOverlay = new MapViewOverlay(drawable, this);
 		for (Iterator<PointOfInterest> iter = db.iterator(); iter.hasNext();) {
 			PointOfInterest poi = iter.next();
 			HashSet<String> types = poi.getLocationTypes();
 
 			String title = ""; // The title should be the title of the POI, but at the moment we will just have to live with the types
-			for (Iterator<String> typesIter = types.iterator(); iter.hasNext();) {
+			for (Iterator<String> typesIter = types.iterator(); typesIter.hasNext();) {
 				title += ToDoMeActivity.keywords.getDescriptionForType(typesIter.next()) + " ";
 				if (title.length() > 10)
 					break;
@@ -127,6 +129,7 @@ public class MapViewActivity extends MapActivity {
 	public void onPause() {
 		// Disable GPS to save battery
 		locationManager.removeUpdates(guh);
+		ToDoMeActivity.getInstance().sendMessageToService(ToDoMeService.MSG_MAP_MODE_DISABLE);
 		super.onPause();
 	}
 
@@ -135,6 +138,7 @@ public class MapViewActivity extends MapActivity {
 		// Enable GPS again
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, guh);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
+		ToDoMeActivity.getInstance().sendMessageToService(ToDoMeService.MSG_MAP_MODE_ENABLE);
 		super.onResume();
 	}
 

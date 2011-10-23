@@ -107,6 +107,8 @@ public class ToDoMeActivity extends TabActivity {
 
 		dataEditor.putString("tasks", Util.getTaskArrayString(newTasks));
 		dataEditor.commit();
+
+		ToDoMeActivity.getInstance().sendMessageToService(ToDoMeService.MSG_TASKS_UPDATED);
 	}
 
 	private void readKeywords() {
@@ -236,7 +238,7 @@ public class ToDoMeActivity extends TabActivity {
 		}
 	}
 
-	private void sendMessageToService(int msgType) {
+	void sendMessageToService(int msgType) {
 		if (mIsBound) {
 			if (mService != null) {
 				try {

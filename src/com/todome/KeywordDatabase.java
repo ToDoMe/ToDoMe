@@ -55,13 +55,21 @@ public class KeywordDatabase implements Serializable {
 		return keywords.size();
 	}
 
+	/*
+	 * Match the words in the task name with the keywords in the dictionary,
+	 * The original implementation did a String.contains, which gave interesting 
+	 * results, for instance "Catch bus" would match with bct, bcs, shop.pet (as the cat in Catch) ...
+	 */
 	public HashSet<String> getTypes(String name) {
 		HashSet<String> types = new HashSet<String>();
 		String lowerName = name.toLowerCase();
+		String[] words = lowerName.split(" ");
 		for (Iterator<Keyword> iter = keywords.iterator(); iter.hasNext();) {
 			Keyword keywordObj = iter.next();
-			if (lowerName.contains(keywordObj.keyword)) {
-				types.add(keywordObj.type);
+			for (int i = 0; i < words.length; i++) {
+				if (words[i] == keywordObj.keyword) {
+					types.add(keywordObj.type);
+				}
 			}
 		}
 		/*

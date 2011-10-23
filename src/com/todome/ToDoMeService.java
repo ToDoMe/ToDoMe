@@ -80,6 +80,9 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private boolean enabled = true;
 
+	// MapMode relates to the frequency of location updates, in map mode these happen as fast as possible
+	private boolean mapMode = false;
+
 	/**
 	 * This array list contains the id's of the point of interests, that have been notified for the current location. To keep this up to date, id's are added as
 	 * notifications are shown, and removed when the user location is updated.
@@ -99,6 +102,8 @@ public class ToDoMeService extends Service implements LocationListener {
 	public static final int MSG_QUERY_ENABLED = 6;
 	public static final int MSG_ENABLE = 7;
 	public static final int MSG_DISABLE = 8;
+	public static final int MSG_MAP_MODE_ENABLE = 9;
+	public static final int MSG_MAP_MODE_DISABLE = 10;
 	/**
 	 * Target we publish for clients to send messages to IncomingHandler.
 	 */
@@ -116,15 +121,26 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		isRunning = true;
 
-		// Register LocationListener
-		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+		setLocationUpdateSettings();
 
 		prefs = getSharedPreferences("prefs", MODE_PRIVATE);
 		data = getSharedPreferences("data", MODE_PRIVATE);
 		readTasks();
 		readKeywords();
+	}
+
+	private void setLocationUpdateSettings() {
+		if (mapMode) {
+			// Register LocationListener
+			locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+		} else {
+			// Register LocationListener
+			locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ToDoMeActivity.LOC_INTERVAL, 0, this);
+		}
 	}
 
 	private void readTasks() {
@@ -140,6 +156,8 @@ public class ToDoMeService extends Service implements LocationListener {
 					// Enable GPS again
 					enableNotifications();
 				}
+				
+				checkForReleventNotifications();
 			} else {
 				Log.i(TAG, "Loaded tasks, but got null, populating database with empty task list");
 				writeTasks(new ArrayList<Task>());
@@ -423,10 +441,10 @@ public class ToDoMeService extends Service implements LocationListener {
 		return taskTypes;
 	}
 
-	// Messaging
-
-	class IncomingHandler extends Handler { // Handler of incoming messages from
-											// clients.
+	/*
+	 * Handler of incoming messages from clients.
+	 */
+	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
@@ -449,6 +467,14 @@ public class ToDoMeService extends Service implements LocationListener {
 				break;
 			case MSG_DISABLE:
 				disableNotifications();
+				break;
+			case MSG_MAP_MODE_ENABLE:
+				mapMode = true;
+				setLocationUpdateSettings();
+				break;
+			case MSG_MAP_MODE_DISABLE:
+				mapMode = false;
+				setLocationUpdateSettings();
 				break;
 			default:
 				super.handleMessage(msg);
