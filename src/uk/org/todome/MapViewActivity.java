@@ -21,15 +21,12 @@
  */
 package uk.org.todome;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -45,22 +42,20 @@ import com.google.android.maps.OverlayItem;
 
 public class MapViewActivity extends MapActivity {
 	/** Called when the activity is first created. */
-	private ArrayList<Task> tasks;
 
 	private MapController mapController;
 	private MapView mapView;
 	private LocationManager locationManager;
-	// private LocationDatabase locDb;
 	private GeoUpdateHandler guh;
 	private MapViewOverlay itemizedOverlay, locOverlay;
 	private List<Overlay> mapOverlays;
-	private Drawable drawable;
-	private SharedPreferences prefs;
 
 	private long hardcodedBeginLat = (long) (50.896996 * 1e6);
 	private long hardcodedBeginLong = (long) (-1.40416 * 1e6);
 
 	private static MapViewActivity instance;
+
+	private Location lastKnownUserLocation;
 
 	final static String TAG = "MapViewActivity";
 
@@ -68,42 +63,11 @@ public class MapViewActivity extends MapActivity {
 		return instance;
 	}
 
-	public void notifyLocationsUpdated() {
-		LocationDatabase db = (LocationDatabase) ToDoMeActivity.db.clone();
-		itemizedOverlay = new MapViewOverlay(drawable, this);
-		for (Iterator<PointOfInterest> iter = db.iterator(); iter.hasNext();) {
-			PointOfInterest poi = iter.next();
-			HashSet<String> types = poi.getLocationTypes();
-
-			String title = ""; // The title should be the title of the POI, but at the moment we will just have to live with the types
-			for (Iterator<String> typesIter = types.iterator(); typesIter.hasNext();) {
-				title += ToDoMeActivity.keywords.getDescriptionForType(typesIter.next()) + " ";
-				if (title.length() > 10)
-					break;
-			}
-
-			String snippet = "";
-			snippet = Double.toString(Util.E6IntToDouble(poi.getLatitudeE6())) + " " + Double.toString(Util.E6IntToDouble(poi.getLongitudeE6()));
-
-			OverlayItem item = new OverlayItem(poi.toGeoPoint(), title, snippet);
-			// TODO Display opening and closing times
-
-			itemizedOverlay.addOverlay(item);
-		}
-		mapOverlays.clear();
-		if (locOverlay != null)
-			mapOverlays.add(locOverlay);
-		mapOverlays.add(itemizedOverlay);
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		instance = this;
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
-		tasks = ToDoMeActivity.tasks;
-
-		prefs = getSharedPreferences("Tasks", MODE_PRIVATE);
 
 		// Enable zoom
 		mapView = (MapView) findViewById(R.id.mapview);
@@ -119,10 +83,13 @@ public class MapViewActivity extends MapActivity {
 
 		// Overlays
 		mapOverlays = mapView.getOverlays();
-		drawable = this.getResources().getDrawable(R.drawable.androidmarker);
-		itemizedOverlay = new MapViewOverlay(drawable, this);
-		GeoPoint lastLocation = new GeoPoint((int) (prefs.getLong("lat", hardcodedBeginLat)), (int) (prefs.getLong("lon", hardcodedBeginLong)));
+		GeoPoint lastLocation = new GeoPoint((int) (ToDoMeActivity.prefs.getLong("lat", hardcodedBeginLat)), (int) (ToDoMeActivity.prefs.getLong("lon",
+				hardcodedBeginLong)));
 		displayMapAt(lastLocation);
+	}
+
+	public void notifyLocationsUpdated() {
+		displayMapAt(mapView.getMapCenter());
 	}
 
 	@Override
@@ -149,16 +116,8 @@ public class MapViewActivity extends MapActivity {
 	public class GeoUpdateHandler implements LocationListener {
 
 		public void onLocationChanged(Location location) {
-			int lat = (int) (location.getLatitude() * 1e6);
-			int lng = (int) (location.getLongitude() * 1e6);
-			GeoPoint point = new GeoPoint(lat, lng);
-			mapController.animateTo(point); // mapController.setCenter(point);
-			mapOverlays.clear();
-			locOverlay = new MapViewOverlay(getResources().getDrawable(R.drawable.current_location), MapViewActivity.this);
-			locOverlay.addOverlay(new OverlayItem(point, "You are here", ""));
-			mapOverlays.add(locOverlay);
-
-			prefs.edit().putLong("lat", (long) (lat)).putLong("lon", (long) (lng)).commit();
+			lastKnownUserLocation = location;
+			GeoPoint point = Util.locationToGeoPoint(location);
 			displayMapAt(point);
 		}
 
@@ -173,12 +132,10 @@ public class MapViewActivity extends MapActivity {
 	}
 
 	void displayMapAt(GeoPoint point) {
-		Log.i("MapViewActivity", "Begining drawingMapAt");
+		mapOverlays.clear();
 
-		// Clear the overlay
-		itemizedOverlay = new MapViewOverlay(drawable, this);
-
-		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
+		itemizedOverlay = new MapViewOverlay(getResources().getDrawable(R.drawable.point_of_interest), this);
+		for (Iterator<Task> iter = ToDoMeActivity.tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			Log.i("MapViewActivity", "Looking at task, " + task.getName());
 			LocationDatabase releventPOIs = ToDoMeActivity.db.searchAboutTypes(task.getTypes());
@@ -186,12 +143,16 @@ public class MapViewActivity extends MapActivity {
 			displayPOIs(releventPOIs);
 		}
 
-		Log.i("MapViewActivity", "mapOverlays " + ((mapOverlays == null) ? "true" : "false"));
+		if (lastKnownUserLocation != null) {
+			locOverlay = new MapViewOverlay(getResources().getDrawable(R.drawable.current_location), MapViewActivity.this);
+			locOverlay.addOverlay(new OverlayItem(Util.locationToGeoPoint(lastKnownUserLocation), "You are here", ""));
 
+			mapOverlays.add(locOverlay);
+		}
 		mapOverlays.add(itemizedOverlay);
+
 		mapController.animateTo(point);
 		mapView.invalidate();
-		drawable.invalidateSelf();
 	}
 
 	private void displayPOIs(HashSet<PointOfInterest> releventPOIs) {
