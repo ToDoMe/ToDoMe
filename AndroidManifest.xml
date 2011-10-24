@@ -23,7 +23,7 @@
 			<uses-permission android:name="android.permission.USE_CREDENTIALS" />
 		-->
 
-		<activity android:name="com.todome.ToDoMeActivity"
+		<activity android:name="uk.org.todome.ToDoMeActivity"
 			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
@@ -32,7 +32,7 @@
 		</activity>
 
 
-		<activity android:name="com.todome.TaskActivity"
+		<activity android:name="uk.org.todome.TaskActivity"
 			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar">
 			<!--
 				<intent-filter> <action android:name="android.intent.action.MAIN" />
@@ -41,7 +41,7 @@
 			-->
 		</activity>
 
-		<activity android:name="com.todome.MapViewActivity"
+		<activity android:name="uk.org.todome.MapViewActivity"
 			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar">
 			<!--
 				<intent-filter> <action android:name="android.intent.action.MAIN" />
@@ -50,10 +50,10 @@
 			-->
 		</activity>
 
-		<activity android:name="com.todome.TestTabActivity"
+		<activity android:name="uk.org.todome.TestTabActivity"
 			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar"></activity>
 
-		<activity android:name="com.todome.AboutActivity"
+		<activity android:name="uk.org.todome.AboutActivity"
 			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar">
 			<!--
 				<intent-filter> <action android:name="android.intent.action.MAIN" />
@@ -62,7 +62,7 @@
 			-->
 		</activity>
 		
-		<activity android:name="com.todome.PreferencesActivity"
+		<activity android:name="uk.org.todome.PreferencesActivityerencesActivity"
 			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar">
 			<!--
 				<intent-filter> <action android:name="android.intent.action.MAIN" />
@@ -71,14 +71,14 @@
 			-->
 		</activity>
 
-		<service android:name="com.todome.ToDoMeService"
+		<service android:name="uk.org.todome.ToDoMeService"
 			android:process=":remote">
 			<intent-filter>
-				<action android:name="com.todome.ToDoMeService" />
+				<action android:name="uk.org.todome.ToDoMeService" />
 			</intent-filter>
 		</service>
 
-		<receiver android:name="com.todome.ToDoMeReceiver">
+		<receiver android:name="uk.org.todome.ToDoMeReceiverceiver">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED">
 				</action>
