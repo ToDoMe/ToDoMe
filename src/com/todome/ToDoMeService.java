@@ -529,9 +529,9 @@ public class ToDoMeService extends Service implements LocationListener {
 					Log.i(TAG, "Putting up notification for timed task");
 					showNotification(task, null);
 				} else {
-					Log.i(TAG, "Regiestering call back");
+					Log.i(TAG, "Regiestering call back for " + (taskTime.toMillis(false) - System.currentTimeMillis()) + " milliseconds");
 					timedTasksHandler.removeCallbacks(mUpdateTimeTask);
-					timedTasksHandler.postDelayed(mUpdateTimeTask, taskTime.toMillis(false));
+					timedTasksHandler.postDelayed(mUpdateTimeTask, taskTime.toMillis(false) - System.currentTimeMillis());
 				}
 			}
 		}
@@ -539,6 +539,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private Runnable mUpdateTimeTask = new Runnable() {
 		public void run() {
+			Log.i(TAG, "Got a call back, checkingForReleventNotifications");
 			checkForReleventNotifications();
 		}
 	};
