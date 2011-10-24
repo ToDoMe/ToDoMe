@@ -42,10 +42,6 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
-import com.todome.R;
-import com.todome.R.drawable;
-import com.todome.R.id;
-import com.todome.R.layout;
 
 public class MapViewActivity extends MapActivity {
 	/** Called when the activity is first created. */
@@ -175,6 +171,9 @@ public class MapViewActivity extends MapActivity {
 	void displayMapAt(GeoPoint point) {
 		Log.i("MapViewActivity", "Begining drawingMapAt");
 
+		// Clear the overlay
+		itemizedOverlay = new MapViewOverlay(drawable, this);
+		
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			Log.i("MapViewActivity", "Looking at task, " + task.getName());

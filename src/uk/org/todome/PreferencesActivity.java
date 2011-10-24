@@ -1,8 +1,6 @@
 package uk.org.todome;
 
-import com.todome.R;
-import com.todome.R.id;
-import com.todome.R.layout;
+import uk.org.todome.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;

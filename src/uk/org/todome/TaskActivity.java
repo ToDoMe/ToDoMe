@@ -26,10 +26,7 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.todome.R;
-import com.todome.R.drawable;
-import com.todome.R.id;
-import com.todome.R.layout;
+import uk.org.todome.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;

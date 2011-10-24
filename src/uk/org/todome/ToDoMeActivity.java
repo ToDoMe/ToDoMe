@@ -23,13 +23,6 @@ package uk.org.todome;
 
 import java.util.ArrayList;
 
-import com.todome.R;
-import com.todome.R.drawable;
-import com.todome.R.id;
-import com.todome.R.layout;
-import com.todome.R.menu;
-import com.todome.R.string;
-
 import android.app.AlertDialog;
 import android.app.TabActivity;
 import android.content.ComponentName;

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,9 +51,6 @@ import android.text.format.Time;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
-import com.todome.R;
-import com.todome.R.drawable;
-import com.todome.R.string;
 
 // Service will fetch location data from server and send it to the Activity
 
