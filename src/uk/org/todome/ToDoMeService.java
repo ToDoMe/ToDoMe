@@ -88,6 +88,8 @@ public class ToDoMeService extends Service implements LocationListener {
 	// happen as fast as possible
 	private boolean mapMode = false;
 
+	Location locationOfLastUpdate;
+
 	/**
 	 * This array list contains the id's of the point of interests, that have been notified for the current location. To keep this up to date, id's are added as
 	 * notifications are shown, and removed when the user location is updated.
@@ -485,16 +487,33 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	void checkForReleventNotifications() {
-		Log.i(TAG, "Checking for relevent notifications");
-		if (!updateDatabase(getAllTaskTypes())) {
-			Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
-			if (pointsOfInterest == null) {
-				Log.w(TAG, "pointsOfInterest ==null aswell, giving up");
+		if (locationOfLastUpdate != null) {
+			Log.i(TAG, "Checking distance to last update, + " + userCurrentLocation.distanceTo(locationOfLastUpdate) + "m");
+			if (userCurrentLocation.distanceTo(locationOfLastUpdate) > 500) {
+				Log.i(TAG, "Checking for relevent notifications");
+				if (!updateDatabase(getAllTaskTypes())) {
+					Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
+					if (pointsOfInterest == null) {
+						Log.w(TAG, "pointsOfInterest ==null aswell, giving up");
+					}
+				} else {
+					locationOfLastUpdate = userCurrentLocation;
+				}
+			}
+		} else {
+			Log.i(TAG, "Checking for relevent notifications, locationOfLastUpdate==null");
+			if (!updateDatabase(getAllTaskTypes())) {
+				Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
+				if (pointsOfInterest == null) {
+					Log.w(TAG, "pointsOfInterest ==null aswell, giving up");
+				}
+			} else {
+				locationOfLastUpdate = userCurrentLocation;
 			}
 		}
 
 		if (userCurrentLocation != null && pointsOfInterest != null) {
-			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.1d);
+			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.5d);
 			// locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
 
 			for (Iterator<PointOfInterest> iter = locDb.iterator(); iter.hasNext();) {

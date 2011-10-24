@@ -55,7 +55,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 public class TaskActivity extends Activity {
-	private ArrayList<Task> tasks; // Loaded from ToDoMeActivity for convenience
 	private Task touchedTask;
 	private ListView lv;
 	private ArrayAdapter<Task> taskAdapter;
@@ -72,8 +71,6 @@ public class TaskActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.todo);
-
-		tasks = ToDoMeActivity.tasks;
 		tasksWithNewTask = new ArrayList<Task>();
 
 		// Build popups
@@ -83,8 +80,8 @@ public class TaskActivity extends Activity {
 			public void onClick(DialogInterface dialog, int id) {
 				// touchedTask.setName("[Completed] " + touchedTask.getName());
 				touchedTask.setComplete(true);
-				tasks.remove(touchedTask);
-				tasks.add(touchedTask);
+				ToDoMeActivity.tasks.remove(touchedTask);
+				ToDoMeActivity.tasks.add(touchedTask);
 				setUpTasksWithNewTasks();
 				taskAdapter.notifyDataSetChanged();
 				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
@@ -99,7 +96,7 @@ public class TaskActivity extends Activity {
 
 		builder.setMessage("Delete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				tasks.remove(touchedTask);
+				ToDoMeActivity.tasks.remove(touchedTask);
 				setUpTasksWithNewTasks();
 				taskAdapter.notifyDataSetChanged();
 				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
@@ -121,17 +118,17 @@ public class TaskActivity extends Activity {
 
 		// Creating list task array
 		setUpTasksWithNewTasks();
-		Log.i(TAG, "Displaying " + tasks.size() + " tasks");
+		Log.i(TAG, "Displaying " + ToDoMeActivity.tasks.size() + " tasks");
 
 		taskAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasksWithNewTask);
 		lv.setAdapter(taskAdapter);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a New Task item
+				if (position == 0 || position == (ToDoMeActivity.tasks.size() + 1)) { // If clicking on a New Task item
 					showTaskDialog(position, false);
 				} else {
-					touchedTask = tasks.get(position - 1);
+					touchedTask = ToDoMeActivity.tasks.get(position - 1);
 					//Log.i(TAG, "Task " + touchedTask.getName() + " " + (position));
 					if (touchedTask.isComplete()) {
 						//Log.i(TAG, "Deleting");
@@ -146,7 +143,7 @@ public class TaskActivity extends Activity {
 
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				if (position == 0 || position == (tasks.size() + 1)) { // If clicking on a NewTask item
+				if (position == 0 || position == (ToDoMeActivity.tasks.size() + 1)) { // If clicking on a NewTask item
 					return false;
 				} else {
 					showTaskDialog(position, true);
@@ -172,7 +169,7 @@ public class TaskActivity extends Activity {
 
 		if (updatingTask) {
 
-			Task thisTask = tasks.get(position - 1);
+			Task thisTask = ToDoMeActivity.tasks.get(position - 1);
 
 			taskNameEntry.setText(thisTask.getName());
 			ratingEntry.setRating(thisTask.getRating());
@@ -245,14 +242,14 @@ public class TaskActivity extends Activity {
 		task.setTypes(type);
 
 		if (updatingTask) {
-			tasks.remove(position - 1);
+			ToDoMeActivity.tasks.remove(position - 1);
 		}
 
 		// Put it in the array, in the right place
 		if (position == 0) {
-			tasks.add(0, task);
+			ToDoMeActivity.tasks.add(0, task);
 		} else {
-			tasks.add(task);
+			ToDoMeActivity.tasks.add(task);
 		}
 
 		// Regenerate the list task array
@@ -261,8 +258,8 @@ public class TaskActivity extends Activity {
 		// Notify the taskAdaptor of the change
 		taskAdapter.notifyDataSetChanged();
 
-		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + tasks.size() + " tasks");
-		Log.i(TAG, "Tasks: " + tasks.toString());
+		Log.i(TAG, "Task just added (" + task.getName() + " " + type + ") now have " + ToDoMeActivity.tasks.size() + " tasks");
+		Log.i(TAG, "Tasks: " + ToDoMeActivity.tasks.toString());
 
 		taskNameEntry.setText("");
 		ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
@@ -272,7 +269,7 @@ public class TaskActivity extends Activity {
 	private void setUpTasksWithNewTasks() {
 		HashSet<Task> tasksToAdd = new HashSet<Task>();
 		tasksWithNewTask.clear();
-		tasksWithNewTask.addAll(tasks);
+		tasksWithNewTask.addAll(ToDoMeActivity.tasks);
 		for (Iterator<Task> iter = tasksWithNewTask.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			if (task.isComplete()) {
@@ -287,14 +284,14 @@ public class TaskActivity extends Activity {
 		}
 		tasksWithNewTask.addAll(tasksToAdd);
 		tasksWithNewTask.add(0, new Task("New Task", "", "", 0));
-		if (tasks.size() != 0)
+		if (ToDoMeActivity.tasks.size() != 0)
 			tasksWithNewTask.add(new Task("New Task", "", "", 0));
 
 	}
 
 	private void addStarRating(int position) {
 		TextView tv = (TextView) lv.getChildAt(position);
-		int rating = tasks.get(position - 1).getRating();
+		int rating = ToDoMeActivity.tasks.get(position - 1).getRating();
 		Drawable img = null;
 
 		switch (rating) {

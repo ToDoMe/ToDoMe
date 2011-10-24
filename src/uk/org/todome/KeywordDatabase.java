@@ -25,8 +25,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import android.util.Log;
-
 public class KeywordDatabase implements Serializable {
 
 	private static final long serialVersionUID = -8902088060528474897L;
