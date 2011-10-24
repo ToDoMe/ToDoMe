@@ -520,23 +520,20 @@ public class ToDoMeService extends Service implements LocationListener {
 				if (!notifiedPOIs.contains(poi)) {
 
 					ArrayList<Task> releventTasks = Util.getReleventTasks(tasks, poi);
+					for (Iterator<Task> checkCompleteTaskIter = releventTasks.iterator(); checkCompleteTaskIter.hasNext();) {
+						Task checkCompleteTask = checkCompleteTaskIter.next();
+						if (checkCompleteTask.isComplete()) {
+							checkCompleteTaskIter.remove();
+						}
+
+					}
 					// Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
 
-					boolean mutipleNotifications = false;
-
-					if (mutipleNotifications) {
-						for (Iterator<Task> taskIter = releventTasks.iterator(); taskIter.hasNext();) {
-							showNotification(taskIter.next(), poi);
-							notifiedPOIs.add(poi);
-						}
+					if (releventTasks.size() > 0) {
+						showNotification(releventTasks, poi);
+						notifiedPOIs.add(poi);
 					} else {
-
-						if (releventTasks.size() > 0) {
-							showNotification(releventTasks, poi);
-							notifiedPOIs.add(poi);
-						} else {
-							Log.e(TAG, "getReleventTasks has returned 0, this should not happen!");
-						}
+						Log.i(TAG, "getReleventTasks has returned 0, this must be because the user has deleted the task");
 					}
 
 				} else {
@@ -552,21 +549,26 @@ public class ToDoMeService extends Service implements LocationListener {
 		for (Iterator<Task> tasksIter = tasks.iterator(); tasksIter.hasNext();) {
 			Task task = tasksIter.next();
 			Time taskTime = task.getAlarmTime();
-			if (taskTime != null) {
-				Time currentTime = new Time();
-				currentTime.set(System.currentTimeMillis());
-				Log.i(TAG, "Task " + task.getName() + " has a alarm time of " + taskTime.hour + ":" + taskTime.minute + ":" + taskTime.second);
-				Log.i(TAG, "Current time is " + currentTime.hour + ":" + currentTime.minute + ":" + currentTime.second);
-				if ((System.currentTimeMillis() - taskTime.toMillis(false)) > -1000 && (System.currentTimeMillis() - taskTime.toMillis(false)) < 1000) {
-					Log.i(TAG, "Putting up notification for timed task");
-					showNotification(task, null);
-				} else {
-					if (taskTime.toMillis(false) - System.currentTimeMillis() > 0) {
-						Log.i(TAG, "Regiestering call back for " + (taskTime.toMillis(false) - System.currentTimeMillis()) + " milliseconds");
-						timedTasksHandler.removeCallbacks(mUpdateTimeTask);
-						timedTasksHandler.postDelayed(mUpdateTimeTask, taskTime.toMillis(false) - System.currentTimeMillis());
+			if (!task.isComplete()) {
+
+				if (taskTime != null) {
+					Time currentTime = new Time();
+					currentTime.set(System.currentTimeMillis());
+					Log.i(TAG, "Task " + task.getName() + " has a alarm time of " + taskTime.hour + ":" + taskTime.minute + ":" + taskTime.second);
+					Log.i(TAG, "Current time is " + currentTime.hour + ":" + currentTime.minute + ":" + currentTime.second);
+					if ((System.currentTimeMillis() - taskTime.toMillis(false)) > -1000 && (System.currentTimeMillis() - taskTime.toMillis(false)) < 1000) {
+						Log.i(TAG, "Putting up notification for timed task");
+						showNotification(task, null);
+					} else {
+						if (taskTime.toMillis(false) - System.currentTimeMillis() > 0) {
+							Log.i(TAG, "Regiestering call back for " + (taskTime.toMillis(false) - System.currentTimeMillis()) + " milliseconds");
+							timedTasksHandler.removeCallbacks(mUpdateTimeTask);
+							timedTasksHandler.postDelayed(mUpdateTimeTask, taskTime.toMillis(false) - System.currentTimeMillis());
+						}
 					}
 				}
+			} else {
+				Log.i(TAG, "Ignoring completed task");
 			}
 		}
 	}
@@ -593,7 +595,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 			// If the point of interest is now "distance" or more away from the users current location, then remove it so more notifications can be given
 			if (!Util.isPointsWithinRange(Util.locationToGeoPoint(userCurrentLocation), poi.toGeoPoint(), distance)) {
-				Log.e(TAG, "Removed " + poi.toGeoPoint() + " dist " + Util.getDistanceBetween(Util.locationToGeoPoint(userCurrentLocation), poi.toGeoPoint()));
+				Log.i(TAG, "Removed " + poi.toGeoPoint() + " dist " + Util.getDistanceBetween(Util.locationToGeoPoint(userCurrentLocation), poi.toGeoPoint()));
 				iter.remove();
 			}
 		}

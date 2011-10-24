@@ -61,7 +61,7 @@ public class MapViewActivity extends MapActivity {
 	private long hardcodedBeginLong = (long) (-1.40416 * 1e6);
 
 	private static MapViewActivity instance;
-	
+
 	final static String TAG = "MapViewActivity";
 
 	public static MapViewActivity getInstance() {
@@ -109,7 +109,7 @@ public class MapViewActivity extends MapActivity {
 		mapView = (MapView) findViewById(R.id.mapview);
 		mapView.setBuiltInZoomControls(true);
 		mapController = mapView.getController();
-		mapController.setZoom(14); // Zoom 1 is world view
+		mapController.setZoom(17); // Zoom 1 is world view
 
 		// Get LocationManager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -127,6 +127,7 @@ public class MapViewActivity extends MapActivity {
 
 	@Override
 	public void onPause() {
+		Log.i(TAG, "Map pausing");
 		// Disable GPS to save battery
 		locationManager.removeUpdates(guh);
 		ToDoMeActivity.getInstance().sendMessageToService(ToDoMeService.MSG_MAP_MODE_DISABLE);
@@ -136,9 +137,12 @@ public class MapViewActivity extends MapActivity {
 	@Override
 	public void onResume() {
 		// Enable GPS again
+		Log.i(TAG, "Map resuming");
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, guh);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
 		ToDoMeActivity.getInstance().sendMessageToService(ToDoMeService.MSG_MAP_MODE_ENABLE);
+		mapController.setZoom(17); // Zoom 1 is world view
+		displayMapAt(mapView.getMapCenter());
 		super.onResume();
 	}
 
@@ -173,7 +177,7 @@ public class MapViewActivity extends MapActivity {
 
 		// Clear the overlay
 		itemizedOverlay = new MapViewOverlay(drawable, this);
-		
+
 		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
 			Task task = iter.next();
 			Log.i("MapViewActivity", "Looking at task, " + task.getName());
@@ -186,6 +190,8 @@ public class MapViewActivity extends MapActivity {
 
 		mapOverlays.add(itemizedOverlay);
 		mapController.animateTo(point);
+		mapView.invalidate();
+		drawable.invalidateSelf();
 	}
 
 	private void displayPOIs(HashSet<PointOfInterest> releventPOIs) {
@@ -199,7 +205,7 @@ public class MapViewActivity extends MapActivity {
 				Log.i("MapViewActivity", "Found type " + type);
 				types = types + " " + type;
 			}
-			
+
 			String name = ToDoMeActivity.keywords.getDescriptionForType(types.split(" ")[0]);
 
 			if (poi.getClosingTimes() != null) {
