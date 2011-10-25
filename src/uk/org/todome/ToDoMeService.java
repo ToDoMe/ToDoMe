@@ -75,7 +75,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	private KeywordDatabase keywords;
 
 	private Location userCurrentLocation;
-	
+
 	final int distBetweenDatabaseUpdates = 350;
 
 	private NotificationManager nm;
@@ -496,7 +496,24 @@ public class ToDoMeService extends Service implements LocationListener {
 		if (locationOfLastUpdate != null) {
 			Log.i(TAG, "Checking distance to last update, + " + userCurrentLocation.distanceTo(locationOfLastUpdate) + "m");
 			if (userCurrentLocation.distanceTo(locationOfLastUpdate) > distBetweenDatabaseUpdates || tasksChanged) {
-				Log.i(TAG, "Updating database");
+				if (tasks != null && tasks.size() > 0) {
+					Log.i(TAG, "Updating database");
+					if (!updateDatabase(getAllTaskTypes())) {
+						Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
+						if (pointsOfInterest == null) {
+							Log.w(TAG, "pointsOfInterest ==null aswell, giving up");
+						}
+					} else {
+						locationOfLastUpdate = userCurrentLocation;
+						tasksChanged = false;
+					}
+				} else {
+					Log.i(TAG, "No tasks so not updating the database");
+				}
+			}
+		} else {
+			if (tasks != null && tasks.size() > 0) {
+				Log.i(TAG, "Updating database, locationOfLastUpdate==null");
 				if (!updateDatabase(getAllTaskTypes())) {
 					Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
 					if (pointsOfInterest == null) {
@@ -504,18 +521,9 @@ public class ToDoMeService extends Service implements LocationListener {
 					}
 				} else {
 					locationOfLastUpdate = userCurrentLocation;
-					tasksChanged = false;
-				}
-			}
-		} else {
-			Log.i(TAG, "Updating database, locationOfLastUpdate==null");
-			if (!updateDatabase(getAllTaskTypes())) {
-				Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
-				if (pointsOfInterest == null) {
-					Log.w(TAG, "pointsOfInterest ==null aswell, giving up");
 				}
 			} else {
-				locationOfLastUpdate = userCurrentLocation;
+				Log.i(TAG, "No tasks so not updating the database");
 			}
 		}
 
