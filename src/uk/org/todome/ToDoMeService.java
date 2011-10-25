@@ -488,7 +488,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		if (locationOfLastUpdate != null) {
 			Log.i(TAG, "Checking distance to last update, + " + userCurrentLocation.distanceTo(locationOfLastUpdate) + "m");
 			if (userCurrentLocation.distanceTo(locationOfLastUpdate) > 500) {
-				Log.i(TAG, "Checking for relevent notifications");
+				Log.i(TAG, "Updating database");
 				if (!updateDatabase(getAllTaskTypes())) {
 					Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
 					if (pointsOfInterest == null) {
@@ -499,7 +499,7 @@ public class ToDoMeService extends Service implements LocationListener {
 				}
 			}
 		} else {
-			Log.i(TAG, "Checking for relevent notifications, locationOfLastUpdate==null");
+			Log.i(TAG, "Updating database, locationOfLastUpdate==null");
 			if (!updateDatabase(getAllTaskTypes())) {
 				Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
 				if (pointsOfInterest == null) {
