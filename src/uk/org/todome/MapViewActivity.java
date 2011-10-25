@@ -109,8 +109,12 @@ public class MapViewActivity extends MapActivity {
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
 		ToDoMeActivity.getInstance().sendMessageToService(ToDoMeService.MSG_MAP_MODE_ENABLE);
 		mapController.setZoom(17); // Zoom 1 is world view
-		displayMapAt(mapView.getMapCenter());
+		refreshMap();
 		super.onResume();
+	}
+
+	public void refreshMap() {
+		displayMapAt(mapView.getMapCenter());
 	}
 
 	public class GeoUpdateHandler implements LocationListener {

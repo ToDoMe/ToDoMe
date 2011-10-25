@@ -75,6 +75,8 @@ public class ToDoMeService extends Service implements LocationListener {
 	private KeywordDatabase keywords;
 
 	private Location userCurrentLocation;
+	
+	final int distBetweenDatabaseUpdates = 350;
 
 	private NotificationManager nm;
 	private LocationManager locationManager;
@@ -87,6 +89,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	private boolean mapMode = false;
 
 	Location locationOfLastUpdate;
+	boolean tasksChanged;
 
 	/**
 	 * This array list contains the id's of the point of interests, that have been notified for the current location. To keep this up to date, id's are added as
@@ -155,8 +158,13 @@ public class ToDoMeService extends Service implements LocationListener {
 			data = getSharedPreferences("data", MODE_PRIVATE); // For some reason this is required for the tasks list to be updated properly
 			String str = data.getString("tasks", null);
 			if (str != null) {
-				tasks = Util.getTaskListFromString(str);
-				Log.i(TAG, "Got " + tasks.size() + " from the shared preferences");
+				ArrayList<Task> tempTasks = Util.getTaskListFromString(str);
+				Log.i(TAG, "Got " + tempTasks.size() + " from the shared preferences");
+				if (tasks != null && tempTasks.size() > tasks.size()) {
+					Log.i(TAG, "This update has enlarged the tasks array, updating the database");
+					tasksChanged = true;
+				}
+				tasks = tempTasks;
 
 				if (this.tasks.size() == 0) {
 					// Disable GPS to save battery
@@ -487,7 +495,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	void checkForReleventNotifications() {
 		if (locationOfLastUpdate != null) {
 			Log.i(TAG, "Checking distance to last update, + " + userCurrentLocation.distanceTo(locationOfLastUpdate) + "m");
-			if (userCurrentLocation.distanceTo(locationOfLastUpdate) > 500) {
+			if (userCurrentLocation.distanceTo(locationOfLastUpdate) > distBetweenDatabaseUpdates || tasksChanged) {
 				Log.i(TAG, "Updating database");
 				if (!updateDatabase(getAllTaskTypes())) {
 					Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
@@ -496,6 +504,7 @@ public class ToDoMeService extends Service implements LocationListener {
 					}
 				} else {
 					locationOfLastUpdate = userCurrentLocation;
+					tasksChanged = false;
 				}
 			}
 		} else {
@@ -511,7 +520,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		}
 
 		if (userCurrentLocation != null && pointsOfInterest != null) {
-			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.5d);
+			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.025d);
 			// locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
 
 			for (Iterator<PointOfInterest> iter = locDb.iterator(); iter.hasNext();) {
@@ -545,7 +554,7 @@ public class ToDoMeService extends Service implements LocationListener {
 			Log.w(TAG, "Cant check for location triggered notifications as userCurrentLocation==null");
 		}
 
-		Log.i(TAG, "Begining to check timed tasks");
+		// Log.i(TAG, "Begining to check timed tasks");
 		for (Iterator<Task> tasksIter = tasks.iterator(); tasksIter.hasNext();) {
 			Task task = tasksIter.next();
 			Time taskTime = task.getAlarmTime();
@@ -714,7 +723,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	// LocationListener
 
 	public void onLocationChanged(Location location) {
-		Log.i(TAG, "Location changed.");
+		// Log.i(TAG, "Location changed.");
 		userCurrentLocation = location;
 		updateNotifiedPOIs();
 
@@ -722,7 +731,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		prefs.edit().putLong("lat", (long) (location.getLatitude() * 1e6)).putLong("lon", (long) (location.getLongitude() * 1e6)).commit();
 
 		checkForReleventNotifications();
-		Log.i(TAG, "tasks.size() = " + tasks.size());
+		// Log.i(TAG, "tasks.size() = " + tasks.size());
 	}
 
 	public void onProviderDisabled(String provider) {

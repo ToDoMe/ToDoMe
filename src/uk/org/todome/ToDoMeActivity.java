@@ -134,6 +134,10 @@ public class ToDoMeActivity extends TabActivity {
 				keywords = Util.getKeywordDatabaseFromString(str);
 			}
 			Log.i(TAG, "keywords.size() = " + keywords.size());
+			if (MapViewActivity.getInstance() != null) {
+				Log.i(TAG, "Refreshing map with new keywords");
+				MapViewActivity.getInstance().refreshMap();
+			}
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
