@@ -21,6 +21,7 @@
  */
 package com.todome;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -171,14 +172,14 @@ public class MapViewActivity extends MapActivity {
 			PointOfInterest poi = releventPOIsIter.next();
 			Log.i("MapViewActivity", "Found relevent POI: " + Util.E6IntToDouble(poi.getLatitudeE6()) + " " + Util.E6IntToDouble(poi.getLongitudeE6()));
 
-			String types = "";
+			ArrayList<String> types = new ArrayList<String>();
 			for (Iterator<String> typesIter = poi.getLocationTypes().iterator(); typesIter.hasNext();) {
 				String type = typesIter.next();
 				Log.i("MapViewActivity", "Found type " + type);
-				types = types + " " + type;
+				types.add(type);
 			}
 
-			String name = ToDoMeActivity.keywords.getDescriptionForType(types.split(" ")[0]);
+			String name = ToDoMeActivity.keywords.getDescriptionForType(types.get(0));
 
 			if (poi.getClosingTimes() != null) {
 				itemizedOverlay.addOverlay(new OverlayItem(poi.toGeoPoint(), name, poi.getOpeningTimes()[getDayOfWeek()] + " - "
