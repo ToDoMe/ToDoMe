@@ -260,7 +260,7 @@ public class TaskActivity extends Activity {
 
 		taskNameEntry.setText("");
 		ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
-		dialog.hide();
+		dialog.dismiss();
 	}
 
 	private void setUpTasksWithNewTasks() {
