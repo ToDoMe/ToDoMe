@@ -51,8 +51,8 @@ public class MapViewActivity extends MapActivity {
 	private MapViewOverlay itemizedOverlay, locOverlay;
 	private List<Overlay> mapOverlays;
 
-	private long hardcodedBeginLat = (long) (50.896996 * 1e6);
-	private long hardcodedBeginLong = (long) (-1.40416 * 1e6);
+	private int hardcodedBeginLat = Util.doubleToIntE6(50.937319d);
+	private int hardcodedBeginLong = Util.doubleToIntE6(-1.397788d);
 
 	private static MapViewActivity instance;
 
@@ -82,10 +82,17 @@ public class MapViewActivity extends MapActivity {
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, guh);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
 
+		//int beginLat = ToDoMeActivity.prefs.getInt("lat", hardcodedBeginLat);
+		int beginLat = hardcodedBeginLat;
+		//int beginLong = ToDoMeActivity.prefs.getInt("lon", hardcodedBeginLong);
+		int beginLong = hardcodedBeginLong;
+
+		Log.i(TAG, "Map Begin lat " + Util.E6IntToDouble(beginLat) + " long " + Util.E6IntToDouble(beginLong) + " coded default ("
+				+ Util.E6IntToDouble(hardcodedBeginLat) + " " + Util.E6IntToDouble(hardcodedBeginLong) + ")");
+
 		// Overlays
 		mapOverlays = mapView.getOverlays();
-		GeoPoint lastLocation = new GeoPoint((int) (ToDoMeActivity.prefs.getLong("lat", hardcodedBeginLat)), (int) (ToDoMeActivity.prefs.getLong("lon",
-				hardcodedBeginLong)));
+		GeoPoint lastLocation = new GeoPoint(beginLat, beginLong);
 		displayMapAt(lastLocation);
 	}
 
@@ -163,7 +170,7 @@ public class MapViewActivity extends MapActivity {
 	private void displayPOIs(HashSet<PointOfInterest> releventPOIs) {
 		for (Iterator<PointOfInterest> releventPOIsIter = releventPOIs.iterator(); releventPOIsIter.hasNext();) {
 			PointOfInterest poi = releventPOIsIter.next();
-			Log.i("MapViewActivity", "Found relevent POI: " + poi.getLatitudeE6() + " " + poi.getLongitudeE6());
+			Log.i("MapViewActivity", "Found relevent POI: " + Util.E6IntToDouble(poi.getLatitudeE6()) + " " + Util.E6IntToDouble(poi.getLongitudeE6()));
 
 			ArrayList<String> types = new ArrayList<String>();
 			for (Iterator<String> typesIter = poi.getLocationTypes().iterator(); typesIter.hasNext();) {
