@@ -362,11 +362,11 @@ public class ToDoMeActivity extends TabActivity {
 
 		switch (item.getItemId()) {
 		case R.id.about_menu_button:
-			myIntent.setClassName("com.todome", "com.todome.AboutActivity");
+			myIntent.setClassName("uk.org.todome", "uk.org.todome.AboutActivity");
 			startActivity(myIntent);
 			return true;
 		case R.id.preferences_menu_button:
-			myIntent.setClassName("com.todome", "com.todome.PreferencesActivity");
+			myIntent.setClassName("uk.org.todome", "uk.org.todome.PreferencesActivity");
 			startActivity(myIntent);
 			return true;
 		case R.id.toggle_notifications_menu_button:

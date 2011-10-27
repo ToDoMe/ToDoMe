@@ -82,9 +82,9 @@ public class MapViewActivity extends MapActivity {
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, guh);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, guh);
 
-		//int beginLat = ToDoMeActivity.prefs.getInt("lat", hardcodedBeginLat);
+		// int beginLat = ToDoMeActivity.prefs.getInt("lat", hardcodedBeginLat);
 		int beginLat = hardcodedBeginLat;
-		//int beginLong = ToDoMeActivity.prefs.getInt("lon", hardcodedBeginLong);
+		// int beginLong = ToDoMeActivity.prefs.getInt("lon", hardcodedBeginLong);
 		int beginLong = hardcodedBeginLong;
 
 		Log.i(TAG, "Map Begin lat " + Util.E6IntToDouble(beginLat) + " long " + Util.E6IntToDouble(beginLong) + " coded default ("
@@ -92,8 +92,14 @@ public class MapViewActivity extends MapActivity {
 
 		// Overlays
 		mapOverlays = mapView.getOverlays();
-		GeoPoint lastLocation = new GeoPoint(beginLat, beginLong);
+		GeoPoint lastLocation;
+		if (lastKnownUserLocation != null) {
+			lastLocation = Util.locationToGeoPoint(lastKnownUserLocation);
+		} else {
+			lastLocation = new GeoPoint(beginLat, beginLong);
+		}
 		displayMapAt(lastLocation);
+		mapController.setCenter(lastLocation);
 	}
 
 	public void notifyLocationsUpdated() {
