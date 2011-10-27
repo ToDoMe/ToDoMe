@@ -84,8 +84,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	private boolean enabled = true;
 
-	// MapMode relates to the frequency of location updates, in map mode these
-	// happen as fast as possible
+	// MapMode relates to the frequency of location updates, in map mode these happen as fast as possible
 	private boolean mapMode = false;
 
 	Location locationOfLastUpdate;
