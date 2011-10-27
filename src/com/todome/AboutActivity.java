@@ -1,6 +1,6 @@
-package uk.org.todome;
+package com.todome;
 
-import uk.org.todome.R;
+import com.todome.R;
 
 import android.app.Activity;
 import android.os.Bundle;

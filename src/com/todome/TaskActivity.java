@@ -19,14 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package uk.org.todome;
+package com.todome;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import uk.org.todome.R;
+import com.todome.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
