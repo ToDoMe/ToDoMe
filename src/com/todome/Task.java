@@ -21,35 +21,36 @@
  */
 package com.todome;
 
-import java.io.Serializable;
 import java.util.HashSet;
+
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 
 import android.text.format.Time;
 
-public class Task implements Serializable, Comparable<Task> {
+@DatabaseTable(tableName = "tasks")
+public class Task implements Comparable<Task> {
 
-	private static final long serialVersionUID = 4693889711884116969L;
-
+	@DatabaseField(generatedId = true)
+	private int id;
+	@DatabaseField(canBeNull = false)
 	private String name;
+	@DatabaseField(canBeNull = true)
 	private String notes;
-	private String postcode;
-	private HashSet<String> types;
+	@DatabaseField(canBeNull = false)
 
-	private int second;
-	private int minute;
-	private int hour;
-	private int monthDay;
-	private int month;
-	private int year;
+	private TagList tags;
 
+	@DatabaseField(canBeNull = false)
 	private boolean complete;
-	private int rating;
+
+	public Task() {
+
+	}
 
 	public Task(String name, String notes, String postcode, int rating) {
 		this.name = name;
 		this.notes = notes;
-		this.postcode = postcode;
-		this.rating = rating;
 		this.complete = false;
 	}
 
@@ -73,74 +74,14 @@ public class Task implements Serializable, Comparable<Task> {
 		this.notes = notes;
 	}
 
-	public String getPostcode() {
-		return postcode;
-	}
-
-	public void setPostcode(String postcode) {
-		this.postcode = postcode;
-	}
-
-	public HashSet<String> getTypes() { // Returns an empty array for completed tasks
-		if (!complete) {
-			return types;
-		} else {
-			return new HashSet<String>();
-		}
-	}
-
-	public void setTypes(HashSet<String> types) {
-		this.types = types;
-	}
-
-	public boolean isComplete() {
-		return complete;
-	}
-
-	public void setComplete(boolean complete) {
-		this.complete = complete;
-	}
-
-	public int getRating() {
-		return rating;
-	}
-
-	public void setRating(int rating) {
-		this.rating = rating;
-	}
-
-	public Time getAlarmTime() {
-		if (year != 0) { // TODO: Hack
-		Time time = new Time();
-		time.set(second, minute, hour, monthDay, month, year);
-		return time;
-		} else {
-			return null;
-		}
-	}
-
-	public void setAlarmTime(Time alarmTime) {
-		second = alarmTime.second;
-		minute = alarmTime.minute;
-		hour = alarmTime.hour;
-		monthDay = alarmTime.monthDay;
-		month = alarmTime.month;
-		year = alarmTime.year;
-	}
-
 	public int compareTo(Task another) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public Task clone() {
-		// new String() just to be on the safe side (hopefully)
-		Task newTask = new Task(new String(this.name), new String(this.notes), new String(this.postcode), this.rating);
-		newTask.setComplete(this.complete);
-		if (this.getAlarmTime() != null) {
-			newTask.setAlarmTime(this.getAlarmTime());
-		}
-		return newTask;
+		// TODO
+		return null;
 	}
 
 }

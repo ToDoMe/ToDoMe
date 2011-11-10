@@ -69,11 +69,6 @@ public class ToDoMeService extends Service implements LocationListener {
 	 */
 	private SharedPreferences data;
 
-	// Data
-	private ArrayList<Task> tasks;
-	private LocationDatabase pointsOfInterest;
-	private KeywordDatabase keywords;
-
 	private Location userCurrentLocation;
 
 	final int distBetweenDatabaseUpdates = 350;
