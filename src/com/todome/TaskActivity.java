@@ -73,7 +73,7 @@ public class TaskActivity extends Activity {
 		// Build popups
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		builder.setMessage("Mark complete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		builder.setMessage(R.string.mark_complete).setCancelable(false).setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				// touchedTask.setName("[Completed] " + touchedTask.getName());
 				touchedTask.setComplete(true);
@@ -83,7 +83,7 @@ public class TaskActivity extends Activity {
 				taskAdapter.notifyDataSetChanged();
 				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
 			}
-		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+		}).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.cancel();
 			}
@@ -91,14 +91,14 @@ public class TaskActivity extends Activity {
 
 		alertMarkComplete = builder.create();
 
-		builder.setMessage("Delete?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		builder.setMessage(R.string.delete_message).setCancelable(false).setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				ToDoMeActivity.tasks.remove(touchedTask);
 				setUpTasksWithNewTasks();
 				taskAdapter.notifyDataSetChanged();
 				ToDoMeActivity.writeTasks(ToDoMeActivity.tasks);
 			}
-		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+		}).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.cancel();
 			}

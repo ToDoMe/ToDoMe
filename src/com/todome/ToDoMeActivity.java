@@ -31,7 +31,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,17 +47,8 @@ import android.widget.TabHost;
 public class ToDoMeActivity extends TabActivity {
 	private static final String TAG = "ToDoMeActivity";
 
-	/**
-	 * Used to store preferences for the app
-	 */
+	/** Used to store preferences for the app */
 	static SharedPreferences prefs;
-
-	/**
-	 * Used to store data
-	 * 
-	 * "tasks" for the tasks array "keywords" for the keywords database
-	 */
-	static SharedPreferences data;
 
 	private static ToDoMeActivity instance;
 
@@ -70,8 +60,9 @@ public class ToDoMeActivity extends TabActivity {
 
 	// Create preferences setting method, and overload with defaults.
 	public static void setPreferences(Float search_radius, Long extra_time, Long gps_timeout) {
-		prefs.edit().putFloat("search_radius", search_radius > 10 ? 10 : search_radius).putLong("extra_time", extra_time).putLong("gps_timeout", gps_timeout)
-				.commit();
+		prefs.edit().putFloat("search_radius", search_radius > 10 ? 10 : search_radius)
+					.putLong("extra_time", extra_time).putLong("gps_timeout", gps_timeout)
+					.commit();
 	}
 
 	public static void setDefaultPreferences() {
@@ -82,64 +73,26 @@ public class ToDoMeActivity extends TabActivity {
 					.commit();
 	}
 
-	// Data
-	public static LocationDatabase db = new LocationDatabase();
-	public static KeywordDatabase keywords = new KeywordDatabase();
-	public static ArrayList<Task> tasks = new ArrayList<Task>();
-
 	private boolean notificationsEnabled = true;
 
-	// About dialog
 	private AlertDialog aboutDialog;
 
 	private void readTasks() {
-		try {
-			String str = data.getString("tasks", null);
-			if (str != null) {
-				tasks = Util.getTaskListFromString(str);
-			} else {
-				Log.i(TAG, "Loaded tasks, but got null, populating database with empty task list");
-				writeTasks(new ArrayList<Task>());
-			}
-			Log.i(TAG, "tasks.size() = " + tasks.size());
-		} catch (Exception ex) {
-			Log.e(TAG, "", ex);
-		}
-
+		// TODO Get tasks
 	}
 
 	static void writeTasks(ArrayList<Task> newTasks) {
-		if (newTasks.size() != tasks.size()) {
-			Log.e(TAG, "Oh dear, this shouldn't happen, tasks and newTasks are of a different size in ToDoMeActivity.writeTasks();");
-		}
-		Editor dataEditor = data.edit();
-
-		dataEditor.putString("tasks", Util.getTaskArrayString(newTasks));
-		if (dataEditor.commit()) {
-			Log.i(TAG, "Sucessfuly commited " + newTasks.size());
-		} else {
-			Log.e(TAG, "ERROR commiting tasks, in ToDoMeActivity.writeTasks(); " + newTasks.size());
-		}
-
-		Log.i(TAG, "Now have " + newTasks.size() + " tasks");
+		// TODO Write tasks
 		notifyTasksChanged();
 	}
 
 	private void readKeywords() {
-		try {
-			data = getSharedPreferences("data", MODE_PRIVATE);
-			
-			String str = data.getString("keywords", null);
-			if (str != null) {
-				keywords = Util.getKeywordDatabaseFromString(str);
-			}
-			Log.i(TAG, "keywords.size() = " + keywords.size());
-			if (MapViewActivity.getInstance() != null) {
-				Log.i(TAG, "Refreshing map with new keywords");
-				MapViewActivity.getInstance().refreshMap();
-			}
-		} catch (Exception ex) {
-			Log.e(TAG, "", ex);
+		// TODO Get keywords
+		//Log.i(TAG, "keywords.size() = " + keywords.size());
+		
+		// Refresh map with new keywords
+		if (MapViewActivity.getInstance() != null) {
+			MapViewActivity.getInstance().refreshMap();
 		}
 	}
 
@@ -153,20 +106,16 @@ public class ToDoMeActivity extends TabActivity {
 
 			// Load the two shared preferences files
 			prefs = getSharedPreferences("prefs", MODE_PRIVATE);
-			data = getSharedPreferences("data", MODE_PRIVATE);
 
 			if (prefs.getBoolean("firstStart", true)) {
 				final AlertDialog alertDialog = new AlertDialog.Builder(ToDoMeActivity.this).create();
-				alertDialog.setTitle("Welcome to ToDoMe");
-				alertDialog.setMessage("To start using ToDoMe, enter some tasks in the To-Do tab. " +
-									   "ToDoMe picks up certain keywords in the task name to detect " +
-									   "what types of locations will enable you to carry out your task. " +
-									   "Please note that this software is beta, and there are lots of " +
-									   "bugs and stability issues.");
-				alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-				      public void onClick(DialogInterface dialog, int which) {
-				    	  alertDialog.dismiss();
-				      } }); 
+				alertDialog.setTitle(getString(R.string.welcome_title));
+				alertDialog.setMessage(getString(R.string.welcome_message));
+				alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(android.R.string.ok),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							alertDialog.dismiss();
+						} }); 
 				alertDialog.show();
 				prefs.edit().putBoolean("firstStart", false).commit();
 			}
@@ -248,12 +197,6 @@ public class ToDoMeActivity extends TabActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case ToDoMeService.MSG_LOCATIONS_UPDATED:
-				try {
-					db = Util.getLocationDatabaseFromString(msg.getData().getString("str1"));
-				} catch (Exception ex) {
-					Log.e(TAG, ex.getClass().toString() + " " + ex.getMessage());
-				}
-				Log.i(TAG, "db.size() = " + db.size());
 				if (MapViewActivity.getInstance() != null) {
 					MapViewActivity.getInstance().notifyLocationsUpdated();
 				}

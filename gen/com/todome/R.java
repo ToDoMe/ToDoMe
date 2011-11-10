@@ -100,7 +100,9 @@ public final class R {
         public static final int app_version=0x7f040010;
         public static final int cancel=0x7f04001b;
         public static final int clear_data=0x7f040020;
+        public static final int complete_message=0x7f040024;
         public static final int created_by=0x7f040011;
+        public static final int delete_message=0x7f040025;
         public static final int disable_notifications=0x7f04001d;
         public static final int enable_notifications=0x7f04001e;
         public static final int findwithin=0x7f040014;
@@ -128,6 +130,8 @@ public final class R {
         public static final int time_label=0x7f04000e;
         public static final int updategps=0x7f040016;
         public static final int website_info=0x7f040021;
+        public static final int welcome_message=0x7f040022;
+        public static final int welcome_title=0x7f040023;
         public static final int with=0x7f04000d;
     }
 }
