@@ -57,23 +57,10 @@ import com.google.android.maps.GeoPoint;
 public class ToDoMeService extends Service implements LocationListener {
 	private final String TAG = "ToDoMeService";
 
-	/**
-	 * Used to store preferences for the app
-	 */
+	/** Used to store preferences for the app */
 	private SharedPreferences prefs;
 
-	/**
-	 * Used to store data
-	 * 
-	 * "tasks" for the tasks array "keywords" for the keywords database
-	 */
-	private SharedPreferences data;
-
 	// Data
-	private ArrayList<Task> tasks;
-	private LocationDatabase pointsOfInterest;
-	private KeywordDatabase keywords;
-
 	private Location userCurrentLocation;
 
 	final int distBetweenDatabaseUpdates = 350;
@@ -96,9 +83,7 @@ public class ToDoMeService extends Service implements LocationListener {
 	 */
 	HashSet<PointOfInterest> notifiedPOIs = new HashSet<PointOfInterest>();
 
-	/**
-	 * Keeps track of all current registered clients.
-	 */
+	/** Keeps track of all current registered clients. */
 	ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 	int mValue = 0; // Holds last value set by a client.
 	public static final int MSG_REGISTER_CLIENT = 1;
@@ -111,10 +96,8 @@ public class ToDoMeService extends Service implements LocationListener {
 	public static final int MSG_DISABLE = 8;
 	public static final int MSG_MAP_MODE_ENABLE = 9;
 	public static final int MSG_MAP_MODE_DISABLE = 10;
-	/**
-	 * Target we publish for clients to send messages to IncomingHandler.
-	 */
-	final Messenger mMessenger = new Messenger(new IncomingHandler()); //
+	/** Target we publish for clients to send messages to IncomingHandler. */
+	final Messenger mMessenger = new Messenger(new IncomingHandler());
 
 	private Handler timedTasksHandler = new Handler();
 
@@ -133,7 +116,6 @@ public class ToDoMeService extends Service implements LocationListener {
 		setLocationUpdateSettings();
 
 		prefs = getSharedPreferences("prefs", MODE_PRIVATE);
-		data = getSharedPreferences("data", MODE_PRIVATE);
 		readKeywords();
 		readTasks();
 	}
@@ -153,86 +135,44 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	private void readTasks() {
-		try {
-			data = getSharedPreferences("data", MODE_PRIVATE); // For some reason this is required for the tasks list to be updated properly
-			String str = data.getString("tasks", null);
-			if (str != null) {
-				ArrayList<Task> tempTasks = Util.getTaskListFromString(str);
-				Log.i(TAG, "Got " + tempTasks.size() + " from the shared preferences");
-				if (tasks != null && tempTasks.size() > tasks.size()) {
-					Log.i(TAG, "This update has enlarged the tasks array, updating the database");
-					tasksChanged = true;
-				}
-				tasks = tempTasks;
+		// TODO get tasks from OrmLite
+		/*if (tasks.size() == 0) {
+			// Disable GPS to save battery
+			disableNotifications();
+		} else {
+			// Enable GPS again
+			enableNotifications();
+		}*/
 
-				if (this.tasks.size() == 0) {
-					// Disable GPS to save battery
-					disableNotifications();
-				} else {
-					// Enable GPS again
-					enableNotifications();
-				}
-
-				checkForReleventNotifications();
-			} else {
-				Log.i(TAG, "Loaded tasks, but got null, populating database with empty task list");
-				writeTasks(new ArrayList<Task>());
-			}
-		} catch (Exception ex) {
-			Log.e(TAG, "", ex);
-		}
-
-	}
-
-	private void writeTasks(ArrayList<Task> newTasks) {
-		Editor dataEditor = data.edit();
-
-		dataEditor.putString("tasks", Util.getTaskArrayString(newTasks));
-		dataEditor.commit();
+		checkForReleventNotifications();
 	}
 
 	private void readKeywords() {
 		Log.i(TAG, "Reading keywords.");
 		try {
-			data = getSharedPreferences("data", MODE_PRIVATE); // Added as per tasks above
-			String str = data.getString("keywords", null);
-			if (str != null) {
-				keywords = Util.getKeywordDatabaseFromString(str);
-				long keywordsDate = data.getLong("keywordsDate", -1);
-				if (keywordsDate == -1 || keywords.size() == 0) {
-					getKeywordDatabaseFromServer();
-				} else {
-					// Calculate the time since last update
-					Time lastUpdate = new Time();
-					lastUpdate.set(keywordsDate);
-					Time now = new Time();
-					now.setToNow();
-					if ((now.toMillis(false) - lastUpdate.toMillis(false)) < 1.21E9 /*
-																					 * 2 weeks in ms
-																					 */) {
-						writeKeywords(keywords);
-					} else {
-						Log.i(TAG, "Keywords out of date. Populating database with keywords from server.");
-						getKeywordDatabaseFromServer();
-					}
-				}
-
-			} else {
-				Log.i(TAG, "Loaded keywords, but got null. Populating database with keywords from server.");
+			// TODO Get keyword database
+			// TODO Work out how to store the last update time
+			/*long keywordsDate = data.getLong("keywordsDate", -1);
+			if (keywordsDate == -1 || keywords.size() == 0) {
+				// If the database has never been downloaded
 				getKeywordDatabaseFromServer();
+			} else {
+				// Calculate the time since last update
+				Time lastUpdate = new Time();
+				lastUpdate.set(keywordsDate);
+				Time now = new Time();
+				now.setToNow();
+				if ((now.toMillis(false) - lastUpdate.toMillis(false)) > 1.21E9 ) {
+					// If the keywords database was last updated over two weeks ago
+					getKeywordDatabaseFromServer();
+				}
 			}
+
 			Log.i(TAG, "keywords.size() = " + keywords.size() + ". Sending MSG_KEYWORDS_UPDATED");
-			sendMessageToUI(MSG_KEYWORDS_UPDATED);
+			sendMessageToUI(MSG_KEYWORDS_UPDATED);*/
 		} catch (Exception ex) {
 			Log.e(TAG, "", ex);
 		}
-	}
-
-	private void writeKeywords(KeywordDatabase newKeywords) {
-		Editor dataEditor = data.edit();
-
-		dataEditor.putString("keywords", Util.getKeywordDatabaseString(newKeywords));
-		dataEditor.commit();
 	}
 
 	@Override
@@ -249,6 +189,7 @@ public class ToDoMeService extends Service implements LocationListener {
 		isRunning = false;
 	}
 
+	// TODO: See if showNotification's two overloads can share more code
 	private void showNotification(ArrayList<Task> notifyTasks, PointOfInterest poi) {
 		Log.i(TAG, "Showing notification");
 		Collections.sort(notifyTasks, new TaskPriorityComparator());
@@ -257,17 +198,11 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		String tickerText = "";
 		for (int i = 0; i < notifyTasks.size(); i++) {
-			if (i != (notifyTasks.size() - 2)) {
-				tickerText += notifyTasks.get(i).getName() + ", ";
-			} else {
-				tickerText += notifyTasks.get(i).getName() + " and ";
-			}
+			tickerText += notifyTasks.get(i).getName() + ((i != (notifyTasks.size() - 2)) ? ", " : " and ");
 		}
 
-		Log.i(TAG, "TickerText " + tickerText);
-
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		// Set the icon, scrolling text and timestamp
+		// Set the icon, scrolling text and time-stamp
 		Notification notification = new Notification(R.drawable.notification_icon, tickerText, System.currentTimeMillis());
 		notification.defaults |= Notification.DEFAULT_SOUND;
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
@@ -294,8 +229,9 @@ public class ToDoMeService extends Service implements LocationListener {
 		typesIntersection.addAll(taskTypes);
 		typesIntersection.retainAll(locationTypes);
 
-		for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
-			message = message + keywords.getDescriptionForType(iter.next()) + " ";
+		for (String str : typesIntersection) {
+			// TODO Change to use OrmLite
+			//message = message + keywords.getDescriptionForType(str) + " ";
 		}
 
 		Log.i(TAG, "Message " + message);
@@ -318,11 +254,9 @@ public class ToDoMeService extends Service implements LocationListener {
 
 		Time taskTime = notifyTask.getAlarmTime();
 		PendingIntent contentIntent;
-		if (taskTime != null) { // If a timed task, dont show the map
-			contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class).putExtra("displayMap", false), 0);
-		} else {
-			contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class).putExtra("displayMap", true), 0);
-		}
+		// If a timed task, don't show the map
+		contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ToDoMeActivity.class).putExtra("displayMap", (taskTime == null)), 0);
+
 		// Set the info for the views that show in the notification panel.
 		String message = "";
 
@@ -336,16 +270,16 @@ public class ToDoMeService extends Service implements LocationListener {
 			typesIntersection.addAll(taskTypes);
 			typesIntersection.retainAll(locationTypes);
 
-			for (Iterator<String> iter = typesIntersection.iterator(); iter.hasNext();) {
-				message = message + keywords.getDescriptionForType(iter.next()) + " ";
+			for (String str : typesIntersection) {
+				// TODO Change to use OrmLite
+				//message = message + keywords.getDescriptionForType(str) + " ";
 			}
 		} else {
 			message = notifyTask.getNotes();
 		}
 		notification.setLatestEventInfo(this, notifyTask.getName(), message, contentIntent);
 
-		// Send the notification.
-		// We use a layout id because it is a unique number. We use it later to cancel.
+		// Send the notification. We use a layout id because it is a unique number. We use it later to cancel.
 		nm.notify(R.string.service_started, notification);
 	}
 
@@ -370,7 +304,6 @@ public class ToDoMeService extends Service implements LocationListener {
 					String type = jsonObject.getString("name");
 					if (!KeywordDatabase.blacklistedTypes.contains(type)) {
 						String descr = jsonObject.getString("description");
-						// Log.v(TAG, type);
 						JSONArray tags = jsonObject.getJSONArray("tags");
 						for (int j = 0; j < tags.length(); j++) {
 							String name = tags.getJSONObject(j).getString("name");
@@ -390,19 +323,15 @@ public class ToDoMeService extends Service implements LocationListener {
 			// Save the date
 			Time now = new Time();
 			now.setToNow();
-			data.edit().putLong("keywordsDate", now.toMillis(false)).commit();
+			//data.edit().putLong("keywordsDate", now.toMillis(false)).commit();	// TODO Work out how to store the last update time
 
-			keywords = db;
-			writeKeywords(db);
+			// TODO save the downloaded data to OrmLite
 		} else {
 			Log.e(TAG, "Got null keywords database from server");
-			writeKeywords(new KeywordDatabase());
 		}
 	}
 
-	/**
-	 * Fetches locations about the given arguments. Returns null if a error occurs.
-	 */
+	/** Fetches locations about the given arguments. Returns null if a error occurs. */
 	private LocationDatabase getLocationDatabase(GeoPoint point, int radius, String type) {
 		Log.i(TAG, "Beginning to get data from server, for " + Util.E6IntToDouble(point.getLatitudeE6()) + " " + Util.E6IntToDouble(point.getLongitudeE6()));
 
@@ -457,9 +386,7 @@ public class ToDoMeService extends Service implements LocationListener {
 
 	}
 
-	/**
-	 * This updates the central database with the relevant data from the server
-	 */
+	/** Updates the central database with the relevant data from the server */
 	private boolean updateDatabase(HashSet<String> taskTypes) {
 		LocationDatabase newDatabase = new LocationDatabase();
 
@@ -479,11 +406,9 @@ public class ToDoMeService extends Service implements LocationListener {
 		}
 
 		if (newDatabase.size() > 0) {
-
-			pointsOfInterest = newDatabase; // TODO At the moment new location data replaces old data, this needs to be fixed
+			// TODO Store the downloaded data in OrmLite
 			Log.i(TAG, "Location database replaced with new data");
-
-			sendDatabaseToUI(pointsOfInterest);
+			
 			return true;
 		} else {
 			Log.w(TAG, "updateDatabase got a empty database");
@@ -492,9 +417,11 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	void checkForReleventNotifications() {
-		if (locationOfLastUpdate != null) {
+		// TODO get tasks and pointsOfInterest from OrmLite
+		/*if (locationOfLastUpdate != null) {
 			Log.i(TAG, "Checking distance to last update, + " + userCurrentLocation.distanceTo(locationOfLastUpdate) + "m");
-			if (userCurrentLocation.distanceTo(locationOfLastUpdate) > distBetweenDatabaseUpdates || tasksChanged) {
+			if (tasksChanged || userCurrentLocation.distanceTo(locationOfLastUpdate) > distBetweenDatabaseUpdates) {
+				// Update the database
 				if (tasks != null && tasks.size() > 0) {
 					Log.i(TAG, "Updating database");
 					if (!updateDatabase(getAllTaskTypes())) {
@@ -506,23 +433,7 @@ public class ToDoMeService extends Service implements LocationListener {
 						locationOfLastUpdate = userCurrentLocation;
 						tasksChanged = false;
 					}
-				} else {
-					Log.i(TAG, "No tasks so not updating the database");
 				}
-			}
-		} else {
-			if (tasks != null && tasks.size() > 0) {
-				Log.i(TAG, "Updating database, locationOfLastUpdate==null");
-				if (!updateDatabase(getAllTaskTypes())) {
-					Log.w(TAG, "checkForReleventNotifications errored, falling back to old database");
-					if (pointsOfInterest == null) {
-						Log.w(TAG, "pointsOfInterest ==null aswell, giving up");
-					}
-				} else {
-					locationOfLastUpdate = userCurrentLocation;
-				}
-			} else {
-				Log.i(TAG, "No tasks so not updating the database");
 			}
 		}
 
@@ -530,63 +441,40 @@ public class ToDoMeService extends Service implements LocationListener {
 			LocationDatabase locDb = pointsOfInterest.findPointsWithinRadius(Util.locationToGeoPoint(userCurrentLocation), 0.025d);
 			// locDb.removeDuplicatesOfTypeByDistance(Util.locationToGeoPoint(userCurrentLocation), getAllTaskTypes());
 
-			for (Iterator<PointOfInterest> iter = locDb.iterator(); iter.hasNext();) {
-				PointOfInterest poi = iter.next();
-
+			for (PointOfInterest poi : locDb) {
 				if (!notifiedPOIs.contains(poi)) {
-
 					ArrayList<Task> releventTasks = Util.getReleventTasks(tasks, poi);
 					for (Iterator<Task> checkCompleteTaskIter = releventTasks.iterator(); checkCompleteTaskIter.hasNext();) {
 						Task checkCompleteTask = checkCompleteTaskIter.next();
 						if (checkCompleteTask.isComplete()) {
 							checkCompleteTaskIter.remove();
 						}
-
 					}
-					// Log.i(TAG, "Distance from " + poi.toString() + " is " + releventTasks.size() + " relevent tasks.");
 
 					if (releventTasks.size() > 0) {
 						showNotification(releventTasks, poi);
 						notifiedPOIs.add(poi);
-					} else {
-						Log.i(TAG, "getReleventTasks has returned 0, this must be because the user has deleted the task");
 					}
-
-				} else {
-					Log.i(TAG, "Not notifying for " + poi.getLatitudeE6() + " " + poi.getLongitudeE6()
-							+ " as it has been notified for in this location already");
 				}
 			}
-		} else {
-			Log.w(TAG, "Cant check for location triggered notifications as userCurrentLocation==null");
 		}
 
-		// Log.i(TAG, "Begining to check timed tasks");
+		// Check timed tasks
 		for (Iterator<Task> tasksIter = tasks.iterator(); tasksIter.hasNext();) {
 			Task task = tasksIter.next();
 			Time taskTime = task.getAlarmTime();
-			if (!task.isComplete()) {
-
-				if (taskTime != null) {
-					Time currentTime = new Time();
-					currentTime.set(System.currentTimeMillis());
-					Log.i(TAG, "Task " + task.getName() + " has a alarm time of " + taskTime.hour + ":" + taskTime.minute + ":" + taskTime.second);
-					Log.i(TAG, "Current time is " + currentTime.hour + ":" + currentTime.minute + ":" + currentTime.second);
-					if ((System.currentTimeMillis() - taskTime.toMillis(false)) > -1000 && (System.currentTimeMillis() - taskTime.toMillis(false)) < 1000) {
-						Log.i(TAG, "Putting up notification for timed task");
-						showNotification(task, null);
-					} else {
-						if (taskTime.toMillis(false) - System.currentTimeMillis() > 0) {
-							Log.i(TAG, "Regiestering call back for " + (taskTime.toMillis(false) - System.currentTimeMillis()) + " milliseconds");
-							timedTasksHandler.removeCallbacks(mUpdateTimeTask);
-							timedTasksHandler.postDelayed(mUpdateTimeTask, taskTime.toMillis(false) - System.currentTimeMillis());
-						}
-					}
+			if (!task.isComplete() && taskTime != null) {
+				Time now = new Time();
+				now.set(System.currentTimeMillis());
+				if ((System.currentTimeMillis() - taskTime.toMillis(false)) > -1000 && (System.currentTimeMillis() - taskTime.toMillis(false)) < 1000) {
+					showNotification(task, null);
+				} else if (taskTime.toMillis(false) - System.currentTimeMillis() > 0) {
+					// Register call back
+					timedTasksHandler.removeCallbacks(mUpdateTimeTask);
+					timedTasksHandler.postDelayed(mUpdateTimeTask, taskTime.toMillis(false) - System.currentTimeMillis());
 				}
-			} else {
-				Log.i(TAG, "Ignoring completed task");
 			}
-		}
+		}*/
 	}
 
 	private Runnable mUpdateTimeTask = new Runnable() {
@@ -596,14 +484,13 @@ public class ToDoMeService extends Service implements LocationListener {
 		}
 	};
 
-	/*
-	 * This method removes all poi's that are not close to the users current location
-	 */
+	/* This method removes all poi's that are not close to the users current location */
 	private void updateNotifiedPOIs() {
 		double distance = 0.1d; // meters
 
-		if (pointsOfInterest == null)
-			return;
+		// TODO get pointsOfInterest from OrmLite
+		/*if (pointsOfInterest == null)
+			return;*/
 
 		// Look at each of the points of interest that have been notified for
 		for (Iterator<PointOfInterest> iter = notifiedPOIs.iterator(); iter.hasNext();) {
@@ -618,25 +505,20 @@ public class ToDoMeService extends Service implements LocationListener {
 	}
 
 	HashSet<String> getAllTaskTypes() {
-
-		// Log.i(TAG, "Finding all task types " + tasks.size());
 		HashSet<String> taskTypes = new HashSet<String>();
 
-		for (Iterator<Task> iter = tasks.iterator(); iter.hasNext();) {
-			Task task = iter.next();
+		// TODO get tasks from OrmLite
+		/*for (Task task : tasks) {
 			Log.i(TAG, "The task named \"" + task.getName() + "\" has types " + task.getTypes());
 			HashSet<String> thisTaskTypes = task.getTypes();
 			if (thisTaskTypes != null) {
 				taskTypes.addAll(task.getTypes());
 			}
-		}
-		// Log.i(TAG, "Total of " + taskTypes.size() + " types returned");
+		}*/
 		return taskTypes;
 	}
 
-	/*
-	 * Handler of incoming messages from clients.
-	 */
+	/* Handler of incoming messages from clients. */
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
@@ -693,27 +575,6 @@ public class ToDoMeService extends Service implements LocationListener {
 		}
 	}
 
-	private void sendDatabaseToUI(LocationDatabase db) {
-		sendMessageToUI(Util.getLocationDatabaseString(db));
-	}
-
-	private void sendMessageToUI(String value) {
-		for (int i = mClients.size() - 1; i >= 0; i--) {
-			try {
-				// Send data as a String
-				Bundle b = new Bundle();
-				b.putString("str1", value);
-				Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATED);
-				msg.setData(b);
-				mClients.get(i).send(msg);
-
-			} catch (RemoteException e) {
-				// The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
-				mClients.remove(i);
-			}
-		}
-	}
-
 	private void sendMessageToUI(int msgType) {
 		for (int i = mClients.size() - 1; i >= 0; i--) {
 			try {
@@ -738,7 +599,6 @@ public class ToDoMeService extends Service implements LocationListener {
 		prefs.edit().putLong("lat", (long) (location.getLatitude() * 1e6)).putLong("lon", (long) (location.getLongitude() * 1e6)).commit();
 
 		checkForReleventNotifications();
-		// Log.i(TAG, "tasks.size() = " + tasks.size());
 	}
 
 	public void onProviderDisabled(String provider) {

@@ -123,55 +123,7 @@ public class Util {
 		return loc;
 	}
 
-	// Serialization
-
-	public static String getTaskArrayString(ArrayList<Task> tasks) {
-		return getStringFromObject(tasks);
-	}
-
-	public static String getLocationDatabaseString(LocationDatabase ld) {
-		return getStringFromObject(ld);
-	}
-
-	public static String getKeywordDatabaseString(KeywordDatabase kd) {
-		return getStringFromObject(kd);
-	}
-
-	public static String getStringFromObject(Serializable obj) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		try {
-			ObjectOutputStream oos = new ObjectOutputStream(baos);
-			oos.writeObject(obj);
-			return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-		} catch (IOException e) {
-			Log.e("Util.getStringFromObject", "IOException: " + e.getMessage());
-		}
-		return null;
-	}
-
-	public static LocationDatabase getLocationDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
-		return (LocationDatabase) getObjectFromString(str);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static ArrayList<Task> getTaskListFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
-		return (ArrayList<Task>) getObjectFromString(str);
-	}
-
-	public static KeywordDatabase getKeywordDatabaseFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
-		return (KeywordDatabase) getObjectFromString(str);
-	}
-
-	public static Object getObjectFromString(String str) throws StreamCorruptedException, IOException, ClassNotFoundException {
-		ObjectInputStream ois = null;
-		try {
-			ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(str, Base64.DEFAULT)));
-		} catch (EOFException ex) {
-			Log.i("Util.getObjectFromString", "EOFException");
-		}
-		return ois.readObject();
-	}
+	// Maths
 
 	public static boolean isPointsWithinRange(GeoPoint point1, GeoPoint point2, double radius) {
 		return (getDistanceBetween(point1, point2) <= radius);

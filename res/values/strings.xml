@@ -40,4 +40,8 @@ You should have received a copy of the GNU General Public License along with thi
     <string name="reset_prefs">Reset preferences</string>
     <string name="clear_data">Clear data</string>
     <string name="website_info">Website at todome.org.uk created by Alex Baker.</string>
+    <string name="welcome_message">To start using ToDoMe, enter some tasks in the To-Do tab. ToDoMe picks up certain keywords in the task name to detect what types of locations will enable you to carry out your task. Please note that this software is beta, and there are lots of bugs and stability issues.</string>
+    <string name="welcome_title">Welcome to ToDoMe</string>
+    <string name="complete_message">Mark complete?</string>
+    <string name="delete_message">Delete?</string>
 </resources>
