@@ -1,11 +1,14 @@
 package com.todome;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 
-public class Tag implements Serializable {
+@DatabaseTable(tableName = "tags")
+public class Tag {
+	
+	public final static String TAG_FIELD_NAME = "tag";
+
+	@DatabaseField(id = true, canBeNull = false)
 	private final String tag;
 
 	public Tag(String tag) {

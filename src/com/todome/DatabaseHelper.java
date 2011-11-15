@@ -7,63 +7,66 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
+import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
 /**
- * Database helper class used to manage the creation and upgrading of your database. This class also usually provides
- * the DAOs used by the other classes.
+ * Database helper class used to manage the creation and upgrading of your
+ * database. This class also usually provides the DAOs used by the other
+ * classes.
  */
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
-	// name of the database file for your application -- change to something appropriate for your app
+	// name of the database file for your application -- change to something
+	// appropriate for your app
 	private static final String DATABASE_NAME = "ToDoMe.db";
-	// any time you make changes to your database objects, you may have to increase the database version
+	// any time you make changes to your database objects, you may have to
+	// increase the database version
 	private static final int DATABASE_VERSION = 1;
 
 	// the DAO object we use to access the SimpleData table
-	private KeywordDaoImpl keywordDao = null;
+	private Dao<Task, Integer> taskDao;
+	private Dao<Tag, Integer> tagDao;
 
 	public DatabaseHelper(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION, R.raw.ormlite_config);
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
 	/**
-	 * This is called when the database is first created. Usually you should call createTable statements here to create
-	 * the tables that will store your data.
+	 * This is called when the database is first created. Usually you should
+	 * call createTable statements here to create the tables that will store
+	 * your data.
 	 */
 	@Override
 	public void onCreate(SQLiteDatabase db, ConnectionSource connectionSource) {
 		try {
 			Log.i(DatabaseHelper.class.getName(), "onCreate");
-			TableUtils.createTable(connectionSource, SimpleData.class);
+
+			TableUtils.createTable(connectionSource, Task.class);
+			TableUtils.createTable(connectionSource, Tag.class);
+
 		} catch (SQLException e) {
 			Log.e(DatabaseHelper.class.getName(), "Can't create database", e);
 			throw new RuntimeException(e);
 		}
-
-		// here we try inserting data in the on-create as a test
-		RuntimeExceptionDao<SimpleData, Integer> dao = getSimpleDataDao();
-		long millis = System.currentTimeMillis();
-		// create some entries in the onCreate
-		SimpleData simple = new SimpleData(millis);
-		dao.create(simple);
-		simple = new SimpleData(millis + 1);
-		dao.create(simple);
-		Log.i(DatabaseHelper.class.getName(), "created new entries in onCreate: " + millis);
 	}
 
 	/**
-	 * This is called when your application is upgraded and it has a higher version number. This allows you to adjust
-	 * the various data to match the new version number.
+	 * This is called when your application is upgraded and it has a higher
+	 * version number. This allows you to adjust the various data to match the
+	 * new version number.
 	 */
 	@Override
-	public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource, int oldVersion, int newVersion) {
+	public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource,
+			int oldVersion, int newVersion) {
 		try {
 			Log.i(DatabaseHelper.class.getName(), "onUpgrade");
-			TableUtils.dropTable(connectionSource, SimpleData.class, true);
+			TableUtils.dropTable(connectionSource, Task.class, true);
+			TableUtils.dropTable(connectionSource, Tag.class, true);
+
 			// after we drop the old databases, we create the new ones
 			onCreate(db, connectionSource);
 		} catch (SQLException e) {
@@ -72,26 +75,18 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 		}
 	}
 
-	/**
-	 * Returns the Database Access Object (DAO) for our SimpleData class. It will create it or just give the cached
-	 * value.
-	 */
-	public Dao<SimpleData, Integer> getDao() throws SQLException {
-		if (simpleDao == null) {
-			simpleDao = getDao(SimpleData.class);
+	public Dao<Task, Integer> getTaskDao() throws SQLException {
+		if (taskDao == null) {
+			taskDao = this.getDao(Task.class);
 		}
-		return simpleDao;
+		return taskDao;
 	}
 
-	/**
-	 * Returns the RuntimeExceptionDao (Database Access Object) version of a Dao for our SimpleData class. It will
-	 * create it or just give the cached value. RuntimeExceptionDao only through RuntimeExceptions.
-	 */
-	public RuntimeExceptionDao<SimpleData, Integer> getSimpleDataDao() {
-		if (simpleRuntimeDao == null) {
-			simpleRuntimeDao = getRuntimeExceptionDao(SimpleData.class);
+	public Dao<Tag, Integer> getTagDao() throws SQLException {
+		if (tagDao == null) {
+			tagDao = this.getDao(Tag.class);
 		}
-		return simpleRuntimeDao;
+		return tagDao;
 	}
 
 	/**
@@ -100,6 +95,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 	@Override
 	public void close() {
 		super.close();
-		simpleRuntimeDao = null;
+		taskDao = null;
+		tagDao = null;
 	}
 }

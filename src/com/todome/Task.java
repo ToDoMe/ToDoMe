@@ -21,41 +21,52 @@
  */
 package com.todome;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
-
-import android.text.format.Time;
 
 @DatabaseTable(tableName = "tasks")
 public class Task implements Comparable<Task> {
 
-	@DatabaseField(generatedId = true)
+	public final static String ID_FIELD_NAME = "id";
+	public final static String NAME_FIELD_NAME = "name";
+	public final static String NOTES_FIELD_NAME = "notes";
+	public final static String TAGS_FIELD_NAME = "tags";
+	public final static String COMPLETE_FIELD_NAME = "complete";
+
+	@DatabaseField(id = true)
 	private int id;
 	@DatabaseField(canBeNull = false)
 	private String name;
 	@DatabaseField(canBeNull = true)
 	private String notes;
 	@DatabaseField(canBeNull = false)
-
-	private TagList tags;
+	@ForeignCollectionField(eager = true)
+	private ArrayList<Tag> tags;
 
 	@DatabaseField(canBeNull = false)
 	private boolean complete;
 
 	public Task() {
-
+		this(0, "", "", new ArrayList<Tag>(), false);
 	}
 
-	public Task(String name, String notes, String postcode, int rating) {
+	public Task(int id, String name, String notes, ArrayList<Tag> tags, boolean complete) {
+		this.id = id;
 		this.name = name;
 		this.notes = notes;
-		this.complete = false;
+		this.tags = tags;
+		this.complete = complete;
 	}
 
 	public String toString() {
 		return name;
+	}
+
+	public int getID() {
+		return id;
 	}
 
 	public String getName() {
@@ -70,6 +81,22 @@ public class Task implements Comparable<Task> {
 		return notes;
 	}
 
+	public ArrayList<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(ArrayList<Tag> tags) {
+		this.tags = tags;
+	}
+
+	public boolean isComplete() {
+		return complete;
+	}
+
+	public void setComplete(boolean complete) {
+		this.complete = complete;
+	}
+
 	public void setNotes(String notes) {
 		this.notes = notes;
 	}
@@ -80,8 +107,7 @@ public class Task implements Comparable<Task> {
 	}
 
 	public Task clone() {
-		// TODO
-		return null;
+		return new Task(id, name, notes, tags, complete);
 	}
 
 }

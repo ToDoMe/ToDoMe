@@ -1,17 +1,14 @@
 package com.todome;
 
-import java.io.Serializable;
-
 import com.j256.ormlite.table.DatabaseTable;
 
-
-@DatabaseTable(tableName = "accounts", daoClass=KeywordDaoImpl.class)
+@DatabaseTable(tableName = "accounts", daoClass = KeywordDaoImpl.class)
 public class Keyword {
-	
+
 	String keyword;
-	
-	TagList tags;
-	
+
+	// TagList tags;
+
 	String description;
 
 	Keyword(String keyword, String type, String description) {
